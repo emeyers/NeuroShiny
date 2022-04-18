@@ -44,7 +44,7 @@ decoding_analysis <- tabPanel(
                       conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
                                        uiOutput("DS_gen_list_of_var_to_decode"),
                                        uiOutput("DS_gen_select_num_of_groups"),
-                                       numericInput("DS_gen_class_number","How many classes?", 1, min = 1),
+                                       numericInput("DS_gen_class_number","How many classes?", 1, min = 2),
                                        #splitLayout(
                                          uiOutput("DS_gen_label_levels"),
                                          #uiOutput("DS_gen_test_label_levels"),

@@ -242,11 +242,8 @@ function(input, output, session){
 
   reactive_all_levels_of_gen_test_var_to_use <- reactive({
     req(rv$binned_file_name)
-    req(input$DS_gen_train_label_levels)
-
     binned_data = rv$binned_data
-    tempLevels <- levels(factor(binned_data[[paste0("labels.",input$DS_gen_var_to_decode)]]))
-    tempLevels[-(which(tempLevels %in% input$DS_gen_train_label_levels))]
+    levels(factor(binned_data[[paste0("labels.",input$DS_gen_var_to_decode)]]))
   })
 
 
@@ -282,11 +279,14 @@ function(input, output, session){
 
   reactive_all_basic_site_IDs_to_exclude <- reactive({
     req(rv$binned_file_name)
-    req(input$DS_basic_site_IDs_to_use)
-
     binned_data = rv$binned_data
     tempLevels <- levels(unique(factor(binned_data$siteID)))
-    tempLevels[-(which(tempLevels %in% input$DS_basic_site_IDs_to_use))]
+    if (is.null(input$DS_basic_site_IDs_to_use)){
+      tempLevels
+    }else{
+      tempLevels[-(which(tempLevels %in% input$DS_basic_site_IDs_to_use))]
+    }
+
   })
 
 
@@ -298,11 +298,14 @@ function(input, output, session){
 
   reactive_all_gen_site_IDs_to_exclude <- reactive({
     req(rv$binned_file_name)
-    req(input$DS_gen_site_IDs_to_use)
-
     binned_data = rv$binned_data
     tempLevels <- levels(unique(factor(binned_data$siteID)))
-    tempLevels[-(which(tempLevels %in% input$DS_gen_site_IDs_to_use))]
+
+    if (is.null(input$DS_gen_site_IDs_to_use)){
+      tempLevels
+    }else{
+      tempLevels[-(which(tempLevels %in% input$DS_gen_site_IDs_to_use))]
+    }
   })
 
 
@@ -311,9 +314,8 @@ function(input, output, session){
     req(rv$binned_data)
     if(input$DS_type == "ds_basic"){
       validate(
-        need(!is.null(input$DS_basic_levels_to_use)||!input$DS_basic_use_all_levels, paste0("You haven't set ",
-                                                                                            "your levels yet")))
-                                                                                     #lLabels$DS_basic_levels_to_use, " yet")))
+        need(!is.null(input$DS_basic_levels_to_use)||!input$DS_basic_use_all_levels, paste0("You haven't set your levels yet")))
+
       if(!input$DS_basic_use_all_levels){
         reactive_all_levels_of_basic_var_to_decode()
       }else{
@@ -323,7 +325,6 @@ function(input, output, session){
       #TO DO fix
       input$DS_gen_train_label_levels
       #reactive_all_levels_of_gen_var_to_use()
-      #temp_training_level_group_ids <- paste0("input$DS_training_level_group_", c(1:3))
       #temp_training_level_group_ids <- paste0("input$DS_training_level_group_", c(1:input$DS_gen_num_training_level_groups))
       #temp_need <- lapply(temp_training_level_group_ids, function(i){
         #eval(parse(text = paste0("need(", i, ", '", "You need to set ", eval(parse(text = paste0("lLabels$", i))), "')")))
@@ -350,7 +351,6 @@ function(input, output, session){
                                                                 input$DS_gen_var_to_use,
                                                                 levels_to_use = reactive_DS_levels_to_use())
     }
-    print(num_label_reps)
     num_label_reps
   })
 
@@ -414,20 +414,33 @@ function(input, output, session){
   })
 
   output$DS_gen_train_label_levels = renderUI({
+
     req(rv$binned_file_name)
-    selectInput("DS_gen_train_label_levels",
-                "Training levels to use",
-                reactive_all_levels_of_gen_train_var_to_use(),
-                multiple = TRUE)
+    req(input$DS_gen_class_number)
+
+    train_lst <- list()
+    test_lst <- list()
+
+    for (i in 1:input$DS_gen_class_number){
+      train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                  paste("Class",i, "- Training levels to use"),
+                  reactive_all_levels_of_gen_train_var_to_use(),
+                  multiple = TRUE)
+      test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                  paste("Class",i, "- Testing levels to use"),
+                  reactive_all_levels_of_gen_test_var_to_use(),
+                  multiple = TRUE)
+    }
+    c(rbind(train_lst, test_lst))
   })
 
-  output$DS_gen_test_label_levels = renderUI({
-    req(rv$binned_file_name)
-    selectInput("DS_gen_test_label_levels",
-                "Testing labels to use",
-                reactive_all_levels_of_gen_test_var_to_use(),
-                multiple = TRUE)
-  })
+  #output$DS_gen_test_label_levels = renderUI({
+  #  req(rv$binned_file_name)
+  #  selectInput("DS_gen_test_label_levels",
+  #              "Testing labels to use",
+  #              reactive_all_levels_of_gen_test_var_to_use(),
+  #              multiple = TRUE)
+  #})
 
   output$DS_gen_use_count_data = renderUI({
     selectInput("DS_gen_use_count_data",
@@ -703,7 +716,6 @@ function(input, output, session){
   })
 
   output$CV_parallel_outfile = renderUI({
-    req(input$CV_advanced == TRUE)
     req(!is.null(input$CV_num_parallel_cores))
     req(input$CV_num_parallel_cores >= 1)
 

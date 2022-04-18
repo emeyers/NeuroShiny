@@ -46,7 +46,7 @@ decoding_analysis <- tabPanel(
                                        uiOutput("DS_gen_select_num_of_groups"),
                                        numericInput("DS_gen_class_number","How many classes?", 1, min = 1),
                                        #splitLayout(
-                                         uiOutput("DS_gen_train_label_levels"),
+                                         uiOutput("DS_gen_label_levels"),
                                          #uiOutput("DS_gen_test_label_levels"),
                                        checkboxInput("DS_gen_advanced", "Select advanced parameters?", FALSE)
                       ),
@@ -88,11 +88,11 @@ decoding_analysis <- tabPanel(
                       title = "Classifier",
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
-                      selectInput("CL", "Classifier", all_cl),
+                      selectInput("CL_type", "Classifier", all_cl),
                       box(
                         width = NULL,
                         title = "Additional parameters (if applicable)",
-                        conditionalPanel(condition  = "input.CL == 'cl_svm'",
+                        conditionalPanel(condition  = "input.CL_type == 'cl_svm'",
                                          selectInput("CL_svm_kernel",
                                                      "Kernel",
                                                      c("linear", "polynomial", "radial", "sigmoid"),

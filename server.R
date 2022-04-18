@@ -130,71 +130,8 @@ function(input, output, session){
 
 
 
-  observeEvent(input$DC_scriptize,{
-    rv_para$id <-  c("DS_binned_data", "DS_type", "DC_to_be_saved_result_name")
-    if(input$DS_type == "ds_basic"){
-      rv_para$id <- c(rv_para$id,"DS_var_to_decode")
-      if(!input$DS_use_all_levels){
-        rv_para$id <- c(rv_para$id,  "label_levels_to_use")
-      }
-    } else{
-      rv_para$id <- c(rv_para$id,"DS_gen_var_to_use","DS_var_to_decode", "DS_gen_num_training_level_groups")
-    }
-
-    rv_para$inputID <- paste0("input$", rv_para$id)
-
-    rv_para$decoding_para_id_computed <- rv_para$decoding_para_id_computed * (-1)
-    eval(parse(text = paste0("req(", rv_para$inputID, ")")))
-    ds_basic_paras <- gen_DS_paras <- NULL
-
-    if(input$DS_type == "ds_basic"){
-      ds_basic_paras <- c("label_levels_to_use")
-    }else{
-      gen_DS_paras <- c("train_label_levels", "label_levels")
-    }
 
 
-    DS_decoding <- paste0("DS_", c(all_DS_paras, ds_basic_paras, gen_DS_paras))
-
-    rv_para$id_of_useful_paras <-  c("DS_type", DS_decoding)
-
-    # this one is bad because level_groups can be passed from the previous selection
-    if(input$DS_type == "ds_generalization"){
-      temp_training_level_groups <- paste0("input$DS_training_level_group_", c(1:input$DS_gen_num_training_level_groups))
-      temp_testing_level_groups <- paste0("input$DS_testing_level_group_", c(1:input$DS_gen_num_testing_level_groups))
-      rv_para$id_of_useful_paras <- c(rv_para$id_of_useful_paras, trainin_level_groups, testing_level_groups)
-    }
-
-
-
-
-    if(input$DS_type == "ds_basic"){
-      ds_basic_paras <- c("label_levels_to_use")
-      rv_para$id_of_useful_paras <- c(rv_para$id_of_useful_paras,"DS_label_levels_to_use2")
-
-    }else{
-      gen_DS_paras <- c("DS_train_label_levels", "DS_test_label_levels")
-      rv_para$id_of_useful_paras <- c(rv_para$id_of_useful_paras,"DS_train_label_levels", "DS_test_label_levels")
-    }
-
-    DS_decoding <- paste0("DS_", c(all_DS_paras, ds_basic_paras, gen_DS_paras))
-
-    rv_para$inputID_of_useful_paras <- paste0("input$", DS_decoding)
-    rv_para$values <- lapply(rv_para$inputID_of_useful_paras, function(i){
-      eval(parse(text = i))
-    })
-
-
-    lDecoding_paras <- c(eval(rv$binned_file_name), input$DS_type, rv_para$values, input$DS_use_all_levels)
-
-    lDecoding_paras <- setNames(lDecoding_paras, c("binned_data", rv_para$id_of_useful_paras))
-
-
-    if (input$DC_script_mode == "R") {
-      rv$displayed_script <- create_script_in_r(lDecoding_paras)
-    }
-
-  })
 
   er_scriptize_action_error <- eventReactive(rv_para$decoding_para_id_computed,{
     #if we don't have this line, this function will be called as soon as users click the script tab because rv_para$decoding_para_id_computed is going from NULL to 1 (I think)
@@ -323,7 +260,7 @@ function(input, output, session){
       }
     }else{
       #TO DO fix
-      input$DS_gen_train_label_levels
+      input$DS_gen_label_levels
       #reactive_all_levels_of_gen_var_to_use()
       #temp_training_level_group_ids <- paste0("input$DS_training_level_group_", c(1:input$DS_gen_num_training_level_groups))
       #temp_need <- lapply(temp_training_level_group_ids, function(i){
@@ -413,7 +350,7 @@ function(input, output, session){
                 rv$binned_all_var)
   })
 
-  output$DS_gen_train_label_levels = renderUI({
+  output$DS_gen_label_levels = renderUI({
 
     req(rv$binned_file_name)
     req(input$DS_gen_class_number)
@@ -422,7 +359,7 @@ function(input, output, session){
     test_lst <- list()
 
     for (i in 1:input$DS_gen_class_number){
-      train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+      train_lst[[i]] <- selectInput(paste0("DS_gen_label_levels_class_", i),
                   paste("Class",i, "- Training levels to use"),
                   reactive_all_levels_of_gen_train_var_to_use(),
                   multiple = TRUE)
@@ -432,6 +369,7 @@ function(input, output, session){
                   multiple = TRUE)
     }
     c(rbind(train_lst, test_lst))
+
   })
 
   #output$DS_gen_test_label_levels = renderUI({
@@ -658,8 +596,8 @@ function(input, output, session){
   ### Feature Processing ----
   #### Reactive Functions ----
   reactive_all_fp_avail <- reactive({
-    req(input$CL)
-    all_fp[df_cl_fp[,input$CL]>0]
+    req(input$CL_type)
+    all_fp[df_cl_fp[,input$CL_type]>0]
   })
 
   reactive_bin_num_neuron <- reactive({
@@ -734,42 +672,82 @@ function(input, output, session){
                         mode = input$DC_script_mode)
   })
 
-  observeEvent(input$DC_run_decoding,{
-    req(input$DC_to_be_saved_result_name, rv$displayed_script)
-    # add the appropriate file extenstion to the saved file name
-    if(input$DC_script_mode == "R Markdown"){
-      file_extension <- ".Rmd"
-    }else{
-      file_extension <- ".R"
-    }
 
-    file_pieces <- unlist(base::strsplit(input$DC_to_be_saved_result_name, "[.]"))
 
-    if(length(file_pieces) == 1){
-      save_file_name <- paste0(file_pieces[1], file_extension)
+  observeEvent(input$DC_scriptize,{
+
+    rv_para$id <-  c("DS_binned_data", "DS_type", "DC_to_be_saved_result_name")
+
+    #Data Source
+    #ds_basic
+    if(input$DS_type == "ds_basic"){
+      rv_para$id <- c(rv_para$id,"DS_basic_list_of_var_to_decode",
+                      "DS_basic_num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
+                      "DS_show_chosen_repetition_info", "DS_basic_num_resample_sites")
+      if(input$DS_basic_use_all_levels){
+        rv_para$id <- c(rv_para$id,  "DS_basic_list_of_levels_to_use")
+      }
+      if(input$DS_basic_advanced){
+        rv_para$id <- c(rv_para$id,  "DS_basic_use_count_data", "DS_basic_site_IDs_to_use",
+                        "DS_basic_site_IDs_to_exclude", "DS_basic_randomly_shuffled_labels",
+                        "DS_basic_create_simultaneous_populations")
+      }
+
+    #ds_gen
     }else{
-      if(!(file_pieces[length(file_pieces)] == file_extension)){
-        save_file_name <- paste0(save_file_name, file_extension)
-      }else{
-        save_file_name <- input$DC_to_be_saved_result_name
+      rv_para$id <- c(rv_para$id, "DS_gen_list_of_var_to_decode", "DS_gen_select_num_of_groups",
+                      "DS_gen_label_levels", "DS_gen_num_label_repeats_per_cv_split",
+                      "DS_gen_num_cv_splits", "DS_gen_num_resample_sites")
+      if(input$DS_gen_advanced){
+        rv_para$id <- c(rv_para$id, "DS_gen_use_count_data","DS_gen_site_IDs_to_use",
+                        "DS_gen_site_IDs_to_exclude", "DS_gen_randomly_shuffled_labels",
+                        "DS_gen_create_simultaneous_populations")
       }
     }
 
-
-    save_script_name <- file.path(script_base_dir, save_file_name)
-    write(rv$displayed_script, file = save_script_name)
-
-    rv$save_script_name <- save_script_name
-
-    # run the script/Markdown document to get the results
-
-    if(input$DC_script_mode == "R Markdown") {
-      #save_file_name to www directory
-      rmarkdown::render(save_script_name, "pdf_document", output_dir = "www")
-    }else{
-      source(save_script_name)
+    #Classifier
+    rv_para$id <- c(rv_para$id, "CL_type")
+    if(input$CL_type == 'cl_svm'){
+      rv_para$id <- c(rv_para$id, "CL_svm_kernel", "CL_svm_cost")
+      if(input$CL_svm_kernel == 'polynomial'){
+        rv_para$id <- c(rv_para$id, "CL_svm_degree", "CL_svm_coef0", "CL_svm_gamma")
       }
+      if(input$CL_svm_kernel == 'radial'){
+        rv_para$id <- c(rv_para$id, "CL_svm_coef0", "CL_svm_gamma")
+      }
+      if(input$CL_svm_kernel == 'sigmoid'){
+        rv_para$id <- c(rv_para$id, "CL_svm_gamma")
+      }
+    }
+
+    #Feature Preprocessors
+    rv_para$id <- c(rv_para$id, "FP_type")
+    if ('fp_select_k_features' %in% input$FP_type){
+      rv_para$id <- c(rv_para$id, "FP_num_site_to_use", "FP_num_sites_to_exclude")
+    }
+
+    #Cross Validator
+    rv_para$id <- c(rv_para$id, "CV_test_only_at_training_time",
+                    "CV_num_resample_runs", "CV_num_parallel_cores")
+    if(!is.null(input$CV_num_parallel_cores) && input$CV_num_parallel_cores >= 1){
+      rv_para$id <- c(rv_para$id, "CV_parallel_outfile")
+    }
+
+    rv_para$inputIDs <- paste0("input$", rv_para$id)
+    rv_para$values <- lapply(rv_para$inputIDs, function(i){
+      eval(parse(text = i))
     })
+
+
+    decoding_paras <- rv_para$values
+
+    decoding_paras <- setNames(decoding_paras, rv_para$id)
+
+
+    if (input$DC_script_mode == "R") {
+      rv$displayed_script <- create_script_in_r(decoding_paras)
+    }
+  })
 
 
 }

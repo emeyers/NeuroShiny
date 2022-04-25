@@ -149,8 +149,6 @@ function(input, output, session){
 
   output$DC_scriptize_error <- renderText({
     #er_scriptize_action_error()
-    print("Mini Shiny Test")
-
   })
 
 
@@ -461,28 +459,27 @@ function(input, output, session){
     temp_level_rep_info <- reactive_level_repetition_info()
     if(input$DS_type == "ds_basic"){
       updateNumericInput(session, "DS_basic_num_label_repeats_per_cv_split",
-                         max = floor(temp_level_rep_info$DS_max_repetition_avail_with_any_site/input$DS_basic_num_cv_splits))
+                         min = floor(temp_level_rep_info$min_repeats/input$DS_basic_num_cv_splits))
       updateNumericInput(session, "DS_basic_num_cv_splits",
-                         max = floor(temp_level_rep_info$DS_max_repetition_avail_with_any_site/input$DS_basic_num_label_repeats_per_cv_split))
+                         min = floor(temp_level_rep_info$min_repeats/input$DS_basic_num_label_repeats_per_cv_split))
     }else{
       updateNumericInput(session, "DS_gen_num_label_repeats_per_cv_splits",
-                         max = floor(temp_level_rep_info$DS_max_repetition_avail_with_any_site/input$DS_gen_num_cv_splits))
+                         min = floor(temp_level_rep_info$min_repeats/input$DS_gen_num_cv_splits))
       updateNumericInput(session, "DS_gen_num_cv_splits",
-                         max = floor(temp_level_rep_info$DS_max_repetition_avail_with_any_site/input$DS_gen_num_label_repeats_per_cv_splits))
+                         min = floor(temp_level_rep_info$min_repeats/input$DS_gen_num_label_repeats_per_cv_splits))
     }
   })
 
   reactive_level_repetition_info <- reactive({
     req(reactive_DS_levels_to_use())
     if(input$DS_type == "ds_basic"){
-      num_label_reps <- NeuroDecodeR::get_num_label_repetitions(rv$binned_data,
-                                                                input$DS_basic_var_to_decode,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+      num_label_reps <-  NeuroDecodeR:::get_num_label_repetitions_each_site  (rv$binned_data,
+                                                                              input$DS_basic_var_to_decode,
+                                                                              levels_to_use = reactive_DS_levels_to_use())
     }else{
-      #TO DO what is this for gen?
-      num_label_reps <- NeuroDecodeR::get_num_label_repetitions(rv$binned_data,
-                                                                input$DS_gen_var_to_decode,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+      num_label_reps <-  NeuroDecodeR:::get_num_label_repetitions_each_site  (rv$binned_data,
+                                                                              input$DS_gen_var_to_use,
+                                                                              levels_to_use = reactive_DS_levels_to_use())
     }
     num_label_reps
   })

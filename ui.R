@@ -46,7 +46,7 @@ decoding_analysis <- tabPanel(
                                        uiOutput("DS_gen_select_num_of_groups"),
                                        numericInput("DS_gen_class_number","How many classes?", 1, min = 2),
                                        #splitLayout(
-                                         uiOutput("DS_gen_label_levels"),
+                                       uiOutput("DS_gen_label_levels"),
                                          #uiOutput("DS_gen_test_label_levels"),
                                        checkboxInput("DS_gen_advanced", "Select advanced parameters?", FALSE)
                       ),
@@ -76,7 +76,7 @@ decoding_analysis <- tabPanel(
                           conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
                                            uiOutput("DS_gen_num_label_repeats_per_cv_split"),
                                            uiOutput("DS_gen_num_cv_splits"),
-                          #                 uiOutput("DS_show_chosen_repetition_info"),
+                                           #uiOutput("DS_show_chosen_repetition_info"),
                                            uiOutput("DS_gen_num_resample_sites")
                           ),
                           plotlyOutput("DS_show_level_repetition_info")

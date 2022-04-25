@@ -275,14 +275,14 @@ function(input, output, session){
 
   })
 
-  reactive_level_repetition_info <- reactive({
+  reactive_level_repetition_info_each_site <- reactive({
     req(reactive_DS_levels_to_use())
     if(input$DS_type == "ds_basic"){
-      num_label_reps <- NeuroDecodeR::get_num_label_repetitions(rv$binned_data,
+      num_label_reps <- NeuroDecodeR:::get_num_label_repetitions_each_site(rv$binned_data,
                                                                 input$DS_basic_var_to_decode,
                                                                 levels_to_use = reactive_DS_levels_to_use())
     }else{
-      num_label_reps <- NeuroDecodeR::get_num_label_repetitions(rv$binned_data,
+      num_label_reps <- NeuroDecodeR:::get_num_label_repetitions_each_site(rv$binned_data,
                                                                 input$DS_gen_var_to_use,
                                                                 levels_to_use = reactive_DS_levels_to_use())
     }
@@ -473,13 +473,14 @@ function(input, output, session){
   reactive_level_repetition_info <- reactive({
     req(reactive_DS_levels_to_use())
     if(input$DS_type == "ds_basic"){
-      num_label_reps <-  NeuroDecodeR:::get_num_label_repetitions_each_site  (rv$binned_data,
-                                                                              input$DS_basic_var_to_decode,
-                                                                              levels_to_use = reactive_DS_levels_to_use())
+      num_label_reps <- NeuroDecodeR:::get_num_label_repetitions(rv$binned_data,
+                                                                input$DS_basic_var_to_decode,
+                                                                levels_to_use = reactive_DS_levels_to_use())
     }else{
-      num_label_reps <-  NeuroDecodeR:::get_num_label_repetitions_each_site  (rv$binned_data,
-                                                                              input$DS_gen_var_to_use,
-                                                                              levels_to_use = reactive_DS_levels_to_use())
+      #TO DO what is this for gen?
+      num_label_reps <- NeuroDecodeR:::get_num_label_repetitions(rv$binned_data,
+                                                                input$DS_gen_var_to_decode,
+                                                                levels_to_use = reactive_DS_levels_to_use())
     }
     num_label_reps
   })
@@ -504,8 +505,8 @@ function(input, output, session){
   #### General Outputs ----
 
   output$DS_max_repetition_avail_with_any_site <- renderText({
-    req(reactive_level_repetition_info())
-    temp_level_rep_info <- reactive_level_repetition_info()
+    req(reactive_level_repetition_info_each_site())
+    temp_level_rep_info <- reactive_level_repetition_info_each_site()
     paste("Levels chosen for training:", "<font color='red'>",
           paste(reactive_DS_levels_to_use(), collapse = ', '),
           "<br/>", "</font>", "The maximum number of repetitions across all the levels for training as set on the Data Source tab is",
@@ -514,15 +515,17 @@ function(input, output, session){
   })
 
   output$DS_show_chosen_repetition_info <- renderText({
-    req(reactive_chosen_repetition_info())
-    temp_chosen_repetition_info <- reactive_chosen_repetition_info()
+    req(reactive_level_repetition_info_each_site())
+    temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
+    num_repetitions <- input$DS_basic_num_label_repeats_per_cv_split * input$DS_basic_num_cv_splits
+    num_usable_sites <- nrow(filter(temp_chosen_repetition_info, min_repeats > num_repetitions))
     if (input$DS_type == "ds_basic"){
       paste("You selected", "<font color='red'>",
-            temp_chosen_repetition_info$num_repetition, "</font>",
+            num_repetitions, "</font>",
             "trials (", input$DS_basic_num_label_repeats_per_cv_split,
             " repeats x ",  input$DS_basic_num_cv_splits,
-            "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>")
-      #,temp_chosen_repetition_info$num_sites_avail, "</font>", " sites available for decoding.")
+            "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>"
+            , num_usable_sites, "</font>", " sites available for decoding.")
     }else{
       paste("You selected", "<font color='red'>",
             temp_chosen_repetition_info$num_repetition, "</font>",

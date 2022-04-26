@@ -60,7 +60,7 @@ decoding_analysis <- tabPanel(
                     ),
 
                     tabPanel(
-                      title = "Data Split Parameters",
+                      title = "Data Source: Split Parameters",
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
                       fluidRow(
@@ -171,6 +171,6 @@ body <- dashboardBody(tabItems(tabItem(tabName = "decode",
 
 # Dashboard page output -----
 dashboardPage(skin = "blue",
-              dashboardHeader(title = "shinyNDTr"),
+              dashboardHeader(title = "NeuroShiny"),
               sidebar,
               body)

@@ -123,8 +123,8 @@ decoding_analysis <- tabPanel(
                       solidHeader = TRUE, status = "primary",
                       uiOutput("FP_type"),
                       conditionalPanel(condition = "'fp_select_k_features' %in% input.FP_type",
-                                       uiOutput("FP_num_site_to_use"),
-                                       uiOutput("FP_num_sites_to_exclude"))
+                                       uiOutput("FP_skf_num_site_to_use"),
+                                       uiOutput("FP_skf_num_sites_to_exclude"))
                       ),
                     tabPanel(
                       title = "Cross Validator",

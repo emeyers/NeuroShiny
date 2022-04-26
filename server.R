@@ -646,10 +646,10 @@ function(input, output, session){
                        reactive_all_fp_avail())
   })
 
-  output$FP_num_site_to_use = renderUI({
+  output$FP_skf_num_site_to_use = renderUI({
     req(input$FP_type)
     if("fp_select_k_features" %in% input$FP_type){
-      numericInput("FP_num_site_to_use",
+      numericInput("FP_skf_num_site_to_use",
                    "Select top features? (this will be applied first)",
                    reactive_bin_num_neuron(),
                    min = 1,
@@ -657,14 +657,14 @@ function(input, output, session){
     }
   })
 
-  output$FP_num_sites_to_exclude = renderUI({
-    req(input$FP_num_site_to_use)
+  output$FP_skf_num_sites_to_exclude = renderUI({
+    req(input$FP_skf_num_site_to_use)
     if("fp_select_k_features" %in% input$FP_type){
-      numericInput("FP_num_sites_to_exclude",
+      numericInput("FP_skf_num_sites_to_exclude",
                    "exclude top ? features (this will be applied second)",
                    value = 0,
                    min = 1,
-                   max = reactive_bin_num_neuron() - input$FP_num_site_to_use)
+                   max = reactive_bin_num_neuron() - input$FP_skf_num_site_to_use)
     }
   })
 
@@ -755,7 +755,7 @@ function(input, output, session){
     #Feature Preprocessors
     rv_para$id <- c(rv_para$id, "FP_type")
     if ('fp_select_k_features' %in% input$FP_type){
-      rv_para$id <- c(rv_para$id, "FP_num_site_to_use", "FP_num_sites_to_exclude")
+      rv_para$id <- c(rv_para$id, "FP_skf_num_site_to_use", "FP_skf_num_sites_to_exclude")
     }
 
     #Cross Validator
@@ -768,7 +768,7 @@ function(input, output, session){
 
     rv_para$inputIDs <- paste0("input$", rv_para$id)
     rv_para$values <- lapply(rv_para$inputIDs, function(i){
-      eval(parse(text = i))
+      eval(str2lang(i))
     })
 
     decoding_paras <- rv_para$values

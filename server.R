@@ -82,7 +82,6 @@ function(input, output, session){
 
 
   observe({
-
     req(input$DC_to_be_saved_result_name)
     if(input$DC_script_mode == "R Markdown"){
       updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "Rmd"))
@@ -110,8 +109,6 @@ function(input, output, session){
   observeEvent(input$DS_save_binned_to_disk, {
     req(input$DS_uploaded_binned,input$DS_uploaded_binned_name )
     move_file(input$DS_uploaded_binned$datapath,input$DS_uploaded_binned_name )
-
-
   })
 
 
@@ -142,7 +139,6 @@ function(input, output, session){
     temp_need = lapply(rv_para$id, function(i){
       #eval(parse(text = paste0("need(input$", i, ", '", "You need to set ",eval(parse(text = paste0("lLabels$", i))), "')")))
       eval(parse(text = paste0("need(input$", i, ", '", "You need to set it')")))
-
     })
     do.call(validate, temp_need)
   })
@@ -153,15 +149,6 @@ function(input, output, session){
 
 
 
-
-  #reactive_all_levels_of_basic_var_to_decode <- reactive({
-  #  req(rv$binned_file_name)
-  #  binned_data = rv$binned_data
-  #  print("basic test")
-  #  print(levels(factor(binned_data[[paste0("labels.",input$DS_var_to_decode)]])))
-  #  levels(factor(binned_data[[paste0("labels.",input$DS_var_to_decode)]]))
-  #})
-
   reactive_all_levels_of_basic_var_to_decode <- reactive({
     req(rv$binned_file_name)
     binned_data = rv$binned_data
@@ -169,13 +156,7 @@ function(input, output, session){
   })
 
 
-  reactive_all_levels_of_gen_train_var_to_use <- reactive({
-    req(rv$binned_file_name)
-    binned_data = rv$binned_data
-    levels(factor(binned_data[[paste0("labels.",input$DS_gen_var_to_decode)]]))
-  })
-
-  reactive_all_levels_of_gen_test_var_to_use <- reactive({
+  reactive_all_levels_of_gen_var_to_use <- reactive({
     req(rv$binned_file_name)
     binned_data = rv$binned_data
     levels(factor(binned_data[[paste0("labels.",input$DS_gen_var_to_decode)]]))
@@ -348,6 +329,15 @@ function(input, output, session){
                 rv$binned_all_var)
   })
 
+  rv$prev_bins <- NULL
+  rv$gen_bins <- NULL
+
+  # Append new value to previous values when input$DS_gen_class_number changes
+  observeEvent(input$DS_gen_class_number, {
+    rv$prev_bins <- c(tail(rv$prev_bins, 1), input$DS_gen_class_number)
+  })
+
+
   output$DS_gen_label_levels = renderUI({
 
     req(rv$binned_file_name)
@@ -355,19 +345,60 @@ function(input, output, session){
 
     train_lst <- list()
     test_lst <- list()
-
-    for (i in 1:input$DS_gen_class_number){
-      train_lst[[i]] <- selectInput(paste0("DS_gen_label_levels_class_", i),
-                  paste("Class",i, "- Training levels to use"),
-                  reactive_all_levels_of_gen_train_var_to_use(),
-                  multiple = TRUE)
-      test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
-                  paste("Class",i, "- Testing levels to use"),
-                  reactive_all_levels_of_gen_test_var_to_use(),
-                  multiple = TRUE)
+    if (input$DS_gen_class_number == 1){
+      for (i in 1:input$DS_gen_class_number){
+        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                                      paste("Class",i, "- Training levels to use"),
+                                      reactive_all_levels_of_gen_var_to_use(),
+                                      multiple = TRUE)
+        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                                     paste("Class",i, "- Testing levels to use"),
+                                     reactive_all_levels_of_gen_var_to_use(),
+                                     multiple = TRUE)
+      }
     }
-    c(rbind(train_lst, test_lst))
+    if (rv$prev_bins[1] > input$DS_gen_class_number){
+      for (i in 1:rv$prev_bins[1]){
+        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                                      paste("Class",i, "- Training levels to use"),
+                                      reactive_all_levels_of_gen_var_to_use(),
+                                      selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
+                                      multiple = TRUE)
+        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                                     paste("Class",i, "- Testing levels to use"),
+                                     reactive_all_levels_of_gen_var_to_use(),
+                                     selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
+                                     multiple = TRUE)
+      }
+      for (i in (rv$prev_bins[1]+1):input$DS_gen_class_number){
+        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                                      paste("Class",i, "- Training levels to use"),
+                                      reactive_all_levels_of_gen_var_to_use(),
+                                      multiple = TRUE)
+        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                                     paste("Class",i, "- Testing levels to use"),
+                                     reactive_all_levels_of_gen_var_to_use(),
+                                     multiple = TRUE)
+      }
+    }
+    if(rv$prev_bins[1] < input$DS_gen_class_number){
+      for (i in 1:input$DS_gen_class_number){
+        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                                      paste("Class",i, "- Training levels to use"),
+                                      reactive_all_levels_of_gen_var_to_use(),
+                                      selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
+                                      multiple = TRUE)
+        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                                     paste("Class",i, "- Testing levels to use"),
+                                     reactive_all_levels_of_gen_var_to_use(),
+                                     selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
+                                     multiple = TRUE)
+      }
+    }
 
+
+
+    c(rbind(train_lst, test_lst))
   })
 
   #output$DS_gen_test_label_levels = renderUI({
@@ -680,8 +711,9 @@ function(input, output, session){
 
     #Data Source
     #ds_basic
+
     if(input$DS_type == "ds_basic"){
-      rv_para$id <- c(rv_para$id,"DS_basic_list_of_var_to_decode",
+      rv_para$id <- c(rv_para$id,"DS_basic_var_to_decode",
                       "DS_basic_num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
                       "DS_show_chosen_repetition_info", "DS_basic_num_resample_sites")
       if(input$DS_basic_use_all_levels){
@@ -728,9 +760,10 @@ function(input, output, session){
 
     #Cross Validator
     rv_para$id <- c(rv_para$id, "CV_test_only_at_training_time",
-                    "CV_num_resample_runs", "CV_num_parallel_cores")
-    if(!is.null(input$CV_num_parallel_cores) && input$CV_num_parallel_cores >= 1){
-      rv_para$id <- c(rv_para$id, "CV_parallel_outfile")
+                    "CV_num_resample_runs")
+
+    if(!is.na(input$CV_num_parallel_cores) && input$CV_num_parallel_cores >= 1){
+        rv_para$id <- c(rv_para$id, "CV_num_parallel_cores", "CV_parallel_outfile")
     }
 
     rv_para$inputIDs <- paste0("input$", rv_para$id)
@@ -738,16 +771,11 @@ function(input, output, session){
       eval(parse(text = i))
     })
 
-
     decoding_paras <- rv_para$values
-
     decoding_paras <- setNames(decoding_paras, rv_para$id)
-
 
     if (input$DC_script_mode == "R") {
       rv$displayed_script <- create_script_in_r(decoding_paras)
     }
   })
-
-
 }

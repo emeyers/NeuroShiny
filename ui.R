@@ -117,6 +117,8 @@ decoding_analysis <- tabPanel(
                                          )
                         )
                     ),
+
+
                     tabPanel(
                       title = "Feature preprocessors",
                       width = NULL,
@@ -126,6 +128,25 @@ decoding_analysis <- tabPanel(
                                        uiOutput("FP_skf_num_site_to_use"),
                                        uiOutput("FP_skf_num_sites_to_exclude"))
                       ),
+
+
+                    tabPanel(
+                       title = "Result metrics",
+                       width = NULL,
+                       solidHeader = TRUE, status = "primary",
+                       uiOutput("RM_type"),
+                       conditionalPanel(condition = "'rm_main_results' %in% input.RM_type",
+                                        htmlOutput("RM_mr_include_norm_rank_results_text"),
+                                        uiOutput("RM_mr_include_norm_rank_results")),
+                       conditionalPanel(condition = "'rm_confusion_matrix' %in% input.RM_type",
+                                        htmlOutput("RM_confusion_matrix_text"),
+                                        uiOutput("RM_cm_save_only_same_train_test_time"),
+                                        uiOutput("RM_cm_create_decision_vals_confusion_matrix"))
+
+                      ),
+
+
+
                     tabPanel(
                       title = "Cross Validator",
                       width = NULL,

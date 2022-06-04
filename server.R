@@ -549,7 +549,7 @@ function(input, output, session){
     req(reactive_level_repetition_info_each_site())
     temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
     num_repetitions <- input$DS_basic_num_label_repeats_per_cv_split * input$DS_basic_num_cv_splits
-    num_usable_sites <- nrow(filter(temp_chosen_repetition_info, min_repeats > num_repetitions))
+    num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
     if (input$DS_type == "ds_basic"){
       paste("You selected", "<font color='red'>",
             num_repetitions, "</font>",
@@ -669,6 +669,56 @@ function(input, output, session){
   })
 
 
+  ### Result Metrics ----
+  output$RM_type = renderUI({
+    checkboxGroupInput("RM_type",
+                       "Result Metrics",
+                       all_rm,
+                       selected = all_rm)
+  })
+
+
+  #### Output ----
+  output$RM_mr_include_norm_rank_results_text = renderText({
+    if("rm_main_results" %in% input$RM_type){
+      "<br>Parameters for rm_main_results:"
+    }
+  })
+  output$RM_mr_include_norm_rank_results = renderUI({
+    #req(input$RM_mr_include_norm_rank_results)
+    if("rm_main_results" %in% input$RM_type){
+      checkboxInput("RM_mr_include_norm_rank_results",
+                   " Include normalized rank results", value = TRUE)
+    }
+  })
+
+
+  output$RM_confusion_matrix_text = renderText({
+    if("rm_confusion_matrix" %in% input$RM_type){
+      "<br>Parameters for rm_confusion_matrix:"
+    }
+  })
+  output$RM_cm_save_only_same_train_test_time = renderUI({
+    #req(input$RM_mr_include_norm_rank_results)
+    if("rm_confusion_matrix" %in% input$RM_type){
+      checkboxInput("RM_cm_save_only_same_train_test_time",
+                    " Save results only for training and testing at the same time",
+                    value = TRUE, width = '100%')
+    }
+  })
+  output$RM_cm_create_decision_vals_confusion_matrix = renderUI({
+    #req(input$RM_mr_include_norm_rank_results)
+    if("rm_confusion_matrix" %in% input$RM_type){
+      checkboxInput("RM_cm_create_decision_vals_confusion_matrix",
+                    " Create decision value confusion matrix", value = TRUE)
+    }
+  })
+
+
+
+
+
+
   ### Cross-Validator ----
   #### Output ----
   output$CV_num_resample_runs = renderUI({
@@ -757,6 +807,16 @@ function(input, output, session){
     if ('fp_select_k_features' %in% input$FP_type){
       rv_para$id <- c(rv_para$id, "FP_skf_num_site_to_use", "FP_skf_num_sites_to_exclude")
     }
+
+    #Result Metrics
+    rv_para$id <- c(rv_para$id, "RM_type")
+    if ('rm_main_results' %in% input$RM_type){
+      rv_para$id <- c(rv_para$id, "RM_mr_include_norm_rank_results")
+    }
+    if ('rm_confusion_matrix' %in% input$RM_type){
+      rv_para$id <- c(rv_para$id, "RM_cm_save_only_same_train_test_time", "RM_cm_create_decision_vals_confusion_matrix")
+    }
+
 
     #Cross Validator
     rv_para$id <- c(rv_para$id, "CV_test_only_at_training_time",

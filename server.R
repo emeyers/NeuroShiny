@@ -270,6 +270,8 @@ function(input, output, session){
     num_label_reps
   })
 
+
+
 #### Basic Outputs ----
 
   output$DS_basic_list_of_var_to_decode = renderUI({
@@ -383,15 +385,16 @@ function(input, output, session){
     }
     if(rv$prev_bins[1] < input$DS_gen_class_number){
       for (i in 1:input$DS_gen_class_number){
+
         train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
                                       paste("Class",i, "- Training levels to use"),
                                       reactive_all_levels_of_gen_var_to_use(),
-                                      selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
+                                      #selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
                                       multiple = TRUE)
         test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
                                      paste("Class",i, "- Testing levels to use"),
                                      reactive_all_levels_of_gen_var_to_use(),
-                                     selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
+                                     #selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
                                      multiple = TRUE)
       }
     }
@@ -776,10 +779,27 @@ function(input, output, session){
       }
 
     #ds_gen
-    }else{
-      rv_para$id <- c(rv_para$id, "DS_gen_list_of_var_to_decode", "DS_gen_select_num_of_groups",
-                      "DS_gen_label_levels", "DS_gen_num_label_repeats_per_cv_split",
-                      "DS_gen_num_cv_splits", "DS_gen_num_resample_sites")
+    } else{
+      rv_para$id <- c(rv_para$id, "DS_gen_class_number", "DS_basic_var_to_decode",
+                      "DS_gen_num_cv_splits","DS_gen_num_label_repeats_per_cv_split",
+                      "DS_gen_num_resample_sites")
+
+
+      # collect all the training and set labels for each class in the appropriate lists
+      # DS_gen_train_label_levels <- list()
+      # DS_gen_test_label_levels <- list()
+      # for (iClass in 1:input$DS_gen_class_number){
+      #    DS_gen_train_label_levels[[iClass]] <- eval(str2lang(paste0("input$DS_gen_train_label_levels_class_",  iClass)))
+      #    DS_gen_test_label_levels[[iClass]] <- eval(str2lang(paste0("input$DS_gen_test_label_levels_class_",  iClass)))
+      # }
+
+
+      for (iClass in 1:input$DS_gen_class_number){
+        rv_para$id <- c(rv_para$id,
+                        paste0("DS_gen_train_label_levels_class_",  iClass),
+                        paste0("DS_gen_test_label_levels_class_",  iClass))
+      }
+
       if(input$DS_gen_advanced){
         rv_para$id <- c(rv_para$id, "DS_gen_use_count_data","DS_gen_site_IDs_to_use",
                         "DS_gen_site_IDs_to_exclude", "DS_gen_randomly_shuffled_labels",
@@ -834,8 +854,15 @@ function(input, output, session){
     decoding_paras <- rv_para$values
     decoding_paras <- setNames(decoding_paras, rv_para$id)
 
+
+    # if using a ds_generalization, pass the aggregated training and test labels
+    # if(input$DS_type == "ds_generalization"){
+    #   decoding_paras$DS_gen_train_label_levels <- DS_gen_train_label_levels
+    #   decoding_paras$DS_gen_test_label_levels <- DS_gen_test_label_levels
+    # }
+
     if (input$DC_script_mode == "R") {
-      rv$displayed_script <- create_script_in_r(decoding_paras)
+      rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_paras, binned_base_dir)
     }
   })
 }

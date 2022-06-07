@@ -41,7 +41,7 @@ req_dc_para <- c("DS_binned_data", "DS_type")
 
 
 all_cl <- c("cl_max_correlation", "cl_svm", "cl_poisson_naive_bayes")
-all_fp <- c("fp_select_k_features", "fp_zscore")
+all_fp <- c("fp_zscore", "fp_select_k_features")
 all_rm <- c("rm_main_results", "rm_confusion_matrix")
 
 # makes sure that fp_zscore is not used with the cl_poisson_naive_bayes

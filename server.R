@@ -616,7 +616,8 @@ function(input, output, session){
   output$FP_type = renderUI({
     checkboxGroupInput("FP_type",
                        "Feature Preprocessors",
-                       reactive_all_fp_avail())
+                       reactive_all_fp_avail(),
+                       selected = "fp_zscore")
   })
 
   output$FP_skf_num_site_to_use = renderUI({

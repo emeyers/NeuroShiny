@@ -14,7 +14,7 @@ decoding_analysis <- tabPanel(
       column(width = 12,
              tabBox(width = 12,
                     tabPanel(
-                      title = "Data source",
+                      title = "Data Source",
                       width = NULL,
                       solidHeader = TRUE,
                       status = "primary",
@@ -60,7 +60,7 @@ decoding_analysis <- tabPanel(
                     ),
 
                     tabPanel(
-                      title = "DS: Split Parameters",
+                      title = "DS Split Parameters",
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
                       fluidRow(
@@ -120,7 +120,7 @@ decoding_analysis <- tabPanel(
 
 
                     tabPanel(
-                      title = "Feature preprocessors",
+                      title = "Feature Preprocessors",
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
                       uiOutput("FP_type"),
@@ -131,7 +131,7 @@ decoding_analysis <- tabPanel(
 
 
                     tabPanel(
-                       title = "Result metrics",
+                       title = "Result Metrics",
                        width = NULL,
                        solidHeader = TRUE, status = "primary",
                        uiOutput("RM_type"),
@@ -159,7 +159,7 @@ decoding_analysis <- tabPanel(
                     ),
 
                     tabPanel(
-                      title = "Run analysis",
+                      title = "Run Analysis",
                       width = NULL,
                       fluidRow(
                         column(
@@ -191,7 +191,7 @@ body <- dashboardBody(tabItems(tabItem(tabName = "decode",
 
 
 # Dashboard page output -----
-dashboardPage(skin = "blue",
+dashboardPage(skin = "green",
               dashboardHeader(title = "NeuroShiny"),
               sidebar,
               body)

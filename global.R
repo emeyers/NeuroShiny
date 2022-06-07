@@ -62,7 +62,7 @@ preprocess_paras <- function(decoding_params){
 }
 
 
-source("generate_r_script_from_shiny_decoding_params.R")
+source("generate_scripts_from_shiny_params.R")
 
 
 

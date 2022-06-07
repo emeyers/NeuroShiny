@@ -837,6 +837,11 @@ function(input, output, session){
 
     if (input$DC_script_mode == "R") {
       rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_paras)
+    } else if (input$DC_script_mode == "R Markdown") {
+      rv$displayed_script <- generate_r_markdown_from_shiny_decoding_params(decoding_paras)
     }
+
+
+
   })
 }

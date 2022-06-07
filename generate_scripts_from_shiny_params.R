@@ -1,7 +1,7 @@
 
 
 # convert the selected parameters to an R script
-generate_r_script_from_shiny_decoding_params <- function(decoding_params, include_comments = FALSE) {
+generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
   # remove any fields that are null
@@ -310,6 +310,35 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, includ
 
 
 
+
+
+generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
+
+
+  code_body <- generate_r_script_from_shiny_decoding_params(decoding_params)
+
+
+  my_text = ""
+
+  my_text = paste0(my_text, "---\ntitle: 'Decoding Analysis'\noutput: pdf_document\n---\n\n\n",
+                   "```{r setup, include=FALSE}\n\n\n",
+                   "knitr::opts_chunk$set(echo = TRUE)\n\n\n",
+                   "```\n\n\n")
+
+
+  my_text = paste0(my_text, "\n\n\n```{r}\n\n\n")
+
+  my_text = paste0(my_text, code_body)
+
+
+  my_text = paste0(my_text, "\n\n\n```\n\n\n")
+
+
+
+  my_text
+
+
+}
 
 
 

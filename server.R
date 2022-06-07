@@ -51,9 +51,6 @@ function(input, output, session){
 
 
 
-
-
-
   observe({
     req(input$DS_binned_data)
     temp_df_file <- shinyFiles::parseFilePaths(c(wd= rv$binned_base_dir),input$DS_binned_data)
@@ -76,7 +73,7 @@ function(input, output, session){
     updateTextInput(session, "DC_chosen_script_name", value = rv$script_chosen)
   })
 
-  # when unzip a file, the new file is unzipped to exdir with origianl name, thus there is no need to update input with chosen file name
+  # when unzip a file, the new file is unzipped to exdir with original name, thus there is no need to update input with chosen file name
 
 
 
@@ -92,12 +89,11 @@ function(input, output, session){
 
 
 
-
-
   observeEvent(input$bin_save_raster_to_disk, {
     req(input$bin_uploaded_raster,input$bin_uploaded_raster_name )
     unzip(input$bin_uploaded_raster$datapath, exdir=input$bin_uploaded_raster_name)
   })
+
 
 
   observe({
@@ -105,6 +101,7 @@ function(input, output, session){
     temp_file_name <-input$DS_uploaded_binned$datapath
     updateTextInput(session, "DS_uploaded_binned_name", value = file.path(rv$binned_base_dir, basename(temp_file_name)))
   })
+
 
   observeEvent(input$DS_save_binned_to_disk, {
     req(input$DS_uploaded_binned,input$DS_uploaded_binned_name )
@@ -124,7 +121,6 @@ function(input, output, session){
 
   # decoding_para_id changes. This is used by observerEvent who figures out the ids to signal eventReactive to check if they are in position
   rv_para$decoding_para_id_computed <- 1
-
 
 
 
@@ -174,6 +170,10 @@ function(input, output, session){
   })
 
 
+
+
+
+
 ## Data Source ----
 
   output$DS_show_chosen_bin = renderText({
@@ -183,6 +183,8 @@ function(input, output, session){
       basename(rv$binned_file_name)
     }
   })
+
+
 
 
 #### Reactive Functions -----
@@ -237,22 +239,22 @@ function(input, output, session){
       }else{
         input$DS_basic_levels_to_use
       }
-    }else{
-      #TO DO fix
-      input$DS_gen_label_levels
-      #reactive_all_levels_of_gen_var_to_use()
-      #temp_training_level_group_ids <- paste0("input$DS_training_level_group_", c(1:input$DS_gen_num_training_level_groups))
-      #temp_need <- lapply(temp_training_level_group_ids, function(i){
-        #eval(parse(text = paste0("need(", i, ", '", "You need to set ", eval(parse(text = paste0("lLabels$", i))), "')")))
-       # eval(parse(text = paste0("need(", i, ", '", "You need to set it')")))
+    } else{
 
+      all_labels <- c()
+      for (iClass in 1:input$DS_gen_class_number) {
+        curr_train_labels <- eval(str2lang(paste0("input$DS_gen_train_label_levels_class_", iClass)))
+        curr_test_labels <- eval(str2lang(paste0("input$DS_gen_test_label_levels_class_", iClass)))
+        all_labels <- c(all_labels, curr_train_labels, curr_test_labels)
       }
-      #do.call(validate, temp_need)
 
-      #temp_training_level_groups <- lapply(temp_training_level_group_ids, function(i){
-      #  eval(parse(text = i))
-      #})
-      #unlist(temp_training_level_groups)
+
+      all_labels
+
+
+
+    }  # end else statement for the ds_generalization
+
 
   })
 
@@ -347,59 +349,17 @@ function(input, output, session){
 
     train_lst <- list()
     test_lst <- list()
-    if (input$DS_gen_class_number == 1){
-      for (i in 1:input$DS_gen_class_number){
-        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
-                                      paste("Class",i, "- Training levels to use"),
-                                      reactive_all_levels_of_gen_var_to_use(),
-                                      multiple = TRUE)
-        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
-                                     paste("Class",i, "- Testing levels to use"),
-                                     reactive_all_levels_of_gen_var_to_use(),
-                                     multiple = TRUE)
-      }
-    }
-    if (rv$prev_bins[1] > input$DS_gen_class_number){
-      for (i in 1:rv$prev_bins[1]){
-        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
-                                      paste("Class",i, "- Training levels to use"),
-                                      reactive_all_levels_of_gen_var_to_use(),
-                                      selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
-                                      multiple = TRUE)
-        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
-                                     paste("Class",i, "- Testing levels to use"),
-                                     reactive_all_levels_of_gen_var_to_use(),
-                                     selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
-                                     multiple = TRUE)
-      }
-      for (i in (rv$prev_bins[1]+1):input$DS_gen_class_number){
-        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
-                                      paste("Class",i, "- Training levels to use"),
-                                      reactive_all_levels_of_gen_var_to_use(),
-                                      multiple = TRUE)
-        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
-                                     paste("Class",i, "- Testing levels to use"),
-                                     reactive_all_levels_of_gen_var_to_use(),
-                                     multiple = TRUE)
-      }
-    }
-    if(rv$prev_bins[1] < input$DS_gen_class_number){
-      for (i in 1:input$DS_gen_class_number){
+    for (i in 1:input$DS_gen_class_number){
 
-        train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
-                                      paste("Class",i, "- Training levels to use"),
-                                      reactive_all_levels_of_gen_var_to_use(),
-                                      #selected = eval(parse(paste0("input$DS_gen_train_label_levels_class_", i))),
-                                      multiple = TRUE)
-        test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
-                                     paste("Class",i, "- Testing levels to use"),
-                                     reactive_all_levels_of_gen_var_to_use(),
-                                     #selected = eval(parse(paste0("input$DS_gen_test_label_levels_class_", i))),
-                                     multiple = TRUE)
-      }
+      train_lst[[i]] <- selectInput(paste0("DS_gen_train_label_levels_class_", i),
+                                    paste("Class",i, "- Training levels to use"),
+                                    reactive_all_levels_of_gen_var_to_use(),
+                                    multiple = TRUE)
+      test_lst[[i]] <- selectInput(paste0("DS_gen_test_label_levels_class_", i),
+                                   paste("Class",i, "- Testing levels to use"),
+                                   reactive_all_levels_of_gen_var_to_use(),
+                                   multiple = TRUE)
     }
-
-
 
     c(rbind(train_lst, test_lst))
   })
@@ -484,6 +444,8 @@ function(input, output, session){
   #})
 
 
+
+
   ### Cross Valid Temp ----
 
   #### Reactive Functions ----
@@ -534,6 +496,8 @@ function(input, output, session){
            num_sites_avail = nrow(filter(temp_level_repetition_info, min_repeats >= input$DS_gen_num_label_repeats_per_cv_split * input$DS_gen_num_cv_splits)))
     }
   })
+
+
 
 
   #### General Outputs ----
@@ -600,7 +564,7 @@ function(input, output, session){
   output$DS_gen_num_label_repeats_per_cv_split = renderUI({
     numericInput("DS_gen_num_label_repeats_per_cv_split",
                  "Number of repeats of each level in each CV split",
-                 value = 1, min = 2)
+                 value = 1, min = 1)
   })
 
   output$DS_gen_num_cv_splits = renderUI({
@@ -620,10 +584,16 @@ function(input, output, session){
 
   #### Plot ----
   output$DS_show_level_repetition_info <- renderPlotly({
+
+    # unfortunately code somewhere around here leads to a warning that says:
+    #   Warning: Error in select: Can't subset columns that don't exist.
+    #   ✖ Column `labels.` doesn't exist.
+    #   140:
+    # I can't trace where this warning is coming from so I am going to ignore it for now
+
     req(reactive_level_repetition_info())
     temp_level_repetition_info <- reactive_level_repetition_info()
     ggplotly(plot(temp_level_repetition_info))
-
   })
 
 

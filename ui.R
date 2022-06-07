@@ -169,6 +169,7 @@ decoding_analysis <- tabPanel(
                               status = "danger",
                               solidHeader = TRUE,
                               radioButtons("DC_script_mode", "File type for generated script", c("R", "R Markdown", "Matlab"), selected = "R"),
+                              checkboxInput("include_comments", "Add code comments"),
                               uiOutput("DC_offer_scriptize"),
                               uiOutput("DC_offer_run_decoding"))
                         ),

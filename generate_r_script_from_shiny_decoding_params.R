@@ -1,14 +1,40 @@
 
 
 # convert the selected parameters to an R script
-generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned_data_dir_name) {
+generate_r_script_from_shiny_decoding_params <- function(decoding_params, include_comments = FALSE) {
 
+
+  # remove any fields that are null
   decoding_params = decoding_params[!is.na(decoding_params)]
-  decoding_params = preprocess_paras(decoding_params)
+
+
+  include_comments <- decoding_params$include_comments
+
+
+
+  ### Load the NDR and list the binned file name ------
 
   my_text <- "library(NeuroDecodeR)\n\n"
-  my_text <- paste0(my_text, "binned_data <- '", binned_data_dir_name, decoding_params$DS_binned_data$files$`0`[[2]],"' \n\n")
 
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# binned file name\n")
+  }
+
+  my_text <- paste0(my_text,
+                    "binned_data <- '", decoding_params$binned_dir_name,
+                    decoding_params$DS_binned_data$files$`0`[[2]], "' \n\n")
+
+
+
+
+
+  ### Data source ------
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# data source\n")
+  }
 
   # for the ds_generalization, print the labels that belong to each class
   if (decoding_params$DS_type == "ds_generalization") {
@@ -34,7 +60,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
       train_labels_text <- paste0(train_labels_text, "\n\t ", curr_class_train_labels_text)
 
 
-
       curr_class_test_labels_text <- "c("
       for (iTest in seq_along(curr_class_test_labels)) {
         curr_class_test_labels_text <- paste0(curr_class_test_labels_text,
@@ -50,9 +75,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
       eval(str2lang(paste0("decoding_params[['DS_gen_train_label_levels_class_", iClass, "']] <- NULL")))
       eval(str2lang(paste0("decoding_params[['DS_gen_test_label_levels_class_", iClass, "']] <- NULL")))
 
-
     }  # end for loop over the number of classes
-
 
 
     train_labels_text <- substr(train_labels_text, 1, nchar(train_labels_text) - 1)
@@ -68,7 +91,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
 
 
   } # end creating the training and test list for the ds_generalization
-
 
 
 
@@ -111,7 +133,15 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
 
 
 
-  # Classifier
+
+  ### Classifier
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# classifier\n")
+  }
+
   my_text = paste0(my_text, "cl <- ", decoding_params$CL_type,"(")
   for(element in names(decoding_params)){
     if(startsWith(element, "CL_svm")){
@@ -128,7 +158,15 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
 
 
 
-  #Feature Preprocessors
+  ###  Feature Preprocessors
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# feature preprocessors\n")
+  }
+
+
   fp_zs <- NULL
   fp_skf <- NULL
   fp_list <- NULL
@@ -146,7 +184,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
     }
     if(startsWith(element, "FP_skf_")){
       val <- eval(str2lang(paste0("decoding_params$",element)))
-      fp_skf = paste0(fp_skf, gsub("FP_skf_", "", element)," = ", val, ",\n")
+      fp_skf = paste0(fp_skf, "\n\t", gsub("FP_skf_", "", element)," = ", val, ",")
     }
   }
 
@@ -162,11 +200,19 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
 
 
 
-  # Result metrics
+
+
+  ### Result metrics
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# result metrics\n")
+  }
+
 
   rm_main_text <- NULL
   rm_cm_text <- NULL
-
 
   if("rm_main_results" %in% decoding_params$RM_type){
     rm_main_text <- paste0("rm_main <- rm_main_results(\n\t include_norm_rank_results = ",
@@ -201,7 +247,19 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
 
 
 
-  #Cross Validator
+
+
+
+
+  ###  Cross Validator
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# cross validator\n")
+  }
+
+
   my_text = paste0(my_text, "cv <- cv_standard(\n\t datasource = ds, \n")
   my_text = paste0(my_text,"\t classifier = cl, \n\t feature_preprocessors = fps, \n")
   for(element in names(decoding_params)){
@@ -214,11 +272,35 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params, binned
   my_text <- paste0(substring(my_text,1, nchar(my_text)-2), ") \n\n")
 
 
-  # Add code to run the decoding analysis
+
+
+
+
+
+  ### Run the decoding analysis
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# run decoding analysis\n")
+  }
+
+
   my_text <- paste0(my_text, "DECODING_RESULTS <- run_decoding(cv)\n\n")
 
 
-  # Add code to save the results...
+
+
+
+  ### Save the results
+
+
+
+  # add code here
+
+
+
 
 
   return(my_text)

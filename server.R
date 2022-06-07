@@ -817,6 +817,10 @@ function(input, output, session){
         rv_para$id <- c(rv_para$id, "CV_num_parallel_cores", "CV_parallel_outfile")
     }
 
+
+    rv_para$id <- c(rv_para$id, "include_comments")
+
+
     rv_para$inputIDs <- paste0("input$", rv_para$id)
     rv_para$values <- lapply(rv_para$inputIDs, function(i){
       eval(str2lang(i))
@@ -826,14 +830,13 @@ function(input, output, session){
     decoding_paras <- setNames(decoding_paras, rv_para$id)
 
 
-    # if using a ds_generalization, pass the aggregated training and test labels
-    # if(input$DS_type == "ds_generalization"){
-    #   decoding_paras$DS_gen_train_label_levels <- DS_gen_train_label_levels
-    #   decoding_paras$DS_gen_test_label_levels <- DS_gen_test_label_levels
-    # }
+    # add the directory name of the binned data to the decoding params
+    decoding_paras$binned_dir_name <- binned_base_dir
+
+    #decoding_paras$include_comments <- TRUE
 
     if (input$DC_script_mode == "R") {
-      rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_paras, binned_base_dir)
+      rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_paras)
     }
   })
 }

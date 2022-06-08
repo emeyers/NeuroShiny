@@ -349,20 +349,77 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
   code_body <- stringr::str_replace(code_body, "./results/", "../")
 
 
-  my_text = ""
+  my_text <- ""
 
-  my_text = paste0(my_text, "---\ntitle: 'Decoding Analysis'\noutput: pdf_document\n---\n\n\n",
+  my_text <- paste0(my_text, "---\ntitle: 'Decoding Analysis'\noutput: pdf_document\n---\n\n\n",
                    "```{r setup, include=FALSE}\n\n\n",
                    "knitr::opts_chunk$set(echo = TRUE)\n\n\n",
                    "```\n\n\n")
 
 
-  my_text = paste0(my_text, "\n\n\n```{r}\n\n\n")
+  # my_text <- paste0(my_text, "\n\n\n```{r}\n\n\n")
 
-  my_text = paste0(my_text, code_body)
+  my_text <- paste0(my_text, "\n\n\n # Run the decoding analysis \n\n\n```{r}\n\n")
 
 
-  my_text = paste0(my_text, "\n\n\n```\n\n\n")
+  my_text <- paste0(my_text, code_body)
+
+
+  my_text <- paste0(my_text, "\n```\n\n\n")
+
+
+
+
+  # can add some plots of results to the R Markdown file
+
+  # This should be added to the UI
+  add_plots_of_results <- TRUE
+
+
+  if (add_plots_of_results) {
+
+    my_text <- paste0(my_text, "\n\n\n # Plot some results \n\n\n```{r}\n")
+
+
+
+    if ("rm_main_results"  %in% decoding_params$RM_type) {
+
+
+      if (decoding_params$include_comments) {
+        my_text <- paste0(my_text, "\n# plot main results")
+      }
+
+      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results, type = 'line') \n")
+
+
+      if (decoding_params$include_comments) {
+        my_text <- paste0(my_text, "\n# plot temporal-cross-decoding results")
+      }
+
+      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results) \n")
+
+    }
+
+
+
+    if ("rm_confusion_matrix"  %in% decoding_params$RM_type) {
+
+
+      if (decoding_params$include_comments) {
+        my_text <- paste0(my_text, "\n# plot confusion matrices")
+      }
+
+      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_confusion_matrix) \n")
+
+
+    }
+
+
+    my_text <- paste0(my_text, "\n```\n\n\n")
+
+  }
+
+
 
 
 

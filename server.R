@@ -78,14 +78,14 @@ function(input, output, session){
 
 
 
-  observe({
-    req(input$DC_to_be_saved_result_name)
-    if(input$DC_script_mode == "R Markdown"){
-      updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "Rmd"))
-    } else{
-      updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "R"))
-    }
-  })
+  # observe({
+  #   req(input$DC_to_be_saved_result_name)
+  #   if(input$DC_script_mode == "R Markdown"){
+  #     updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "Rmd"))
+  #   } else{
+  #     updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "R"))
+  #   }
+  # })
 
 
 
@@ -162,14 +162,13 @@ function(input, output, session){
 
   output$DC_offer_scriptize = renderUI({
     list(
-      textInput("DC_to_be_saved_result_name",
-                "File name of the result to be saved (e.g., my_results)"),
+      #textInput("DC_to_be_saved_result_name",
+      #          "File name of the result to be saved (e.g., my_results)"),
       actionButton("DC_scriptize", "Generate script"),
+      actionButton("DC_run_script", "Run script"),
       uiOutput("DC_scriptize_error")
     )
   })
-
-
 
 
 
@@ -612,6 +611,7 @@ function(input, output, session){
     length(unique(factor(binned_data$siteID)))
   })
 
+
   #### Output ----
   output$FP_type = renderUI({
     checkboxGroupInput("FP_type",
@@ -722,14 +722,24 @@ function(input, output, session){
   ### Run Decoding ----
 
   output$DC_ace = renderUI({
+
+    if (input$DC_script_mode == "Matlab") {
+      script_editor_mode <- "matlab"
+    } else {
+      script_editor_mode <- "r"
+    }
+
     shinyAce::aceEditor("script",
                         rv$displayed_script,
-                        mode = input$DC_script_mode)
+                        mode = script_editor_mode)
   })
 
 
 
+
   observeEvent(input$DC_scriptize,{
+
+    #req(input$DS_binned_data)
 
     rv_para$id <-  c("DS_binned_data", "DS_type", "DC_to_be_saved_result_name")
 
@@ -826,22 +836,69 @@ function(input, output, session){
       eval(str2lang(i))
     })
 
-    decoding_paras <- rv_para$values
-    decoding_paras <- setNames(decoding_paras, rv_para$id)
+    decoding_params <- rv_para$values
+    decoding_params <- setNames(decoding_params, rv_para$id)
 
 
     # add the directory name of the binned data to the decoding params
-    decoding_paras$binned_dir_name <- binned_base_dir
+    decoding_params$binned_dir_name <- binned_base_dir
+    decoding_params$results_save_dir <- result_base_dir
 
-    #decoding_paras$include_comments <- TRUE
+    #decoding_params$include_comments <- FALSE
 
     if (input$DC_script_mode == "R") {
-      rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_paras)
+      rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_params)
     } else if (input$DC_script_mode == "R Markdown") {
-      rv$displayed_script <- generate_r_markdown_from_shiny_decoding_params(decoding_paras)
+      rv$displayed_script <- generate_r_markdown_from_shiny_decoding_params(decoding_params)
     }
 
 
 
   })
+
+
+  observeEvent(input$DC_run_script,{
+
+    #browser()
+
+    if (input$DC_script_mode == "R") {
+      script_save_dir <- trimws(file.path("r_scripts", " "))
+      file_extension <- ".R"
+    } else if (input$DC_script_mode == "R Markdown") {
+      script_save_dir <- trimws(file.path("r_markdown", " "))
+      file_extension <- ".Rmd"
+    }
+
+
+    # generate analysis script name
+
+    # should perhaps do this when the script is generated and then can add the script name as meta
+    #  data to be saved with the decoding results, but ok for now...
+
+    script_file_name <- paste0(result_base_dir, script_save_dir,
+                               "NeuroShiny_Script_ID_",
+                               NeuroDecodeR:::generate_analysis_ID(),
+                               file_extension)
+
+
+    # write the code to a script
+    fileConn <- file(script_file_name)
+    writeLines(input$script, fileConn)
+    close(fileConn)
+
+
+
+    # run the script
+    if (input$DC_script_mode == "R") {
+      source(script_file_name)
+    } else if (input$DC_script_mode == "R Markdown") {
+      rmarkdown::render(script_file_name, "pdf_document",
+                        output_dir = "./results/r_marakdown_pdfs/")  # hard coding this which isn't great
+    }
+
+
+
+  })
+
+
 }

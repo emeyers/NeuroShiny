@@ -26,8 +26,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-
-
   ### Data source ------
 
   my_text <- paste0(my_text, "\n")  # add more spaces between sections
@@ -291,22 +289,45 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
+  # print the analysis ID from running the decoding
+
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# print out the ID for this analysis\n")
+  }
+
+  my_text <- paste0(my_text, "paste('The analysis ID is:',
+        DECODING_RESULTS$cross_validation_paramaters$analysis_ID)\n\n")
+
+
 
 
   ### Save the results
 
+  my_text <- paste0(my_text, "\n")  # add more spaces between sections
 
 
-  # add code here
+  if (include_comments) {
+    my_text <- paste0(my_text, "\n# save the results\n")
+  }
 
 
+  results_save_directory <- decoding_params$results_save_dir
 
 
+  my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
+                    "'", results_save_directory, trimws(file.path("decoding_results", " ")), "')\n\n")
 
-  return(my_text)
+
+  my_text
 
 
 }
+
+
+
+
 
 
 
@@ -316,6 +337,16 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
 
   code_body <- generate_r_script_from_shiny_decoding_params(decoding_params)
+
+
+  # fix the path to the data so that it is relative to where the R Markdown
+  #   scripts are saved
+  code_body <- stringr::str_replace(code_body, "./data", "../../data")
+
+
+  # fix the path to the results so that it is relative to where the R Markdown
+  #   scripts are saved
+  code_body <- stringr::str_replace(code_body, "./results/", "../")
 
 
   my_text = ""

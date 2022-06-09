@@ -771,11 +771,29 @@ function(input, output, session){
 
 
 
-# Tryting to get the script to update when the include comments box is
-#checked/unchecked but this is not working :(
-#observeEvent(input$include_comments,{
-#    update_ace_editor_code()
-#  })
+
+  # Trying to get the script to update when the include comments box is
+  #  checked/unchecked but this is not working :(
+
+  observeEvent(input$include_comments,{
+
+
+    # unfortunately call this function does nothing so need to manually write the code to do this
+    # update_ace_editor_code()
+
+    curr_radio_button_setting <- input$DC_script_mode
+
+    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                     c("R", "R Markdown", "Matlab"), selected = "R Markdown")
+
+    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                     c("R", "R Markdown", "Matlab"), selected = "R")
+
+    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                     c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)
+
+  })
+
 
 
 

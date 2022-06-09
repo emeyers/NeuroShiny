@@ -163,7 +163,7 @@ function(input, output, session){
     list(
       #textInput("DC_to_be_saved_result_name",
       #          "File name of the result to be saved (e.g., my_results)"),
-      actionButton("DC_scriptize", "Generate script"),
+      #actionButton("DC_scriptize", "Generate script"),
       actionButton("DC_run_script", "Run script"),
       uiOutput("DC_scriptize_error")
     )
@@ -728,23 +728,69 @@ function(input, output, session){
       script_editor_mode <- "r"
     }
 
-    shinyAce::aceEditor("script",
+
+    ace_editor <- shinyAce::aceEditor("script",
                         rv$displayed_script,
                         mode = script_editor_mode)
+
+
+    update_ace_editor_code()
+
+
+    ace_editor
+
+
   })
 
 
 
 
-  observeEvent(input$DC_scriptize,{
+  # a helper function that refreshes what is on the ace editor
+  update_ace_editor_code <- function() {
 
-    #req(input$DS_binned_data)
+    if (rv$displayed_script == "") {
+
+      curr_radio_button_setting <- input$DC_script_mode
+
+      # to make sure the editor shows the script the first time one clicks on a tab
+      #  one needs to chance the radio button to a different choice and then back again
+      #  (definitely a bit of a hack but it seems to work fairly well)
+
+      updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                         c("R", "R Markdown", "Matlab"), selected = "R Markdown")
+
+      updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                         c("R", "R Markdown", "Matlab"), selected = "R")
+
+      updateRadioButtons(session, "DC_script_mode", "File type for generated script",
+                         c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)
+
+    }
+
+  }
+
+
+
+# Tryting to get the script to update when the include comments box is
+#checked/unchecked but this is not working :(
+#observeEvent(input$include_comments,{
+#    update_ace_editor_code()
+#  })
+
+
+
+
+  observeEvent(input$DC_script_mode,{
+
+    # can't generate a script if a particular binned data file has not been selected
+    req(input$DS_binned_data)
 
     rv_para$id <-  c("DS_binned_data", "DS_type", "DC_to_be_saved_result_name")
 
-    #Data Source
-    #ds_basic
 
+    # Data Source
+
+    #ds_basic
     if(input$DS_type == "ds_basic"){
       rv_para$id <- c(rv_para$id,"DS_basic_var_to_decode",
                       "DS_basic_num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
@@ -765,15 +811,6 @@ function(input, output, session){
                       "DS_gen_num_resample_sites")
 
 
-      # collect all the training and set labels for each class in the appropriate lists
-      # DS_gen_train_label_levels <- list()
-      # DS_gen_test_label_levels <- list()
-      # for (iClass in 1:input$DS_gen_class_number){
-      #    DS_gen_train_label_levels[[iClass]] <- eval(str2lang(paste0("input$DS_gen_train_label_levels_class_",  iClass)))
-      #    DS_gen_test_label_levels[[iClass]] <- eval(str2lang(paste0("input$DS_gen_test_label_levels_class_",  iClass)))
-      # }
-
-
       for (iClass in 1:input$DS_gen_class_number){
         rv_para$id <- c(rv_para$id,
                         paste0("DS_gen_train_label_levels_class_",  iClass),
@@ -787,7 +824,8 @@ function(input, output, session){
       }
     }
 
-    #Classifier
+
+    # Classifier
     rv_para$id <- c(rv_para$id, "CL_type")
     if(input$CL_type == 'cl_svm'){
       rv_para$id <- c(rv_para$id, "CL_svm_kernel", "CL_svm_cost")
@@ -802,33 +840,34 @@ function(input, output, session){
       }
     }
 
+
     #Feature Preprocessors
     rv_para$id <- c(rv_para$id, "FP_type")
-    if ('fp_select_k_features' %in% input$FP_type){
+    if ('fp_select_k_features' %in% input$FP_type) {
       rv_para$id <- c(rv_para$id, "FP_skf_num_site_to_use", "FP_skf_num_sites_to_exclude")
     }
 
+
     #Result Metrics
     rv_para$id <- c(rv_para$id, "RM_type")
-    if ('rm_main_results' %in% input$RM_type){
+    if ('rm_main_results' %in% input$RM_type) {
       rv_para$id <- c(rv_para$id, "RM_mr_include_norm_rank_results")
     }
     if ('rm_confusion_matrix' %in% input$RM_type){
       rv_para$id <- c(rv_para$id, "RM_cm_save_only_same_train_test_time", "RM_cm_create_decision_vals_confusion_matrix")
     }
 
-
     #Cross Validator
     rv_para$id <- c(rv_para$id, "CV_test_only_at_training_time",
                     "CV_num_resample_runs")
 
-    if(!is.na(input$CV_num_parallel_cores) && input$CV_num_parallel_cores >= 1){
+    if(!is.null(input$CV_num_parallel_cores) &&
+       !is.na(input$CV_num_parallel_cores) &&
+       input$CV_num_parallel_cores >= 1) {
         rv_para$id <- c(rv_para$id, "CV_num_parallel_cores", "CV_parallel_outfile")
     }
 
-
     rv_para$id <- c(rv_para$id, "include_comments")
-
 
     rv_para$inputIDs <- paste0("input$", rv_para$id)
     rv_para$values <- lapply(rv_para$inputIDs, function(i){
@@ -843,6 +882,7 @@ function(input, output, session){
     decoding_params$binned_dir_name <- binned_base_dir
     decoding_params$results_save_dir <- result_base_dir
 
+
     #decoding_params$include_comments <- FALSE
 
     if (input$DC_script_mode == "R") {
@@ -852,8 +892,11 @@ function(input, output, session){
     }
 
 
+    rv$displayed_script
+
 
   })
+
 
 
 
@@ -925,7 +968,7 @@ function(input, output, session){
       return("No R Markdown results have been knit yet")
     } else if (rv$pdf_knitting_status == "running") {
       # This is never run b/c when code is knitting it holds up any updates to the UI :(
-      # I think I will need to use the promise package to knit asyncrhonously to get this to work :/
+      # I think I will need to use the promise package to knit asynchronously to get this to work :/
       return("R Markdown results are in the process of being knit a pdf...")
     } else {
       tags$iframe(style="height:600px; width:100%", src = rv$latest_pdf_file_name)

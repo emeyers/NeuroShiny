@@ -35,7 +35,6 @@ function(input, output, session){
   rv$result_chosen <- NA
   rv$result_data <- NULL
 
-
   rv$script_rmd_not_saved_yet <- 1
 
   rv$www_base_dir <- www_base_dir
@@ -857,6 +856,9 @@ function(input, output, session){
   })
 
 
+
+  # Create and run R code
+
   observeEvent(input$DC_run_script,{
 
     #browser()
@@ -892,13 +894,48 @@ function(input, output, session){
     if (input$DC_script_mode == "R") {
       source(script_file_name)
     } else if (input$DC_script_mode == "R Markdown") {
+
+
+      rv$pdf_knitting_status <- "running"
+
+      pdf_file_name <- stringr::str_replace(script_file_name, "r_markdown", "r_markdown_pdfs")
+      pdf_file_name <- stringr::str_replace(pdf_file_name, "Rmd$", "pdf")
+
+      rv$latest_pdf_file_name <- basename(pdf_file_name)
+
+
       rmarkdown::render(script_file_name, "pdf_document",
-                        output_dir = "./results/r_marakdown_pdfs/")  # hard coding this which isn't great
-    }
+                        output_dir = "./results/r_markdown_pdfs/")  # hard coding this which isn't great
+
+
+      rv$pdf_knitting_status <- "completed"
+      file.copy(pdf_file_name, paste0("www/", basename(pdf_file_name)))
+
+
+    }  # end for creating an R Markdown document
 
 
 
   })
+
+
+  output$DC_plot_pdf <- renderUI({
+
+    if (is.null(rv$pdf_knitting_status)) {
+      return("No R Markdown results have been knit yet")
+    } else if (rv$pdf_knitting_status == "running") {
+      # This is never run b/c when code is knitting it holds up any updates to the UI :(
+      # I think I will need to use the promise package to knit asyncrhonously to get this to work :/
+      return("R Markdown results are in the process of being knit a pdf...")
+    } else {
+      tags$iframe(style="height:600px; width:100%", src = rv$latest_pdf_file_name)
+    }
+
+
+  })
+
+
+
 
 
 }

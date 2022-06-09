@@ -163,7 +163,7 @@ decoding_analysis <- tabPanel(
                       width = NULL,
                       fluidRow(
                         column(
-                          width = 6,
+                          width = 4,
                           box(title = "Create a new script",
                               width = NULL,
                               status = "danger",
@@ -171,11 +171,20 @@ decoding_analysis <- tabPanel(
                               radioButtons("DC_script_mode", "File type for generated script", c("R", "R Markdown", "Matlab"), selected = "R"),
                               checkboxInput("include_comments", "Add code comments"),
                               uiOutput("DC_offer_scriptize"),
-                              uiOutput("DC_offer_run_decoding"))
+                              uiOutput("DC_offer_run_decoding"))  # Get strange errors if I try to add more UI elements :(
                         ),
-                        column(width = 6, box(width = NULL, uiOutput("DC_ace")))
+                        column(width = 8, box(width = NULL, uiOutput("DC_ace")))
                       )
-                    )
+                    ),
+
+
+                    tabPanel(
+                      title = "View Results",
+                      width = NULL,
+                      solidHeader = TRUE, status = "primary",
+                      uiOutput("DC_plot_pdf")
+                    ),
+
              )
       )
     )

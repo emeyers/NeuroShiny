@@ -102,13 +102,73 @@ function(input, output, session){
   })
 
 
-  observeEvent(input$DS_save_binned_to_disk, {
-    req(input$DS_uploaded_binned,input$DS_uploaded_binned_name )
-    move_file(input$DS_uploaded_binned$datapath,input$DS_uploaded_binned_name )
+
+  observeEvent(input$DS_save_binned_to_disk,{
+    req(input$DS_uploaded_binned, input$DS_uploaded_binned_name )
+    move_file(input$DS_uploaded_binned$datapath, input$DS_uploaded_binned_name)
+  })
+
+
+  output$home_offer_save_state = renderUI({
+    list(
+      textInput("home_state_name",
+                "File name of the current state should be saved (e.g., state_01.Rda)",
+                rv$state_base_dir),
+      actionButton("home_save_state", "Save the current state"),
+      uiOutput("home_save_state_error")
+    )
+  })
+
+  output$home_save_state_error = renderUI({
+    er_home_save_state_error()
+  })
+
+  er_home_save_state_error <- eventReactive(input$home_save_state, {
+    validate(
+      need(input$home_state_name, paste0("Requires name of the file to be saved"))
+    )
+  })
+
+  observeEvent(input$home_save_state, {
+    req(input$home_state_name)
+    state = reactiveValuesToList(input)
+    save(state, file = input$home_state_name)
+
   })
 
 
 
+  observe({
+    req(input$bin_chosen_raster)
+    rv$raster_cur_dir_name <- shinyFiles::parseDirPath(c(wd= rv$raster_base_dir),input$bin_chosen_raster)
+    req(rv$raster_cur_dir_name)
+    temp_names_of_all_mat_files_in_raster_dir <-
+      list.files(rv$raster_cur_dir_name, pattern = "\\.mat$")
+
+    if(length(temp_names_of_all_mat_files_in_raster_dir) > 0){
+      rv$raster_bMat <- TRUE
+    }else{
+      rv$raster_bMat <-FALSE
+      temp_names_of_all_rda_files_in_raster_dir <-
+        list.files(rv$raster_cur_dir_name, pattern = "\\.[rR]da$")
+      rv$raster_num_neuron <- length(temp_names_of_all_rda_files_in_raster_dir)
+
+      if(rv$raster_num_neuron > 0){
+        rv$raster_bRda <- TRUE
+        rv$raster_cur_file_name <- temp_names_of_all_rda_files_in_raster_dir[rv$raster_cur_neuron]
+        load(file.path(rv$raster_cur_dir_name, rv$raster_cur_file_name))
+        temp_dfRaster <- select(raster_data, starts_with("time."))
+        temp_mRaster <- as.matrix(temp_dfRaster)
+        rownames(temp_mRaster) <- 1:dim(temp_mRaster)[1]
+        colnames(temp_mRaster) <- gsub("time.", "", colnames(temp_mRaster))
+        rv$mRaster_cur_data <- temp_mRaster
+      }else{
+        rv$raster_bRda <- FALSE
+        # this doesn't work; observe is for action not calculation
+        # validate("Only accept raster data in .mat or .Rda format !")
+      }
+    }
+  })
 
 
 
@@ -116,30 +176,175 @@ function(input, output, session){
 
   ### Bin the data ---------------------
 
+  observeEvent(input$bin_bin_data,{
+    if(rv$raster_bRda){
+
+      # data binned data in the director data/binned
+      binned_basename <- trimws(file.path("data", "binned", " "))
+
+      temp_call = paste0("NeuroDecodeR:::create_binned_data(rv$raster_cur_dir_name, ",
+                         "paste0(binned_basename, input$bin_prefix_of_binned_file_name),",
+                         "input$bin_bin_width, input$bin_step_size")
+
+      if(!is.na(input$bin_start_ind)){
+        temp_call = paste0(temp_call, ",input$bin_start_ind")
+      }
+      if(!is.na(input$bin_end_ind)){
+        temp_call = paste0(temp_call, ",input$bin_end_ind")
+      }
+      temp_call = paste0(temp_call,")")
+      #rv$create_bin_function_run <- temp_call
+
+      print(binned_basename)
+      rv$create_bin_function_run <- paste0("NeuroDecodeR:::create_binned_data('",
+                                           rv$raster_cur_dir_name, "', ",
+                                           "'", binned_basename,
+                                           input$bin_prefix_of_binned_file_name, "', ",
+                                           input$bin_bin_width, ", ", input$bin_step_size, ")")
+
+      eval(parse(text = temp_call))
+
+    } else if(rv$raster_bMat){
+
+      temp_call = paste0("NeuroDecodeR:::create_binned_data_from_matlab_raster_data(rv$raster_cur_dir_name,",
+                         "input$bin_prefix_of_binned_file_name,",
+                         "input$bin_bin_width, input$bin_step_size")
+      if(!is.na(input$bin_start_ind)){
+        temp_call = paste0(temp_call, ",input$bin_start_ind")
+      }
+      if(!is.na(input$bin_end_ind)){
+        temp_call = paste0(temp_call, ",input$bin_end_ind")
+      }
+      temp_call = paste0(temp_call,")")
+      rv$create_bin_function_run <- temp_call
+      eval(parse(text = temp_call))
+
+    }
+
+  })
+
+  observeEvent(input$bin_create_raster,{
+
+    temp_call = paste0("NeuroDecodeR:::create_raster_data_from_matlab_raster_data(rv$raster_cur_dir_name,",
+                       "input$bin_new_raster")
+    if(!is.na(input$bin_start_ind)){
+      temp_call = paste0(temp_call, ",input$bin_raster_start_ind")
+    }
+    if(!is.na(input$bin_end_ind)){
+      temp_call = paste0(temp_call, ",input$bin_raster_end_ind")
+    }
+    temp_call = paste0(temp_call,")")
+    rv$create_raster_funciton_run <- temp_call
+    eval(parse(text = temp_call))
+
+
+  })
+
   rv_para <- reactiveValues()
 
   # decoding_para_id changes. This is used by observerEvent who figures out the ids to signal eventReactive to check if they are in position
   rv_para$decoding_para_id_computed <- 1
 
 
-
-
-
-  er_scriptize_action_error <- eventReactive(rv_para$decoding_para_id_computed,{
-    #if we don't have this line, this function will be called as soon as users click the script tab because rv_para$decoding_para_id_computed is going from NULL to 1 (I think)
-    req(rv_para$id)
-    validate(
-      need(input$DS_binned_data, "No data has been uploaded")
-    )
-    temp_need = lapply(rv_para$id, function(i){
-      #eval(parse(text = paste0("need(input$", i, ", '", "You need to set ",eval(parse(text = paste0("lLabels$", i))), "')")))
-      eval(parse(text = paste0("need(input$", i, ", '", "You need to set it')")))
-    })
-    do.call(validate, temp_need)
+  observeEvent(input$bin_pre_neuron,{
+    if(rv$raster_cur_neuron > 1){
+      rv$raster_cur_neuron <- rv$raster_cur_neuron - 1
+    }
   })
 
-  output$DC_scriptize_error <- renderText({
-    #er_scriptize_action_error()
+  observeEvent(input$bin_next_neuron,{
+    if(rv$raster_cur_neuron < rv$raster_num_neuron){
+      rv$raster_cur_neuron <- rv$raster_cur_neuron + 1
+    }
+  })
+
+  reactive_bRaster_qualified <- reactive({
+    sum(rv$raster_bMat, rv$raster_bRda)
+  })
+
+  output$bin_offer_create_raster = renderUI({
+    req(rv$raster_cur_dir_name)
+    if(rv$raster_bMat){
+      temp_matlab_raster_dir_name <- rv$raster_cur_dir_name
+      # if the directory name ends with _mat, remove _mat
+      temp_non_desired_pattern = '.*_mat$'
+      if (grepl(temp_non_desired_pattern, temp_matlab_raster_dir_name) == TRUE){
+        temp_r_raster_dir_name <- substr(temp_matlab_raster_dir_name, 1, nchar(temp_matlab_raster_dir_name) - 4)
+      }
+
+      # append Rda
+      temp_r_raster_dir_name <- paste0(temp_r_raster_dir_name, "_rda/")
+
+      list(
+        helpText(paste0("We can bin raster data in .mat format, but do you want to create raster data in .Rda format? ",
+                        "Benefits include the option to plot raster data ")),
+        textInput("bin_new_raster",
+                  "New raster directory name (e.g., data/raster/Zhang_Desimone_7objects_raster_data_rda; by default, we append '_rda' to the matlab raster directory name)",
+                  temp_r_raster_dir_name),
+        numericInput("bin_raster_start_ind",
+                     "Index of the sample where the new raster data begin",
+                     value = NULL),
+        numericInput("bin_raster_end_ind",
+                     "Index of the sample where the new raster data end",
+                     value = NULL),
+
+        actionButton("bin_create_raster", "Create raster"))
+    }
+  })
+
+  output$bin_show_create_bin_function_run = renderText({
+    rv$create_bin_function_run
+  })
+
+  output$bin_show_create_raster_function_run = renderText(({
+    rv$create_raster_funciton_run
+  }))
+
+  output$bin_show_chosen_raster = renderText({
+    req(rv$raster_cur_dir_name)
+    if(is.na(rv$raster_cur_dir_name)){
+      "No file chosen yet"
+    } else{
+      basename(rv$raster_cur_dir_name)
+
+    }
+  })
+
+  output$bin_show_raster_cur_file_name = renderText({
+    paste0("current data shown:", "\n", rv$raster_cur_file_name)
+
+  })
+
+  output$bin_raster_plot = renderPlot({
+    req(rv$mRaster_cur_data)
+    temp_dfMelted <- reshape2::melt(rv$mRaster_cur_data)
+    #trials/rownames are converted from character to integer by melt. Times/colnames are also integer
+    if(length(unique(factor(temp_dfMelted$value))) < 3){
+      ggplot(temp_dfMelted, aes(x = Var2, y = Var1)) +
+        geom_raster(aes(fill=factor(value))) +
+        scale_fill_manual(values=c("0"="white", "1"="black"))+
+        labs(x="Time (ms)", y="Trial")+
+        theme(legend.position="none")
+    } else {
+      ggplot(temp_dfMelted, aes(x = Var2, y = Var1)) +
+        geom_raster(aes(fill=value)) +
+        scale_fill_gradient(low="grey90", high="red")+
+        labs(x="Time (ms)", y="Trial")+
+        theme(legend.position="none")
+    }
+
+  })
+
+  output$bin_PSTH = renderPlot({
+    req(rv$mRaster_cur_data)
+
+    temp_mRaster_cur_data_mean <- colSums(rv$mRaster_cur_data, na.rm = FALSE, dims = 1)/nrow(rv$mRaster_cur_data)
+    temp_dfRaster_mean <- data.frame(time = as.numeric(names(temp_mRaster_cur_data_mean)), spike_mean_over_trials = temp_mRaster_cur_data_mean)
+
+    qplot(x = time, y = spike_mean_over_trials, data = temp_dfRaster_mean, geom = "point", color = "salmon1") +
+      scale_x_continuous(breaks = temp_dfRaster_mean$time[c(TRUE, rep(FALSE, length(temp_dfRaster_mean$time)/10))]) +
+      labs(x="Time (ms)", y="Spike Mean over Trials") +
+      theme(legend.position="none")
   })
 
 
@@ -166,6 +371,46 @@ function(input, output, session){
       #actionButton("DC_scriptize", "Generate script"),
       actionButton("DC_run_script", "Run script"),
       uiOutput("DC_scriptize_error")
+    )
+  })
+
+  output$DC_offer_run_decoding = renderUI({
+    list(
+      helpText(""),
+      actionButton("DC_run_decoding", "Save the script and run decoding"),
+      uiOutput("DC_run_decoding_error")
+    )
+  })
+
+  output$DS_offer_upload_bin = renderUI({
+    list(
+      fileInput("DS_uploaded_binned",
+                "Upload new binned data (optional)",
+                multiple = TRUE),
+      textInput("DS_uploaded_binned_name",
+                "Where you want this file to be saved",
+                rv$binned_base_dir),
+      actionButton("DS_save_binned_to_disk","Save to disk"),
+      uiOutput("DS_save_binned_to_disk_error")
+
+    )
+  })
+
+
+  output$where = renderDataTable(input$bin_uploaded_raster)
+
+
+
+  output$bin_offer_upload_raster = renderUI({
+    list(
+      fileInput("bin_uploaded_raster",
+                "Upload a zipped file raster data",
+                multiple = TRUE),
+      textInput("bin_uploaded_raster_name",
+                "Where you want the file to be unzipped",
+                rv$raster_base_dir),
+      actionButton("bin_save_raster_to_disk", "Save to disk"),
+      uiOutput("bin_save_raster_to_disk_error")
     )
   })
 
@@ -996,6 +1241,198 @@ function(input, output, session){
   })
 
 
+
+
+  output$DC_show_chosen_script = renderText({
+    basename(rv$script_chosen)
+  })
+
+  output$DC_ace = renderUI({
+    shinyAce::aceEditor("script",
+                        rv$displayed_script,
+                        mode = input$DC_script_mode)
+  })
+
+  output$DC_pdf <- renderUI({
+    if (is.null(rv$save_script_name)){
+      "The results will appear as a pdf below once the code is done running."
+    }else{
+      pdf_name <- gsub("Rmd", "pdf", basename(rv$save_script_name))
+      tags$iframe(style="height:600px; width:100%", src = pdf_name)
+    }
+  })
+
+  observeEvent(input$Plot_create_pdf,{
+    req(rv$result_chosen, input$Plot_timeseries_result_type)
+    append_result_to_pdf_and_knit(rv$result_chosen, input$Plot_timeseries_result_type)
+    print("done")
+    output$Plot_pdf <- renderUI({
+      req(rv$result_chosen)
+      pdf_name <- gsub("Rmd", "pdf", rv$save_script_name)
+      tags$iframe(style="height:600px; width:100%", src = pdf_name)
+    })
+
+  })
+
+  observeEvent(input$DC_save_displayed_script,{
+    req(input$DC_to_be_saved_script_name, rv$displayed_script)
+    temp_file_name = file.path(script_base_dir, input$DC_to_be_saved_script_name)
+    file.create(temp_file_name, overwrite = TRUE)
+    write(rv$displayed_script, file = temp_file_name)
+  })
+
+  observeEvent(input$DC_run_decoding, {
+    req(input$DC_to_be_saved_result_name, rv$displayed_script)
+
+    # add the appropriate file extenstion to the saved file name
+    if(input$DC_script_mode == "R Markdown"){
+      file_extension <- ".Rmd"
+    } else {
+      file_extension <- ".R"
+    }
+
+    file_pieces <- unlist(base::strsplit(input$DC_to_be_saved_result_name, "[.]"))
+
+    if(length(file_pieces) == 1){
+      save_file_name <- paste0(file_pieces[1], file_extension)
+    } else{
+      if(!(file_pieces[length(file_pieces)] == file_extension)){
+        save_file_name <- paste0(save_file_name, file_extension)
+      }else{
+        save_file_name <- input$DC_to_be_saved_result_name
+      }
+    }
+
+    save_script_name <- file.path(script_base_dir, save_file_name)
+    write(rv$displayed_script, file = save_script_name)
+    rv$save_script_name <- save_script_name
+
+    if(input$DC_script_mode == "R Markdown") {
+      rmarkdown::render(save_script_name, "pdf_document", output_dir = "www")
+    }else{
+      source(save_script_name)
+    }
+  })
+
+  ## Plotting Results ----
+
+  observe({
+    req(input$Plot_chosen_result)
+    temp_df_file <- shinyFiles::parseFilePaths(c(wd= rv$result_base_dir),input$Plot_chosen_result)
+    req(temp_df_file$datapath)
+    rv$result_chosen <- temp_df_file$datapath
+    load(rv$result_chosen)
+    rv$result_data <- DECODING_RESULTS
+  })
+
+  output$Plot_show_chosen_result = renderText({
+    if(is.na(rv$result_chosen)){
+      "No file chosen yet"
+    } else{
+      basename(rv$result_chosen)
+    }
+  })
+
+  output$Plot_timeseries = renderPlot({
+    req(rv$result_data)
+    plot(rv$result_data$rm_main_results, plot_type = "line",
+         result_type = input$Plot_timeseries_result_type)
+  })
+
+  output$Plot_tct = renderPlot({
+    req(rv$result_data)
+    plot(rv$result_data$rm_main_results,
+         result_type = input$Plot_timeseries_result_type)
+
+  })
+
+# Error Messages ----
+
+  er_scriptize_action_error <- eventReactive(rv_para$decoding_para_id_computed,{
+    # if we don't have this line, this function will be called as soon as users click the script tab because rv_para$decoding_para_id_computed is going from NULL to 1 (I think)
+    req(rv_para$id)
+    validate(
+      need(input$DS_chosen_bin, "Did you not even choose the binned data?")
+    )
+    temp_need = lapply(rv_para$id, function(i){
+      eval(parse(text = paste0("need(input$", i, ", '", "You need to set your parameter first')")))
+    })
+    do.call(validate, temp_need)
+  })
+
+  output$DC_scriptize_error <- renderText({
+    er_scriptize_action_error()
+  })
+
+  er_bin_action_error <- eventReactive(input$bin_bin_data,{
+    validate(
+      need(rv$raster_cur_dir_name, "You haven't chosen the raster data yet!")
+    )
+    validate(
+      need(rv$raster_bRda||rv$raster_bMat, "We only accept .mat and .Rda format !")
+    )
+  })
+
+  er_bin_save_raster_to_disk_error <- eventReactive(input$bin_save_raster_to_disk,{
+    validate(
+      need(input$bin_uploaded_raster, "Please upload a zipped file raster data"),
+      need(input$bin_uploaded_raster_name, "Please tell me where you want the file to be unzipped" )
+    )
+  })
+
+  er_DS_save_binned_to_disk_error <- eventReactive(input$DS_save_binned_to_disk,{
+    validate(
+      need(input$DS_uploaded_binned, "Please upload new binned data"),
+      need(input$DS_uploaded_binned_name, "Please tell me where you want this file to be saved")
+    )
+  })
+
+  er_DC_save_displayed_script_error <- eventReactive(input$DC_save_displayed_script,{
+    validate(
+      need(rv$displayed_script,"Please generate the script first"),
+      need(input$DC_to_be_saved_script_name, "Please tell me the new script name")
+    )
+  })
+
+  output$bin_action_error = renderUI({
+    er_bin_action_error()
+
+  })
+
+  output$bin_save_raster_to_disk_error = renderUI({
+
+    er_bin_save_raster_to_disk_error()
+
+  })
+
+  output$DS_save_binned_to_disk_error = renderUI({
+    er_DS_save_binned_to_disk_error()
+  })
+
+  output$DC_save_displayed_script_error = renderUI({
+    er_DC_save_displayed_script_error()
+  })
+
+  output$DC_run_decoding_error = renderUI({
+    er_DC_save_displayed_script_error()
+  })
+
+  output$bin_evil_raster = renderUI({
+    req(rv$raster_cur_dir_name)
+    validate(
+      need(reactive_bRaster_qualified() > 0, "Only accept .mat and .Rda format. Please change your dataset file type"))
+  })
+
+  er_scriptize_action_error <- eventReactive(rv_para$decoding_para_id_computed,{
+    req(rv_para$id)
+    validate(
+      need(input$DS_binned_data, "No data has been uploaded")
+    )
+    temp_need = lapply(rv_para$id, function(i){
+      eval(parse(text = paste0("need(input$", i, ", '", "Don't forget to set it first)")))
+    })
+    do.call(validate, temp_need)
+  })
 
 
 

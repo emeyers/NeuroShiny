@@ -1209,6 +1209,13 @@ function(input, output, session){
 
       rv$latest_pdf_file_name <- basename(pdf_file_name)
 
+      # add a notification that the R Markdown document is knitting
+      running_id <- showNotification("Knitting R Markdown results...",
+                                     duration = NULL,
+                                     closeButton = FALSE,
+                                     type = "message")
+      on.exit(removeNotification(running_id), add = TRUE)
+
 
       rmarkdown::render(script_file_name, "pdf_document",
                         output_dir = "./results/r_markdown_pdfs/")  # hard coding this which isn't great

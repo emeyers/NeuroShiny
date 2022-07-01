@@ -317,7 +317,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-                    "'", results_save_directory, trimws(file.path("decoding_results", " ")), "')\n\n")
+                    "'", results_save_directory, trimws(file.path(" ")), "')\n\n")
 
 
   my_text
@@ -341,12 +341,12 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   # fix the path to the data so that it is relative to where the R Markdown
   #   scripts are saved
-  code_body <- stringr::str_replace(code_body, "./data", "../../data")
+  #code_body <- stringr::str_replace(code_body, "./data", "../../data")
 
 
   # fix the path to the results so that it is relative to where the R Markdown
   #   scripts are saved
-  code_body <- stringr::str_replace(code_body, "./results/", "../")
+  #code_body <- stringr::str_replace(code_body, "./results/", "../")
 
 
   my_text <- ""
@@ -359,7 +359,7 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   # my_text <- paste0(my_text, "\n\n\n```{r}\n\n\n")
 
-  my_text <- paste0(my_text, "\n\n\n # Run the decoding analysis \n\n\n```{r}\n\n")
+  my_text <- paste0(my_text, "\n\n\n# Run the decoding analysis \n\n\n```{r}\n\n")
 
 
   my_text <- paste0(my_text, code_body)
@@ -378,7 +378,7 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   if (add_plots_of_results) {
 
-    my_text <- paste0(my_text, "\n\n\n # Plot some results \n\n\n```{r}\n")
+    my_text <- paste0(my_text, "\n\n\n# Plot some results \n\n\n```{r}\n")
 
 
 

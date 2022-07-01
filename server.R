@@ -5,7 +5,7 @@ function(input, output, session){
 
   rv <- reactiveValues()
 
-  rv$state_base_dir <- state_base_dir
+  rv$project_basedir <- project_basedir
   rv$state_cur_file_name <- ""
 
   rv$raster_base_dir <- raster_base_dir
@@ -40,7 +40,7 @@ function(input, output, session){
   rv$www_base_dir <- www_base_dir
   # only files meet specified files types will be shown. However, such dir shown as empty can still be choosed
 
-  shinyFiles::shinyFileChoose(input, "home_loaded_state", roots = c(wd=state_base_dir), filetypes = "Rda")
+  shinyFiles::shinyFileChoose(input, "home_loaded_state", roots = c(wd=project_basedir), filetypes = "Rda")
   shinyFiles::shinyDirChoose(input, "bin_chosen_raster", roots = c(wd=raster_base_dir), filetypes = c("mat", "Rda"))
   shinyFiles::shinyFileChoose(input, "DS_binned_data", roots = c(wd=binned_base_dir), filetypes = "Rda")
   shinyFiles::shinyFileChoose(input, "DC_chosen_script_name", root =c(wd=script_base_dir, filetypes = c("R", "Rmd")))
@@ -113,7 +113,7 @@ function(input, output, session){
     list(
       textInput("home_state_name",
                 "File name of the current state should be saved (e.g., state_01.Rda)",
-                rv$state_base_dir),
+                rv$project_basedir),
       actionButton("home_save_state", "Save the current state"),
       uiOutput("home_save_state_error")
     )
@@ -180,10 +180,10 @@ function(input, output, session){
     if(rv$raster_bRda){
 
       # data binned data in the director data/binned
-      binned_basename <- trimws(file.path("data", "binned", " "))
+      #binned_basename <- trimws(file.path("data", "binned", " "))
 
       temp_call = paste0("NeuroDecodeR:::create_binned_data(rv$raster_cur_dir_name, ",
-                         "paste0(binned_basename, input$bin_prefix_of_binned_file_name),",
+                         "paste0(binned_base_dir, input$bin_prefix_of_binned_file_name),",
                          "input$bin_bin_width, input$bin_step_size")
 
       if(!is.na(input$bin_start_ind)){
@@ -195,10 +195,12 @@ function(input, output, session){
       temp_call = paste0(temp_call,")")
       #rv$create_bin_function_run <- temp_call
 
-      print(binned_basename)
+      #print(binned_basename)
+      print(binned_base_dir)
       rv$create_bin_function_run <- paste0("NeuroDecodeR:::create_binned_data('",
                                            rv$raster_cur_dir_name, "', ",
-                                           "'", binned_basename,
+                                           #"'", binned_basename,
+                                           "'", binned_base_dir,
                                            input$bin_prefix_of_binned_file_name, "', ",
                                            input$bin_bin_width, ", ", input$bin_step_size, ")")
 

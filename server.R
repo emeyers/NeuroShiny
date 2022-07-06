@@ -1169,7 +1169,6 @@ function(input, output, session){
 
   observeEvent(input$DC_run_script,{
 
-    #browser()
 
     if (input$DC_script_mode == "R") {
       script_save_dir <- trimws(file.path("r_scripts", " "))
@@ -1206,7 +1205,7 @@ function(input, output, session){
 
       rv$pdf_knitting_status <- "running"
 
-      pdf_file_name <- stringr::str_replace(script_file_name, "r_markdown", "r_markdown_pdfs")
+      pdf_file_name <- stringr::str_replace(script_file_name, "r_markdown", "r_markdown_pdf")
       pdf_file_name <- stringr::str_replace(pdf_file_name, "Rmd$", "pdf")
 
       rv$latest_pdf_file_name <- basename(pdf_file_name)
@@ -1219,8 +1218,7 @@ function(input, output, session){
       on.exit(removeNotification(running_id), add = TRUE)
 
 
-      rmarkdown::render(script_file_name, "pdf_document",
-                        output_dir = "./results/r_markdown_pdfs/")  # hard coding this which isn't great
+      rmarkdown::render(script_file_name, "pdf_document", output_dir = dirname(pdf_file_name))
 
 
       rv$pdf_knitting_status <- "completed"

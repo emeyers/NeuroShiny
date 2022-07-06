@@ -1,15 +1,15 @@
-# I am definitely using these
+
 library('shinydashboard')
 library('NeuroDecodeR')
-
-# I am using these but might abandon these
-library('plotrix')
-library('fields')
-
-# I should use these
 library('ggplot2')
 library('dplyr')
 library('plotly')
+
+
+# perhaps these can be removed
+library('plotrix')
+library('fields')
+
 
 rm(list=ls())
 
@@ -18,8 +18,10 @@ rm(list=ls())
 options(shiny.maxRequestSize=1000*1024^2)
 
 
+# hard coded these for now, should update with a tab to choose the project directory
 projects_folder_path <- file.path("..", "decoding_analysis_projects")
 project_name <- "Katsuki_Constantinidis_popout_R_analysis"
+
 
 
 #project_basedir <- trimws(file.path(here::here(), projects_folder_path, project_name, " "))
@@ -27,7 +29,7 @@ project_basedir <- trimws(file.path(projects_folder_path, project_name, " "))
 
 raster_base_dir <- paste0(project_basedir, trimws(file.path('data', ' ')))
 binned_base_dir <- paste0(project_basedir, trimws(file.path('data','binned_data', ' ')))
-result_base_dir <- paste0(project_basedir, trimws(file.path('results', 'decoding_results', 'decoding_result_files', ' ')))
+result_base_dir <- paste0(project_basedir, trimws(file.path('results', 'decoding_results', ' ')))
 www_base_dir <- trimws(file.path('www', ' '))
 
 

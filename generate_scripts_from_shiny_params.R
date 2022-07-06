@@ -21,8 +21,8 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
   my_text <- paste0(my_text,
-                    "binned_data <- '", decoding_params$binned_dir_name,
-                    decoding_params$DS_binned_data$files$`0`[[2]], "' \n\n")
+                    "binned_data <- file.path(here::here(), '", decoding_params$binned_dir_name,
+                    decoding_params$DS_binned_data$files$`0`[[2]], "') \n\n")
 
 
 
@@ -317,7 +317,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-                    "'", results_save_directory, trimws(file.path(" ")), "')\n\n")
+                    "file.path(here::here(), '", results_save_directory, 'decoding_result_files', trimws(file.path(" ")), "'))\n\n")
 
 
   my_text

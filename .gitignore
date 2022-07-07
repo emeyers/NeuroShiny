@@ -37,3 +37,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Ignore the temporary pdf results stored in www
+www/*.pdf
+

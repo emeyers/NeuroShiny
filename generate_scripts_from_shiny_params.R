@@ -20,10 +20,10 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     my_text <- paste0(my_text, "\n# binned file name\n")
   }
 
-  my_text <- paste0(my_text,
-                    "binned_data <- file.path(here::here(), '", decoding_params$binned_dir_name,
-                    decoding_params$DS_binned_data$files$`0`[[2]], "') \n\n")
 
+  my_text <- paste0(my_text,
+                    "binned_data <- file.path(here::here(), 'data', 'binned_data', '",
+                    decoding_params$DS_binned_data$files$`0`[[2]], "') \n\n")
 
 
   ### Data source ------
@@ -88,7 +88,13 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     my_text <- paste0(my_text, test_labels_text, "\n\n")
 
 
-  } # end creating the training and test list for the ds_generalization
+    # end creating the training and test list for the ds_generalization
+
+  } else if (decoding_params$DS_type == "ds_basic ") {
+
+
+
+  }
 
 
 
@@ -106,12 +112,17 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
         val <- paste0("'", val, "'")
       }
 
+      # if levels_to_use has been specified, but them in as a vector argument
+      if (element == "DS_basic_label_levels_to_use") {
+        val <- paste0("c('", paste(val, collapse = "', '"), "')")
+      }
+
       my_text <- paste0(my_text, "\t", gsub("DS_basic_", "", element)," = ", val, ",\n")
     }
 
 
     if(startsWith(element, "DS_gen_")){
-      val <- eval(str2lang(paste0("decoding_params$",element)))
+      val <- eval(str2lang(paste0("decoding_params$", element)))
       my_text = paste0(my_text, "\t", gsub("DS_gen_", "", element)," = ", val, ",\n")
     }
 
@@ -126,10 +137,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   } else {
     my_text <- paste0(substring(my_text, 1, nchar(my_text)-2), ") \n\n")
   }
-
-
-
-
 
 
   ### Classifier
@@ -317,7 +324,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-                    "file.path(here::here(), '", results_save_directory, 'decoding_result_files', trimws(file.path(" ")), "'))\n\n")
+                    "file.path(here::here(), 'results', 'decoding_results', 'decoding_result_files', trimws(file.path(' ')))", ")\n\n")
 
 
   my_text

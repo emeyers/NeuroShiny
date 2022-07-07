@@ -477,12 +477,12 @@ function(input, output, session){
     req(rv$binned_data)
     if(input$DS_type == "ds_basic"){
       validate(
-        need(!is.null(input$DS_basic_levels_to_use)||!input$DS_basic_use_all_levels, paste0("You haven't set your levels yet")))
+        need(!is.null(input$DS_basic_label_levels_to_use)||!input$DS_basic_use_all_levels, paste0("You haven't set your levels yet")))
 
       if(!input$DS_basic_use_all_levels){
         reactive_all_levels_of_basic_var_to_decode()
       }else{
-        input$DS_basic_levels_to_use
+        input$DS_basic_label_levels_to_use
       }
     } else{
 
@@ -529,7 +529,7 @@ function(input, output, session){
   })
 
   output$DS_basic_list_of_levels_to_use = renderUI({
-    selectInput("DS_basic_levels_to_use",
+    selectInput("DS_basic_label_levels_to_use",
                 "Levels to use",
                 reactive_all_levels_of_basic_var_to_decode(),
                 multiple = TRUE)
@@ -1060,8 +1060,8 @@ function(input, output, session){
       rv_para$id <- c(rv_para$id,"DS_basic_var_to_decode",
                       "DS_basic_num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
                       "DS_show_chosen_repetition_info", "DS_basic_num_resample_sites")
-      if(input$DS_basic_use_all_levels){
-        rv_para$id <- c(rv_para$id,  "DS_basic_list_of_levels_to_use")
+      if(input$DS_basic_use_all_levels){  # seems like a misnomer - should be DS_basic_use_only_specific_levels
+        rv_para$id <- c(rv_para$id,  "DS_basic_label_levels_to_use")
       }
       if(input$DS_basic_advanced){
         rv_para$id <- c(rv_para$id,  "DS_basic_use_count_data", "DS_basic_site_IDs_to_use",

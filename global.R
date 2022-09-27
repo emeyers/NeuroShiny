@@ -23,14 +23,11 @@ raster_base_dir <- paste0(project_basedir, trimws(file.path('data', ' ')))
 #binned_base_dir <- paste0(project_basedir, trimws(file.path('data','binned_data', ' '))) #original non-working directory
 binned_base_dir <- paste0(project_basedir, trimws(file.path('data', ' ')))
 result_base_dir <- paste0(project_basedir, trimws(file.path('results', 'decoding_results', ' ')))
-www_base_dir <- trimws(file.path('www', ' '))
-
-
-script_base_dir <- "scripts"  # is this needed?
+script_base_dir <- "scripts"
 
 
 
-req_dc_para <- c("DS_binned_data", "DS_type")
+req_dc_para <- c("DS___p___binned_data", "DS_type")
 
 #List of classifiers, feature processors, and result metrics
 all_cl <- c("cl_max_correlation", "cl_svm", "cl_poisson_naive_bayes")
@@ -41,9 +38,9 @@ all_result_type <- c("zero_one_loss", "normalized_rank", "decision_values", "all
 
 #Makes sure that fp_zscore is not used with the cl_poisson_naive_bayes
 #Used in reactive_all_fp_avail
-df_cl_fp <- data.frame(c(1, 1), c(1, 1), c(1, 0))
-colnames(df_cl_fp) <- all_cl
-rownames(df_cl_fp) <- all_fp
+cl_fp <- data.frame(c(1, 1), c(1, 1), c(1, 0))
+colnames(cl_fp) <- all_cl
+rownames(cl_fp) <- all_fp
 
 #Function used to save generated script
 move_file <- function(from, to) {
@@ -51,13 +48,6 @@ move_file <- function(from, to) {
   if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE)
   file.rename(from = from,  to = to)
 }
-
-preprocess_paras <- function(decoding_params){
-  decoding_params$DC_to_be_saved_result_name <- paste0(result_base_dir, trimws(file.path(decoding_params$DC_to_be_saved_result_name)))
-  #decoding_params$DC_to_be_saved_result_name <- here::here(result_base_dir,decoding_params$DC_to_be_saved_result_name)
-  return(decoding_params)
-}
-
 
 source("generate_scripts_from_shiny_params.R")
 

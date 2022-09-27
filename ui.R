@@ -105,44 +105,44 @@ decoding_analysis <- tabPanel(
                           title = "Choose a binned data file",
                           status = "danger",
                           solidHeader = TRUE,
-                          shinyFiles::shinyFilesButton("DS_binned_data", "Browse", "", multiple = FALSE),
+                          shinyFiles::shinyFilesButton("DS___p___binned_data", "Browse", "", multiple = FALSE),
                           helpText("Loaded binned data: "),
                           textOutput("DS_show_chosen_bin")),
                       #Select DS
                       selectInput("DS_type", "Type of data source", c("ds_basic","ds_generalization")),
                       #DS Basic options
                       conditionalPanel(condition = "input.DS_type == 'ds_basic'",
-                                       uiOutput("DS_basic_list_of_labels"),
-                                       checkboxInput("DS_basic_use_all_levels", "Select your specific levels", FALSE),
-                                       checkboxInput("DS_basic_advanced", "Select advanced parameters?", FALSE)
+                                       uiOutput("DS_basic___p___list_of_labels"),
+                                       checkboxInput("DS_basic___np___select_levels", "Select your specific levels", FALSE),
+                                       checkboxInput("DS_basic___np___advanced", "Select advanced parameters?", FALSE)
                       ),
                       #Option to specify levels for DS Basic
-                      conditionalPanel(condition = "input.DS_basic_use_all_levels && input.DS_type == 'ds_basic'",
-                                       uiOutput("DS_basic_list_of_levels_to_use")
+                      conditionalPanel(condition = "input.DS_basic___np___select_levels && input.DS_type == 'ds_basic'",
+                                       uiOutput("DS_basic___np___list_of_levels_to_use")
                       ),
                       #Optional advanced parameters for DS Basic
-                      conditionalPanel(condition = "input.DS_basic_advanced && input.DS_type == 'ds_basic'",
-                                       uiOutput("DS_basic_use_count_data"),
-                                       uiOutput("DS_basic_site_IDs_to_use"),
-                                       uiOutput("DS_basic_site_IDs_to_exclude"),
-                                       uiOutput("DS_basic_randomly_shuffled_labels"),
-                                       uiOutput("DS_basic_create_simultaneous_populations")
+                      conditionalPanel(condition = "input.DS_basic___np___advanced && input.DS_type == 'ds_basic'",
+                                       uiOutput("DS_basic___p___use_count_data"),
+                                       uiOutput("DS_basic___p___site_IDs_to_use"),
+                                       uiOutput("DS_basic___p___site_IDs_to_exclude"),
+                                       uiOutput("DS_basic___p___randomly_shuffled_labels"),
+                                       uiOutput("DS_basic___p___create_simultaneous_populations")
                       ),
                       #DS Generalization options
                       conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
-                                       uiOutput("DS_gen_list_of_labels"),
-                                       uiOutput("DS_gen_select_num_of_groups"),
-                                       numericInput("DS_gen_class_number","How many classes?", 2, min = 2),
-                                       uiOutput("DS_gen_label_levels"),
-                                       checkboxInput("DS_gen_advanced", "Select advanced parameters?", FALSE)
+                                       uiOutput("DS_gen___np___list_of_labels"),
+                                       #uiOutput("DS_gen___np___select_num_of_groups"),
+                                       numericInput("DS_gen___np___class_number","How many classes?", 2, min = 2),
+                                       uiOutput("DS_gen___p___label_levels"),
+                                       checkboxInput("DS_gen___np___advanced", "Select advanced parameters?", FALSE)
                       ),
                       #Optional advanced parameters for DS Generalization
-                      conditionalPanel(condition = "input.DS_gen_advanced && input.DS_type == 'ds_generalization'",
-                                       uiOutput("DS_gen_use_count_data"),
-                                       uiOutput("DS_gen_site_IDs_to_use"),
-                                       uiOutput("DS_gen_site_IDs_to_exclude"),
-                                       uiOutput("DS_gen_randomly_shuffled_labels"),
-                                       uiOutput("DS_gen_create_simultaneous_populations")
+                      conditionalPanel(condition = "input.DS_gen___np___advanced && input.DS_type == 'ds_generalization'",
+                                       uiOutput("DS_gen___p___use_count_data"),
+                                       uiOutput("DS_gen___p___site_IDs_to_use"),
+                                       uiOutput("DS_gen___p___site_IDs_to_exclude"),
+                                       uiOutput("DS_gen___p___randomly_shuffled_labels"),
+                                       uiOutput("DS_gen___p___create_simultaneous_populations")
                       )
                     ),
 
@@ -159,16 +159,16 @@ decoding_analysis <- tabPanel(
                           #DS Basic parameters
                           conditionalPanel(condition = "input.DS_type == 'ds_basic'",
                                            uiOutput("DS_basic_num_cv_splits"),
-                                           uiOutput("DS_basic_num_label_repeats_per_cv_split"),
+                                           uiOutput("DS_basic___p___num_label_repeats_per_cv_split"),
                                            uiOutput("DS_show_chosen_repetition_info"),
-                                           uiOutput("DS_basic_num_resample_sites")
+                                           uiOutput("DS_basic___p___num_resample_sites")
                           ),
                           #DS Generalization parameters
                           conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
-                                           uiOutput("DS_gen_num_cv_splits"),
-                                           uiOutput("DS_gen_num_label_repeats_per_cv_split"),
-                                           #uiOutput("DS_show_chosen_repetition_info"),
-                                           uiOutput("DS_gen_num_resample_sites")
+                                           uiOutput("DS_gen___p___num_cv_splits"),
+                                           uiOutput("DS_gen___p___num_label_repeats_per_cv_split"),
+                                           #uiOutput("DS_show_chosen_repetition_info"), ELISA
+                                           uiOutput("DS_gen___p___num_resample_sites")
                           ),
                           #plot output for number of sites against number of repeated conditions
                           plotlyOutput("DS_show_level_repetition_info")
@@ -188,33 +188,34 @@ decoding_analysis <- tabPanel(
                         title = "Additional parameters (if applicable)",
                         #Select parameters if classifier is svm
                         conditionalPanel(condition  = "input.CL_type == 'cl_svm'",
-                                         selectInput("CL_svm_kernel",
+                                         selectInput("CL_svm___p___kernel",
                                                      "Kernel",
                                                      c("linear", "polynomial", "radial", "sigmoid"),
                                                      selected = "linear"),
-                                         numericInput("CL_svm_cost",
+                                         numericInput("CL_svm___p___cost",
                                                       "Cost",
                                                       value = 1, min = 0),
                                          #If polynomial kernel selected for svm classifier:
-                                         conditionalPanel(condition ="input.CL_svm_kernel == 'polynomial'",
-                                                          numericInput("CL_svm_degree",
+                                         conditionalPanel(condition ="input.CL_svm___p___kernel == 'polynomial'",
+                                                          numericInput("CL_svm___p___degree",
                                                                        "Degree of polynomial",
                                                                        value = 3,
                                                                        min = 2,
                                                                        max  = 10)),
                                          #If radial or polynomial kernel selected for svm classifier:
-                                         conditionalPanel(condition = "input.CL_svm_kernel == 'radial'|input.CL_svm_kernel == 'polynomial'",
-                                                          numericInput("CL_svm_coef0",
+                                         conditionalPanel(condition = "input.CL_svm___p___kernel == 'radial'|input.CL_svm___p___kernel == 'polynomial'",
+                                                          numericInput("CL_svm___p___coef0",
                                                                        "Coef0",
                                                                        0)),
                                          #If radial or polynomial kernel selected for svm classifier:
-                                         conditionalPanel(condition = "input.CL_svm_kernel == 'radial'|input.CL_svm_kernel == 'polynomial'|input.CL_svm_kernel == 'sigmoid'",
-                                                          numericInput("CL_svm_gamma",
+                                         conditionalPanel(condition = "input.CL_svm___p___kernel == 'radial'|input.CL_svm___p___kernel == 'polynomial'|input.CL_svm___p___kernel == 'sigmoid'",
+                                                          numericInput("CL_svm___p___gamma",
                                                                        "Gamma",
                                                                        NULL))
                                          )
                         )
                     ),
+                    #ETHAN - should I include return_decision_values for CL's?
 
                     #Fourth decoding tab: feature processors
                     tabPanel(
@@ -225,8 +226,8 @@ decoding_analysis <- tabPanel(
                       uiOutput("FP_type"),
                       #Select additional parameters if user chooses fp_select_k_features
                       conditionalPanel(condition = "'fp_select_k_features' %in% input.FP_type",
-                                       uiOutput("FP_skf_num_sites_to_use"),
-                                       uiOutput("FP_skf_num_sites_to_exclude"))
+                                       uiOutput("FP_skf___p___num_sites_to_use"),
+                                       uiOutput("FP_skf___p___num_sites_to_exclude"))
                       ),
 
                     #Fifth decoding tab: result metrics
@@ -238,13 +239,13 @@ decoding_analysis <- tabPanel(
                        uiOutput("RM_type"),
                        #Select additional parameters if user chooses rm_main_results
                        conditionalPanel(condition = "'rm_main_results' %in% input.RM_type",
-                                        htmlOutput("RM_mr_include_norm_rank_results_text"),
-                                        uiOutput("RM_mr_include_norm_rank_results")),
-                       #Select additional parameters if user chooses RM_confusion_matrix_text
+                                        htmlOutput("RM_mr___np___include_norm_rank_results_text"),
+                                        uiOutput("RM_mr___p___include_norm_rank_results")),
+                       #Select additional parameters if user chooses RM_cm___np___text
                        conditionalPanel(condition = "'rm_confusion_matrix' %in% input.RM_type",
-                                        htmlOutput("RM_confusion_matrix_text"),
-                                        uiOutput("RM_cm_save_TCD_results"),
-                                        uiOutput("RM_cm_create_decision_vals_confusion_matrix"))
+                                        htmlOutput("RM_cm___np___text"),
+                                        uiOutput("RM_cm___p___save_TCD_results"),
+                                        uiOutput("RM_cm___p___create_decision_vals_confusion_matrix"))
 
                       ),
 
@@ -254,12 +255,12 @@ decoding_analysis <- tabPanel(
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
                       #Select cross validator parameters
-                      checkboxInput("CV_run_TCD", "Test only at training times?",FALSE),
-                      uiOutput("CV_num_resample_runs"),
-                      uiOutput("CV_num_parallel_cores"),
+                      checkboxInput("CV___p___run_TCD", "Test only at training times?",FALSE),
+                      uiOutput("CV___p___num_resample_runs"),
+                      uiOutput("CV___p___num_parallel_cores"),
                       #Include parallel outfile parameter if conditions met (as defined by online reference)
-                      conditionalPanel(condition = "input.CV_num_parallel_cores >= 1 | !input.CV_num_parallel_cores",
-                                       uiOutput("CV_parallel_outfile"))
+                      conditionalPanel(condition = "input.CV___p___num_parallel_cores >= 1 | !input.CV___p___num_parallel_cores",
+                                       uiOutput("CV___p___parallel_outfile"))
                     ),
 
                     #Seventh decoding tab: runing analysis and generating scripts
@@ -365,3 +366,4 @@ dashboardPage(skin = "green",
               dashboardHeader(title = "NeuroShiny"),
               sidebar,
               body)
+

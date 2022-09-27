@@ -1,290 +1,298 @@
 
 
-# convert the selected parameters to an R script
+# Function converts the selected parameters to an R script
+# Essentially creates a long string
 generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
+  # Remove any fields that are null
+  decoding_params <-  decoding_params[!is.na(decoding_params)]
 
-  # remove any fields that are null
-  decoding_params = decoding_params[!is.na(decoding_params)]
+  # Conditional variable to check for optional comments added to script
+  #include_comments <- decoding_params$include_comments ETHAN - where do you want it
+  include_comments <- FALSE
 
-
-  include_comments <- decoding_params$include_comments
-
-
-
-  ### Load the NDR and list the binned file name ------
-
+  ### Load the NDR ------
   my_text <- "library(NeuroDecodeR)\n\n"
 
+  ### Binned Data ------
   if (include_comments) {
     my_text <- paste0(my_text, "\n# binned file name\n")
   }
 
-
+  #ELISA/ETHAN - is this a hardcode that will fix itself eventually?
   my_text <- paste0(my_text,
                     "binned_data <- file.path(here::here(), 'data', 'binned_data', '",
-                    decoding_params$DS_binned_data$files$`0`[[2]], "') \n\n")
-
+                    decoding_params$DS___p___binned_data$files$`0`[[2]], "') \n\n")
 
   ### Data source ------
-
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# data source\n")
   }
 
-  # for the ds_generalization, print the labels that belong to each class
+  # Creating ds_generalization training and testing labels, not added until later
   if (decoding_params$DS_type == "ds_generalization") {
 
-
+    # Start of string for training and testing levels
     train_labels_text <- "train_label_levels <- list("
     test_labels_text <- "test_label_levels <- list("
 
-    for (iClass in 1:decoding_params$DS_gen_class_number){
+    # Add the labels that belong to each class
+    for (class_i in 1:decoding_params$DS_gen___np___class_number) {
+      # Assign train and test labels for class i
+      class_i_train_labels <- eval(str2lang(paste0("decoding_params$DS_genc___p___train_label_levels_class_", class_i)))
+      class_i_test_labels <- eval(str2lang(paste0("decoding_params$DS_genc___p___test_label_levels_class_", class_i)))
 
-      curr_class_train_labels <- eval(str2lang(paste0("decoding_params$DS_gen_train_label_levels_class_", iClass)))
-      curr_class_test_labels <- eval(str2lang(paste0("decoding_params$DS_gen_test_label_levels_class_", iClass)))
+      # Start of string for class i's labels
+      class_i_train_labels_text <- "c("
+      class_i_test_labels_text <- "c("
 
-      curr_class_train_labels_text <- "c("
-      for (iTrain in seq_along(curr_class_train_labels)) {
-        curr_class_train_labels_text <- paste0(curr_class_train_labels_text,
-                                               "'", curr_class_train_labels[iTrain], "', ")
+      # Add training and testing labels to string
+      for (train_i in seq_along(class_i_train_labels)) {
+        class_i_train_labels_text <- paste0(class_i_train_labels_text, "'",
+                                            class_i_train_labels[train_i], "', ")
+      }
+      for (test_i in seq_along(class_i_test_labels)) {
+        class_i_test_labels_text <- paste0(class_i_test_labels_text, "'",
+                                           class_i_test_labels[test_i], "', ")
       }
 
-      curr_class_train_labels_text <- substr(curr_class_train_labels_text, 1, nchar(curr_class_train_labels_text) - 2)
-      curr_class_train_labels_text <- paste0(curr_class_train_labels_text, "),")
+      # Remove last ", " in the string to close the list with "),
+      #ELISA class_i_train_labels_text <- substr(class_i_train_labels_text, 1, nchar(class_i_train_labels_text) - 2)
+      class_i_train_labels_text <- gsub('.{2}$', "),", class_i_train_labels_text)
+      class_i_test_labels_text <- gsub('.{2}$', "),", class_i_test_labels_text)
 
-      train_labels_text <- paste0(train_labels_text, "\n\t ", curr_class_train_labels_text)
+      # Add the new class label list to the full set lists for training labels
+      train_labels_text <- paste0(train_labels_text, "\n\t ", class_i_train_labels_text)
+      test_labels_text <- paste0(test_labels_text, "\n\t ", class_i_test_labels_text)
 
+      # Remove the DS_genc___p___train_label_levels_class_ for class i from the decoding_params
+      eval(str2lang(paste0("decoding_params[['DS_genc___p___train_label_levels_class_", class_i, "']] <- NULL")))
+      eval(str2lang(paste0("decoding_params[['DS_genc___p___test_label_levels_class_", class_i, "']] <- NULL")))
 
-      curr_class_test_labels_text <- "c("
-      for (iTest in seq_along(curr_class_test_labels)) {
-        curr_class_test_labels_text <- paste0(curr_class_test_labels_text,
-                                               "'", curr_class_test_labels[iTest], "', ")
-      }
-
-      curr_class_test_labels_text <- substr(curr_class_test_labels_text, 1, nchar(curr_class_test_labels_text) - 2)
-      curr_class_test_labels_text <- paste0(curr_class_test_labels_text, "),")
-
-      test_labels_text <- paste0(test_labels_text, "\n\t ", curr_class_test_labels_text)
-
-      # remove the DS_gen_train_label_levels_class_ from the decoding_params
-      eval(str2lang(paste0("decoding_params[['DS_gen_train_label_levels_class_", iClass, "']] <- NULL")))
-      eval(str2lang(paste0("decoding_params[['DS_gen_test_label_levels_class_", iClass, "']] <- NULL")))
-
-    }  # end for loop over the number of classes
+    }  # End for loop over the number of classes
 
 
-    train_labels_text <- substr(train_labels_text, 1, nchar(train_labels_text) - 1)
-    train_labels_text <- paste0(train_labels_text, ")")
+    #ELISA train_labels_text <- substr(train_labels_text, 1, nchar(train_labels_text) - 1)
+    #ELISA train_labels_text <- paste0(train_labels_text, ")")
+    # Remove final character to replace with ")" and close list
+    train_labels_text <- gsub('.{1}$', ")", train_labels_text)
+    test_labels_text <- gsub('.{1}$', ")", test_labels_text)
 
-    test_labels_text <- substr(test_labels_text, 1, nchar(test_labels_text) - 1)
-    test_labels_text <- paste0(test_labels_text, ")")
+    # Remove the number of classes from decoding_params
+    decoding_params$DS_gen___np___class_number <- NULL
 
-    decoding_params$DS_gen_class_number <- NULL
-
+    # Add space between sections
     my_text <- paste0(my_text, train_labels_text, "\n\n")
     my_text <- paste0(my_text, test_labels_text, "\n\n")
 
 
-    # end creating the training and test list for the ds_generalization
+    # End creating the training and test list for the ds_generalization
 
   } else if (decoding_params$DS_type == "ds_basic ") {
-
-
+    # Ask Ethan
 
   }
 
 
 
+
+  # Add start of data source assignment
   my_text <- paste0(my_text, "ds <- ", decoding_params$DS_type,"(\n",
                     "\tbinned_data = binned_data,\n")
 
-  for(element in names(decoding_params)){
+  for (element in names(decoding_params)) {
 
-    if(startsWith(element, "DS_basic_")){
+    # For ds_basic parameters
+    if (startsWith(element, "DS_basic___p___")) {
 
       val <- eval(str2lang(paste0("decoding_params$",element)))
 
-      # put the name of the variable to be decoding in quotes
-      if (element == "DS_basic_var_to_decode") {
+      # Put the name of the variable to be decoded in quotes
+      if (element == "DS_basic___p___labels") {
         val <- paste0("'", val, "'")
       }
 
-      # if levels_to_use has been specified, but them in as a vector argument
-      if (element == "DS_basic_label_levels_to_use") {
+      # If label_levels has been specified, but them in as a vector argument
+      if (element == "DS_basic_label_levels") {
         val <- paste0("c('", paste(val, collapse = "', '"), "')")
       }
 
-      my_text <- paste0(my_text, "\t", gsub("DS_basic_", "", element)," = ", val, ",\n")
+      # Add current element and it's value to string
+      my_text <- paste0(my_text, "\t", gsub("DS_basic___p___", "", element)," = ", val, ",\n")
     }
 
 
-    if(startsWith(element, "DS_gen_")){
+    if(startsWith(element, "DS_gen___p___")){
       val <- eval(str2lang(paste0("decoding_params$", element)))
-      my_text = paste0(my_text, "\t", gsub("DS_gen_", "", element)," = ", val, ",\n")
+      # Add all current existing ds_generalization elements in decoding_params
+       paste0(my_text, "\t", gsub("DS_gen___p___", "", element)," = ", val, ",\n")
     }
 
   }
 
   if (decoding_params$DS_type == "ds_generalization") {
-
-    my_text <- paste0(substring(my_text, 1, nchar(my_text)-1),
+    # Add training and testing levels from above, then finish data source
+    my_text <- paste0(gsub('.{1}$', "", my_text),
                       "\n\t", "train_label_levels = train_label_levels,",
                       "\n\t", "test_label_levels = test_label_levels) \n\n")
 
   } else {
-    my_text <- paste0(substring(my_text, 1, nchar(my_text)-2), ") \n\n")
+    # Otherwise, just finish data source
+    my_text <- gsub('.{2}$', ") \n\n", my_text)
   }
 
 
-  ### Classifier
+  ### Classifier -----
 
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# classifier\n")
   }
 
-  my_text = paste0(my_text, "cl <- ", decoding_params$CL_type,"(")
-  for(element in names(decoding_params)){
-    if(startsWith(element, "CL_svm")){
+  my_text <- paste0(my_text, "cl <- ", decoding_params$CL_type, "(")
+  for (element in names(decoding_params)) {
+
+    # Add support vector machine classifier, if applicable
+    if (startsWith(element, "CL_svm___p___")) {
       val <- eval(str2lang(paste0("decoding_params$",element)))
-      my_text = paste0(my_text, gsub("CL_svm_", "", element)," = ", val, ",\n")
+      my_text <- paste0(my_text, gsub("CL_svm___p___", "", element), " = ", val, ",\n")
     }
   }
 
-  if(decoding_params$CL_type == 'cl_svm'){
-    my_text = paste0(substring(my_text,1, nchar(my_text)-2), ") \n\n")
-  }else{
-    my_text = paste0(my_text, ") \n\n")
+  # Finish classifiers
+  if (decoding_params$CL_type == 'cl_svm') {
+    my_text <- gsub('.{2}$', ") \n\n", my_text)
+  } else {
+    my_text <- paste0(my_text, ") \n\n")
   }
 
 
 
-  ###  Feature Preprocessors
+  ###  Feature Preprocessors ----
 
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# feature preprocessors\n")
   }
 
-
+  # Initialize empty strings
   fp_zs <- NULL
   fp_skf <- NULL
   fp_list <- NULL
 
-
-  for(element in names(decoding_params)){
-    if(startsWith(element, "FP_type")){
-      if("fp_zscore" %in% decoding_params$FP_type){
+  for (element in names(decoding_params)) {
+    if (startsWith(element, "FP_type")) {
+      # Add zscore feature preprocessor if selected
+      if ("fp_zscore" %in% decoding_params$FP_type) {
         fp_zs <- "fp_zs <- fp_zscore()\n\n"
-        fp_list = paste0(fp_list,"fp_zs,")
+        fp_list <-  paste0(fp_list, "fp_zs,")
       }
-      if("fp_select_k_features" %in% decoding_params$FP_type){
+      # Add select_k_features feature preprocessor if selected
+      if ("fp_select_k_features" %in% decoding_params$FP_type) {
         fp_skf <- "fp_skf <- fp_select_k_features("
       }
     }
-    if(startsWith(element, "FP_skf_")){
+    # If select_k_features is selected, add additional parameters
+    if (startsWith(element, "FP_skf___p___")) {
       val <- eval(str2lang(paste0("decoding_params$",element)))
-      fp_skf = paste0(fp_skf, "\n\t", gsub("FP_skf_", "", element)," = ", val, ",")
+      fp_skf <- paste0(fp_skf, "\n\t", gsub("FP_skf___p___", "", element)," = ", val, ",")
     }
   }
 
 
-  if(!is.null(fp_skf)){
-    fp_skf = paste0(substring(fp_skf,1, nchar(fp_skf)-2), ") \n\n")
-    fp_list = paste0(fp_list,"fp_skf,")
+  if (!is.null(fp_skf)) {
+    # Close select_k_features and add to string for all feature preprocessors
+    fp_skf <- gsub('.{1}$', ") \n\n", fp_skf)
+    #ELISA fp_skf = paste0(substring(fp_skf,1, nchar(fp_skf)-2), )
+    fp_list <- paste0(fp_list,"fp_skf,")
   }
 
-  my_text = paste0(my_text,fp_skf,fp_zs)
-  fp_list = paste0(substring(fp_list,1, nchar(fp_list)-1), ") \n\n")
-  my_text = paste0(my_text, "fps <- list(",fp_list)
+  my_text <- paste0(my_text, fp_skf, fp_zs)
+  fp_list <- gsub('.{1}$', ") \n\n", fp_list)
+  #ELISAfp_list <- paste0(substring(fp_list,1, nchar(fp_list)-1), ") \n\n")
+  my_text <- paste0(my_text, "fps <- list(", fp_list)
 
 
 
 
 
-  ### Result metrics
+  ### Result metrics ----
 
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# result metrics\n")
   }
 
-
+  # Initialize empty strings
   rm_main_text <- NULL
   rm_cm_text <- NULL
 
-  if("rm_main_results" %in% decoding_params$RM_type){
+  # Add selected result metrics
+  if ("rm_main_results" %in% decoding_params$RM_type) {
     rm_main_text <- paste0("rm_main <- rm_main_results(\n\t include_norm_rank_results = ",
-                           as.character(decoding_params$RM_mr_include_norm_rank_results), ")\n")
+                           as.character(decoding_params$RM_mr___p___include_norm_rank_results), ")\n")
   }
 
-  if("rm_confusion_matrix" %in% decoding_params$RM_type){
-    rm_cm_text <- paste0("rm_cm <- rm_confusion_matrix(\n\t save_only_same_train_test_time = ",
-                         as.character(decoding_params$RM_cm_save_only_same_train_test_time), ",\n\t ",
+  if ("rm_confusion_matrix" %in% decoding_params$RM_type) {
+    rm_cm_text <- paste0("rm_cm <- rm_confusion_matrix(\n\t save_TCD_results = ",
+                         as.character(decoding_params$RM_cm___p___save_TCD_results), ",\n\t ",
                          "create_decision_vals_confusion_matrix = ",
-                         as.character(decoding_params$RM_cm_create_decision_vals_confusion_matrix), ")\n")
+                         as.character(decoding_params$RM_cm_RM_cm___p___create_decision_vals_confusion_matrix), ")\n")
   }
 
 
-  # create text with a list that has the results metrics in them
+  # Create text list of selected results metrics
   rm_list_text <- "rms <- list("
-  if(!is.null(rm_main_text)){
+  if (!is.null(rm_main_text)) {
     rm_list_text <- paste0(rm_list_text, "rm_main")
   }
-  if(!is.null(rm_cm_text)){
-
-    if(!is.null(rm_main_text)){
+  if (!is.null(rm_cm_text)) {
+    if (!is.null(rm_main_text)) {
       rm_list_text <- paste0(rm_list_text, ", ")
     }
-
     rm_list_text <- paste0(rm_list_text, "rm_cm")
   }
   rm_list_text <- paste0(rm_list_text, ")\n\n")
 
 
-  my_text <-  paste0(my_text, rm_main_text, rm_cm_text,  rm_list_text)
+  my_text <- paste0(my_text, rm_main_text, rm_cm_text, rm_list_text)
 
 
 
 
+  ###  Cross Validator -----
 
-
-
-  ###  Cross Validator
-
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# cross validator\n")
   }
 
+  my_text <- paste0(my_text, "cv <- cv_standard(\n\t datasource = ds,\n")
+  my_text <- paste0(my_text,"\t classifier = cl, \n\t feature_preprocessors = fps,\n")
 
-  my_text = paste0(my_text, "cv <- cv_standard(\n\t datasource = ds, \n")
-  my_text = paste0(my_text,"\t classifier = cl, \n\t feature_preprocessors = fps, \n")
-  for(element in names(decoding_params)){
-    if(startsWith(element, "CV_")){
+  # Add existing cross validator parameters
+  for (element in names(decoding_params)) {
+    if (startsWith(element, "CV___p___")) {
       val <- eval(str2lang(paste0("decoding_params$",element)))
-      my_text = paste0(my_text, "\t ", gsub("CV_", "", element)," = ", val, ",\n")
+       paste0(my_text, "\t ", gsub("CV___p___", "", element)," = ", val, ",\n")
     }
   }
 
-  my_text <- paste0(substring(my_text,1, nchar(my_text)-2), ") \n\n")
+  my_text <- gsub('.{2}$', ") \n\n", my_text)
 
 
 
 
 
+  ### Run the decoding analysis ----
 
-
-  ### Run the decoding analysis
-
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
 
   if (include_comments) {
@@ -292,40 +300,34 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
 
-  my_text <- paste0(my_text, "DECODING_RESULTS <- run_decoding(cv)\n\n")
-
-
-
-  # print the analysis ID from running the decoding
-
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "DECODING_RESULTS <- run_decoding(cv)")
+  my_text <- paste0(my_text, "\n\n")  # Add space between sections
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# print out the ID for this analysis\n")
   }
 
+  # Print the analysis ID from running the decoding
   my_text <- paste0(my_text, "paste('The analysis ID is:',
         DECODING_RESULTS$cross_validation_paramaters$analysis_ID)\n\n")
 
 
 
 
-  ### Save the results
+  ### Save the results ----
 
-  my_text <- paste0(my_text, "\n")  # add more spaces between sections
+  my_text <- paste0(my_text, "\n")  # Add space between sections
 
 
   if (include_comments) {
     my_text <- paste0(my_text, "\n# save the results\n")
   }
 
-
   results_save_directory <- decoding_params$results_save_dir
-
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
                     "file.path(here::here(), 'results', 'decoding_results', 'decoding_result_files', trimws(file.path(' ')))", ")\n\n")
-
+#ETHAN, do we still want to use here::here()? I know I added that...
 
   my_text
 
@@ -342,11 +344,13 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
-
+  # Generate the same code from R script
   code_body <- generate_r_script_from_shiny_decoding_params(decoding_params)
 
+  #include_comments <- decoding_params$include_comments ELISA - where do you want it
+  include_comments <- FALSE
 
-  # fix the path to the data so that it is relative to where the R Markdown
+  # ETHAN - fix the path to the data so that it is relative to where the R Markdown
   #   scripts are saved
   #code_body <- stringr::str_replace(code_body, "./data", "../../data")
 
@@ -358,20 +362,17 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   my_text <- ""
 
+  # Add markdown header
   my_text <- paste0(my_text, "---\ntitle: 'Decoding Analysis'\noutput: pdf_document\n---\n\n\n",
                    "```{r setup, include=FALSE}\n\n\n",
                    "knitr::opts_chunk$set(echo = TRUE)\n\n\n",
                    "```\n\n\n")
 
-
-  # my_text <- paste0(my_text, "\n\n\n```{r}\n\n\n")
-
+  # Start chunk
   my_text <- paste0(my_text, "\n\n\n# Run the decoding analysis \n\n\n```{r}\n\n")
-
-
+  # Add code
   my_text <- paste0(my_text, code_body)
-
-
+  # Close chunk
   my_text <- paste0(my_text, "\n```\n\n\n")
 
 
@@ -379,27 +380,21 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   # can add some plots of results to the R Markdown file
 
-  # This should be added to the UI
+  # This should be added to the UI - ETHAN where would you want this to be in the ui
   add_plots_of_results <- TRUE
 
-
   if (add_plots_of_results) {
-
+    # Start chunk
     my_text <- paste0(my_text, "\n\n\n# Plot some results \n\n\n```{r}\n")
 
-
-
-    if ("rm_main_results"  %in% decoding_params$RM_type) {
-
-
-      if (decoding_params$include_comments) {
+    if ("rm_main_results" %in% decoding_params$RM_type) {
+      if (include_comments) {
         my_text <- paste0(my_text, "\n# plot main results")
       }
 
       my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results, type = 'line') \n")
 
-
-      if (decoding_params$include_comments) {
+      if (include_comments) {
         my_text <- paste0(my_text, "\n# plot temporal-cross-decoding results")
       }
 
@@ -407,31 +402,20 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
     }
 
-
-
-    if ("rm_confusion_matrix"  %in% decoding_params$RM_type) {
-
-
-      if (decoding_params$include_comments) {
+    if ("rm_confusion_matrix" %in% decoding_params$RM_type) {
+      if (include_comments) {
         my_text <- paste0(my_text, "\n# plot confusion matrices")
       }
 
       my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_confusion_matrix) \n")
-
-
     }
 
-
+    # Close chunk
     my_text <- paste0(my_text, "\n```\n\n\n")
 
   }
 
-
-
-
-
   my_text
-
 
 }
 

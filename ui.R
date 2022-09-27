@@ -112,7 +112,7 @@ decoding_analysis <- tabPanel(
                       selectInput("DS_type", "Type of data source", c("ds_basic","ds_generalization")),
                       #DS Basic options
                       conditionalPanel(condition = "input.DS_type == 'ds_basic'",
-                                       uiOutput("DS_basic_list_of_var_to_decode"),
+                                       uiOutput("DS_basic_list_of_labels"),
                                        checkboxInput("DS_basic_use_all_levels", "Select your specific levels", FALSE),
                                        checkboxInput("DS_basic_advanced", "Select advanced parameters?", FALSE)
                       ),
@@ -130,7 +130,7 @@ decoding_analysis <- tabPanel(
                       ),
                       #DS Generalization options
                       conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
-                                       uiOutput("DS_gen_list_of_var_to_decode"),
+                                       uiOutput("DS_gen_list_of_labels"),
                                        uiOutput("DS_gen_select_num_of_groups"),
                                        numericInput("DS_gen_class_number","How many classes?", 2, min = 2),
                                        uiOutput("DS_gen_label_levels"),
@@ -225,7 +225,7 @@ decoding_analysis <- tabPanel(
                       uiOutput("FP_type"),
                       #Select additional parameters if user chooses fp_select_k_features
                       conditionalPanel(condition = "'fp_select_k_features' %in% input.FP_type",
-                                       uiOutput("FP_skf_num_site_to_use"),
+                                       uiOutput("FP_skf_num_sites_to_use"),
                                        uiOutput("FP_skf_num_sites_to_exclude"))
                       ),
 
@@ -243,7 +243,7 @@ decoding_analysis <- tabPanel(
                        #Select additional parameters if user chooses RM_confusion_matrix_text
                        conditionalPanel(condition = "'rm_confusion_matrix' %in% input.RM_type",
                                         htmlOutput("RM_confusion_matrix_text"),
-                                        uiOutput("RM_cm_save_only_same_train_test_time"),
+                                        uiOutput("RM_cm_save_TCD_results"),
                                         uiOutput("RM_cm_create_decision_vals_confusion_matrix"))
 
                       ),
@@ -254,7 +254,7 @@ decoding_analysis <- tabPanel(
                       width = NULL,
                       solidHeader = TRUE, status = "primary",
                       #Select cross validator parameters
-                      checkboxInput("CV_test_only_at_training_time", "Test only at training times?",FALSE),
+                      checkboxInput("CV_run_TCD", "Test only at training times?",FALSE),
                       uiOutput("CV_num_resample_runs"),
                       uiOutput("CV_num_parallel_cores"),
                       #Include parallel outfile parameter if conditions met (as defined by online reference)

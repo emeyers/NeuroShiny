@@ -351,17 +351,17 @@ function(input, output, session){
 
 
 
-  reactive_all_levels_of_basic_var_to_decode <- reactive({
+  reactive_all_levels_of_basic_labels <- reactive({
     req(rv$binned_file_name)
     binned_data = rv$binned_data
-    levels(factor(binned_data[[paste0("labels.",input$DS_basic_var_to_decode)]]))
+    levels(factor(binned_data[[paste0("labels.",input$DS_basic_labels)]]))
   })
 
 
   reactive_all_levels_of_gen_var_to_use <- reactive({
     req(rv$binned_file_name)
     binned_data = rv$binned_data
-    levels(factor(binned_data[[paste0("labels.",input$DS_gen_var_to_decode)]]))
+    levels(factor(binned_data[[paste0("labels.",input$DS_gen_labels)]]))
   })
 
 
@@ -477,12 +477,12 @@ function(input, output, session){
     req(rv$binned_data)
     if(input$DS_type == "ds_basic"){
       validate(
-        need(!is.null(input$DS_basic_label_levels_to_use)||!input$DS_basic_use_all_levels, paste0("You haven't set your levels yet")))
+        need(!is.null(input$DS_basic_label_levels)||!input$DS_basic_use_all_levels, paste0("You haven't set your levels yet")))
 
       if(!input$DS_basic_use_all_levels){
-        reactive_all_levels_of_basic_var_to_decode()
+        reactive_all_levels_of_basic_labels()
       }else{
-        input$DS_basic_label_levels_to_use
+        input$DS_basic_label_levels
       }
     } else{
 
@@ -507,12 +507,12 @@ function(input, output, session){
     req(reactive_DS_levels_to_use())
     if(input$DS_type == "ds_basic"){
       num_label_reps <- NeuroDecodeR:::get_num_label_repetitions_each_site(rv$binned_data,
-                                                                input$DS_basic_var_to_decode,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+                                                                input$DS_basic_labels,
+                                                                label_levels = reactive_DS_levels_to_use())
     }else{
       num_label_reps <- NeuroDecodeR:::get_num_label_repetitions_each_site(rv$binned_data,
                                                                 input$DS_gen_var_to_use,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+                                                                label_levels = reactive_DS_levels_to_use())
     }
     num_label_reps
   })
@@ -521,17 +521,17 @@ function(input, output, session){
 
 #### Basic Outputs ----
 
-  output$DS_basic_list_of_var_to_decode = renderUI({
+  output$DS_basic_list_of_labels = renderUI({
     req(rv$binned_file_name)
-    selectInput("DS_basic_var_to_decode",
+    selectInput("DS_basic_labels",
                 "Variable to decode and to use",
                 rv$binned_all_var)
   })
 
   output$DS_basic_list_of_levels_to_use = renderUI({
-    selectInput("DS_basic_label_levels_to_use",
+    selectInput("DS_basic_label_levels",
                 "Levels to use",
-                reactive_all_levels_of_basic_var_to_decode(),
+                reactive_all_levels_of_basic_labels(),
                 multiple = TRUE)
   })
 
@@ -571,9 +571,9 @@ function(input, output, session){
 
 #### General Output ----
 
-  output$DS_gen_list_of_var_to_decode = renderUI({
+  output$DS_gen_list_of_labels = renderUI({
     req(rv$binned_file_name)
-    selectInput("DS_gen_var_to_decode",
+    selectInput("DS_gen_labels",
                 "Variable to decode and to use",
                 rv$binned_all_var)
   })
@@ -715,13 +715,13 @@ function(input, output, session){
     req(reactive_DS_levels_to_use())
     if(input$DS_type == "ds_basic"){
       num_label_reps <- NeuroDecodeR:::get_num_label_repetitions(rv$binned_data,
-                                                                input$DS_basic_var_to_decode,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+                                                                input$DS_basic_labels,
+                                                                label_levels = reactive_DS_levels_to_use())
     }else{
       #TO DO what is this for gen?
       num_label_reps <- NeuroDecodeR:::get_num_label_repetitions(rv$binned_data,
-                                                                input$DS_gen_var_to_decode,
-                                                                levels_to_use = reactive_DS_levels_to_use())
+                                                                input$DS_gen_labels,
+                                                                label_levels = reactive_DS_levels_to_use())
     }
     num_label_reps
   })
@@ -866,10 +866,10 @@ function(input, output, session){
                        selected = "fp_zscore")
   })
 
-  output$FP_skf_num_site_to_use = renderUI({
+  output$FP_skf_num_sites_to_use = renderUI({
     req(input$FP_type)
     if("fp_select_k_features" %in% input$FP_type){
-      numericInput("FP_skf_num_site_to_use",
+      numericInput("FP_skf_num_sites_to_use",
                    "Select top features? (this will be applied first)",
                    reactive_bin_num_neuron(),
                    min = 1,
@@ -878,13 +878,13 @@ function(input, output, session){
   })
 
   output$FP_skf_num_sites_to_exclude = renderUI({
-    req(input$FP_skf_num_site_to_use)
+    req(input$FP_skf_num_sites_to_use)
     if("fp_select_k_features" %in% input$FP_type){
       numericInput("FP_skf_num_sites_to_exclude",
                    "exclude top ? features (this will be applied second)",
                    value = 0,
                    min = 1,
-                   max = reactive_bin_num_neuron() - input$FP_skf_num_site_to_use)
+                   max = reactive_bin_num_neuron() - input$FP_skf_num_sites_to_use)
     }
   })
 
@@ -918,10 +918,10 @@ function(input, output, session){
       "<br>Parameters for rm_confusion_matrix:"
     }
   })
-  output$RM_cm_save_only_same_train_test_time = renderUI({
+  output$RM_cm_save_TCD_results = renderUI({
     #req(input$RM_mr_include_norm_rank_results)
     if("rm_confusion_matrix" %in% input$RM_type){
-      checkboxInput("RM_cm_save_only_same_train_test_time",
+      checkboxInput("RM_cm_save_TCD_results",
                     " Save results only for training and testing at the same time",
                     value = TRUE, width = '100%')
     }
@@ -1057,11 +1057,11 @@ function(input, output, session){
 
     #ds_basic
     if(input$DS_type == "ds_basic"){
-      rv_para$id <- c(rv_para$id,"DS_basic_var_to_decode",
+      rv_para$id <- c(rv_para$id,"DS_basic_labels",
                       "DS_basic_num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
                       "DS_show_chosen_repetition_info", "DS_basic_num_resample_sites")
       if(input$DS_basic_use_all_levels){  # seems like a misnomer - should be DS_basic_use_only_specific_levels
-        rv_para$id <- c(rv_para$id,  "DS_basic_label_levels_to_use")
+        rv_para$id <- c(rv_para$id,  "DS_basic_label_levels")
       }
       if(input$DS_basic_advanced){
         rv_para$id <- c(rv_para$id,  "DS_basic_use_count_data", "DS_basic_site_IDs_to_use",
@@ -1070,8 +1070,8 @@ function(input, output, session){
       }
 
     #ds_gen
-    } else{
-      rv_para$id <- c(rv_para$id, "DS_gen_class_number", "DS_basic_var_to_decode",
+    } else {
+      rv_para$id <- c(rv_para$id, "DS_gen_class_number", "DS_basic_labels",
                       "DS_gen_num_cv_splits","DS_gen_num_label_repeats_per_cv_split",
                       "DS_gen_num_resample_sites")
 
@@ -1109,7 +1109,7 @@ function(input, output, session){
     #Feature Preprocessors
     rv_para$id <- c(rv_para$id, "FP_type")
     if ('fp_select_k_features' %in% input$FP_type) {
-      rv_para$id <- c(rv_para$id, "FP_skf_num_site_to_use", "FP_skf_num_sites_to_exclude")
+      rv_para$id <- c(rv_para$id, "FP_skf_num_sites_to_use", "FP_skf_num_sites_to_exclude")
     }
 
 
@@ -1119,11 +1119,11 @@ function(input, output, session){
       rv_para$id <- c(rv_para$id, "RM_mr_include_norm_rank_results")
     }
     if ('rm_confusion_matrix' %in% input$RM_type){
-      rv_para$id <- c(rv_para$id, "RM_cm_save_only_same_train_test_time", "RM_cm_create_decision_vals_confusion_matrix")
+      rv_para$id <- c(rv_para$id, "RM_cm_save_TCD_results", "RM_cm_create_decision_vals_confusion_matrix")
     }
 
     #Cross Validator
-    rv_para$id <- c(rv_para$id, "CV_test_only_at_training_time",
+    rv_para$id <- c(rv_para$id, "CV_run_TCD",
                     "CV_num_resample_runs")
 
     if(!is.null(input$CV_num_parallel_cores) &&
@@ -1145,7 +1145,7 @@ function(input, output, session){
 
     # add the directory name of the binned data to the decoding params
     decoding_params$binned_dir_name <- binned_base_dir
-    decoding_params$results_save_dir <- result_base_dir
+    decoding_params$results_dir_name <- result_base_dir #might break this
 
 
     #decoding_params$include_comments <- FALSE

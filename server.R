@@ -5,7 +5,7 @@ function(input, output, session){
 
   rv <- reactiveValues()
 
-  rv$project_basedir <- project_basedir
+  rv$working_dir <- working_dir
   rv$state_cur_file_name <- ""
 
   rv$raster_base_dir <- raster_base_dir
@@ -37,13 +37,11 @@ function(input, output, session){
 
   rv$script_rmd_not_saved_yet <- 1
 
-  # only files meet specified files types will be shown. However, such dir shown as empty can still be choosed
+  # only files meet specified files types will be shown. However, such dir shown as empty can still be choosen
 
-  shinyFiles::shinyFileChoose(input, "home_loaded_state", roots = c(wd=project_basedir), filetypes = "Rda")
   shinyFiles::shinyDirChoose(input, "bin_chosen_raster", roots = c(wd=raster_base_dir), filetypes = c("mat", "Rda"))
   shinyFiles::shinyFileChoose(input, "DS___p___binned_data", roots = c(wd=binned_base_dir), filetypes = "Rda")
-  shinyFiles::shinyFileChoose(input, "DC_chosen_script_name", root =c(wd=script_base_dir, filetypes = c("R", "Rmd")))
-  shinyFiles::shinyFileChoose(input, "Plot_chosen_result", root =c(wd=result_base_dir), filetypes = "Rda")
+  shinyFiles::shinyFileChoose(input, "Plot_chosen_result", root = c(wd=result_base_dir), filetypes = "Rda")
 
 
 
@@ -64,7 +62,7 @@ function(input, output, session){
 
   observe({
     req(input$DC_chosen_script_name)
-    temp_df_file <- shinyFiles::parseFilePaths(c(wd= rv$script_base_dir),input$DC_chosen_script_name)
+    temp_df_file <- shinyFiles::parseFilePaths(c(wd=rv$script_base_dir),input$DC_chosen_script_name)
     req(temp_df_file$datapath)
     rv$script_chosen <- temp_df_file$datapath
     rv$displayed_script <- readChar(rv$script_chosen, file.info(rv$script_chosen)$size)
@@ -112,7 +110,7 @@ function(input, output, session){
     list(
       textInput("home_state_name",
                 "File name of the current state should be saved (e.g., state_01.Rda)",
-                rv$project_basedir),
+                rv$working_dir),
       actionButton("home_save_state", "Save the current state"),
       uiOutput("home_save_state_error")
     )
@@ -141,20 +139,20 @@ function(input, output, session){
     req(input$bin_chosen_raster)
     rv$raster_cur_dir_name <- shinyFiles::parseDirPath(c(wd= rv$raster_base_dir),input$bin_chosen_raster)
     req(rv$raster_cur_dir_name)
-    temp_names_of_all_mat_files_in_raster_dir <-
+    mat_files_in_raster_dir <-
       list.files(rv$raster_cur_dir_name, pattern = "\\.mat$")
 
-    if(length(temp_names_of_all_mat_files_in_raster_dir) > 0){
+    if(length(mat_files_in_raster_dir) > 0){
       rv$raster_bMat <- TRUE
     }else{
       rv$raster_bMat <-FALSE
-      temp_names_of_all_rda_files_in_raster_dir <-
+      rda_files_in_raster_dir <-
         list.files(rv$raster_cur_dir_name, pattern = "\\.[rR]da$")
-      rv$raster_num_neuron <- length(temp_names_of_all_rda_files_in_raster_dir)
+      rv$raster_num_neuron <- length(rda_files_in_raster_dir)
 
       if(rv$raster_num_neuron > 0){
         rv$raster_bRda <- TRUE
-        rv$raster_cur_file_name <- temp_names_of_all_rda_files_in_raster_dir[rv$raster_cur_neuron]
+        rv$raster_cur_file_name <- rda_files_in_raster_dir[rv$raster_cur_neuron]
         load(file.path(rv$raster_cur_dir_name, rv$raster_cur_file_name))
         temp_dfRaster <- select(raster_data, starts_with("time."))
         temp_mRaster <- as.matrix(temp_dfRaster)
@@ -194,8 +192,6 @@ function(input, output, session){
       temp_call = paste0(temp_call,")")
       #rv$create_bin_function_run <- temp_call
 
-      #print(binned_basename)
-      print(binned_base_dir)
       rv$create_bin_function_run <- paste0("NeuroDecodeR:::create_binned_data('",
                                            rv$raster_cur_dir_name, "', ",
                                            #"'", binned_basename,
@@ -699,8 +695,8 @@ function(input, output, session){
     temp_level_rep_info <- reactive_level_repetition_info()
     if(input$DS_type == "ds_basic"){
       updateNumericInput(session, "DS_basic___p___num_label_repeats_per_cv_split",
-                         min = floor(temp_level_rep_info$min_repeats/input$DS_basic_num_cv_splits))
-      updateNumericInput(session, "DS_basic_num_cv_splits",
+                         min = floor(temp_level_rep_info$min_repeats/input$DS_basic___p___num_cv_splits))
+      updateNumericInput(session, "DS_basic___p___num_cv_splits",
                          min = floor(temp_level_rep_info$min_repeats/input$DS_basic___p___num_label_repeats_per_cv_split))
     }else{
       updateNumericInput(session, "DS_gen___p___num_label_repeats_per_cv_splits",
@@ -728,10 +724,10 @@ function(input, output, session){
 
   reactive_chosen_repetition_info <- reactive({
     if(input$DS_type == "ds_basic"){
-      req(input$DS_basic_num_cv_splits, input$DS_basic___p___num_label_repeats_per_cv_split, reactive_level_repetition_info())
+      req(input$DS_basic___p___num_cv_splits, input$DS_basic___p___num_label_repeats_per_cv_split, reactive_level_repetition_info())
       temp_level_repetition_info <- reactive_level_repetition_info()
-      list(num_repetition = input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic_num_cv_splits,
-      num_sites_avail = nrow(filter(temp_level_repetition_info, min_repeats >= input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic_num_cv_splits)))
+      list(num_repetition = input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits,
+      num_sites_avail = nrow(filter(temp_level_repetition_info, min_repeats >= input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits)))
 
     }else{
       req(input$DS_gen___p___num_cv_splits, input$DS_gen___p___num_label_repeats_per_cv_split, reactive_level_repetition_info())
@@ -759,13 +755,13 @@ function(input, output, session){
   output$DS_show_chosen_repetition_info <- renderText({
     req(reactive_level_repetition_info_each_site())
     temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
-    num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic_num_cv_splits
+    num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
     num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
     if (input$DS_type == "ds_basic"){
       paste("You selected", "<font color='red'>",
             num_repetitions, "</font>",
             "trials (", input$DS_basic___p___num_label_repeats_per_cv_split,
-            " repeats x ",  input$DS_basic_num_cv_splits,
+            " repeats x ",  input$DS_basic___p___num_cv_splits,
             "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>"
             , num_usable_sites, "</font>", " sites available for decoding.")
     }else{
@@ -787,9 +783,9 @@ function(input, output, session){
                  value = 1, min = 2)
   })
 
-  output$DS_basic_num_cv_splits = renderUI({
+  output$DS_basic___p___num_cv_splits = renderUI({
     req(rv$binned_file_name)
-    numericInput("DS_basic_num_cv_splits",
+    numericInput("DS_basic___p___num_cv_splits",
                  "Number of cross validation splits",
                  value = 2, min = 2)
 
@@ -1046,7 +1042,7 @@ function(input, output, session){
 
   observeEvent(input$DC_script_mode,{
 
-    # can't generate a script if a particular binned data file has not been selected
+    # Can't generate a script if a particular binned data file has not been selected
     req(input$DS___p___binned_data)
 
     rv_para$id <-  c("DS___p___binned_data", "DS_type", "DC_to_be_saved_result_name")
@@ -1054,10 +1050,10 @@ function(input, output, session){
 
     # Data Source
 
-    #ds_basic
+    # For ds_basic parameters
     if(input$DS_type == "ds_basic"){
       rv_para$id <- c(rv_para$id,"DS_basic___p___labels",
-                      "DS_basic___p___num_label_repeats_per_cv_split", "DS_basic_num_cv_splits",
+                      "DS_basic___p___num_label_repeats_per_cv_split", "DS_basic___p___num_cv_splits",
                       "DS_show_chosen_repetition_info", "DS_basic___p___num_resample_sites")
       if(input$DS_basic___np___select_levels){
         rv_para$id <- c(rv_para$id,  "DS_basic___p___label_levels")
@@ -1146,8 +1142,9 @@ function(input, output, session){
 
 
     # add the directory name of the binned data to the decoding params
-    decoding_params$binned_dir_name <- binned_base_dir
-    decoding_params$results_dir_name <- result_base_dir #might break this
+    decoding_params$working_dir <- working_dir
+    decoding_params$binned_dir_name <- rv$binned_base_dir
+    decoding_params$results_dir_name <- rv$result_base_dir #might break this
 
 
     #decoding_params$include_comments <- FALSE
@@ -1173,10 +1170,10 @@ function(input, output, session){
 
 
     if (input$DC_script_mode == "R") {
-      script_save_dir <- trimws(file.path("r_scripts", " "))
+      script_save_dir <- file.path("", "r_scripts", "")
       file_extension <- ".R"
     } else if (input$DC_script_mode == "R Markdown") {
-      script_save_dir <- trimws(file.path("r_markdown", " "))
+      script_save_dir <- file.path("", "r_markdown", "")
       file_extension <- ".Rmd"
     }
 
@@ -1185,7 +1182,7 @@ function(input, output, session){
 
     # should perhaps do this when the script is generated and then can add the script name as meta
     #  data to be saved with the decoding results, but ok for now...
-
+    # ELISA
     script_file_name <- paste0(result_base_dir, script_save_dir,
                                "NeuroShiny_Script_ID_",
                                NeuroDecodeR:::generate_analysis_ID(),
@@ -1194,7 +1191,7 @@ function(input, output, session){
 
     # write the code to a script
     fileConn <- file(script_file_name)
-    writeLines(input$script, fileConn)
+    writeLines(rv$displayed_script, fileConn)
     close(fileConn)
 
 

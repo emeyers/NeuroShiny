@@ -8,8 +8,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   decoding_params <-  decoding_params[!is.na(decoding_params)]
 
   # Conditional variable to check for optional comments added to script
-  #include_comments <- decoding_params$include_comments ETHAN - where do you want it
-  include_comments <- FALSE
+  include_comments <- decoding_params$include_comments
 
   ### Load the NDR ------
   my_text <- "library(NeuroDecodeR)\n\n"
@@ -19,10 +18,12 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     my_text <- paste0(my_text, "\n# binned file name\n")
   }
 
-  #ELISA/ETHAN - is this a hardcode that will fix itself eventually?
+  #ELISA - is this a hardcode that will fix itself eventually? make last one
   my_text <- paste0(my_text,
-                    "binned_data <- file.path(here::here(), 'data', 'binned_data', '",
-                    decoding_params$DS___p___binned_data$files$`0`[[2]], "') \n\n")
+                    "binned_data <- file.path('", decoding_params$binned_dir_name,
+                    "', '", decoding_params$DS___p___binned_data$files$`0`[[2]],
+                    "') \n\n")
+
 
   ### Data source ------
   my_text <- paste0(my_text, "\n")  # Add space between sections
@@ -59,7 +60,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
       }
 
       # Remove last ", " in the string to close the list with "),
-      #ELISA class_i_train_labels_text <- substr(class_i_train_labels_text, 1, nchar(class_i_train_labels_text) - 2)
       class_i_train_labels_text <- gsub('.{2}$', "),", class_i_train_labels_text)
       class_i_test_labels_text <- gsub('.{2}$', "),", class_i_test_labels_text)
 
@@ -74,8 +74,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     }  # End for loop over the number of classes
 
 
-    #ELISA train_labels_text <- substr(train_labels_text, 1, nchar(train_labels_text) - 1)
-    #ELISA train_labels_text <- paste0(train_labels_text, ")")
     # Remove final character to replace with ")" and close list
     train_labels_text <- gsub('.{1}$', ")", train_labels_text)
     test_labels_text <- gsub('.{1}$', ")", test_labels_text)
@@ -89,9 +87,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
     # End creating the training and test list for the ds_generalization
-
-  } else if (decoding_params$DS_type == "ds_basic ") {
-    # Ask Ethan
 
   }
 
@@ -207,13 +202,11 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   if (!is.null(fp_skf)) {
     # Close select_k_features and add to string for all feature preprocessors
     fp_skf <- gsub('.{1}$', ") \n\n", fp_skf)
-    #ELISA fp_skf = paste0(substring(fp_skf,1, nchar(fp_skf)-2), )
     fp_list <- paste0(fp_list,"fp_skf,")
   }
 
   my_text <- paste0(my_text, fp_skf, fp_zs)
   fp_list <- gsub('.{1}$', ") \n\n", fp_list)
-  #ELISAfp_list <- paste0(substring(fp_list,1, nchar(fp_list)-1), ") \n\n")
   my_text <- paste0(my_text, "fps <- list(", fp_list)
 
 
@@ -325,9 +318,8 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
   results_save_directory <- decoding_params$results_save_dir
 
-  my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-                    "file.path(here::here(), 'results', 'decoding_results', 'decoding_result_files', trimws(file.path(' ')))", ")\n\n")
-#ETHAN, do we still want to use here::here()? I know I added that...
+  #my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
+  #                  "file.path(getwd(), 'results', 'decoding_results', 'decoding_result_files', '')", ")\n\n")
 
   my_text
 
@@ -347,17 +339,7 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
   # Generate the same code from R script
   code_body <- generate_r_script_from_shiny_decoding_params(decoding_params)
 
-  #include_comments <- decoding_params$include_comments ELISA - where do you want it
-  include_comments <- FALSE
-
-  # ETHAN - fix the path to the data so that it is relative to where the R Markdown
-  #   scripts are saved
-  #code_body <- stringr::str_replace(code_body, "./data", "../../data")
-
-
-  # fix the path to the results so that it is relative to where the R Markdown
-  #   scripts are saved
-  #code_body <- stringr::str_replace(code_body, "./results/", "../")
+  include_comments <- decoding_params$include_comments
 
 
   my_text <- ""
@@ -380,7 +362,7 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   # can add some plots of results to the R Markdown file
 
-  # This should be added to the UI - ETHAN where would you want this to be in the ui
+  # This should be added to the UI - elisa where would you want this to be in the ui yes do that
   add_plots_of_results <- TRUE
 
   if (add_plots_of_results) {

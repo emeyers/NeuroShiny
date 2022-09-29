@@ -18,16 +18,20 @@ options(shiny.maxRequestSize=1000*1024^2)
 projects_folder_path <- file.path("..", "decoding_analysis_projects")
 project_name <- "Katsuki_Constantinidis_popout_R_analysis"
 
-project_basedir <- trimws(file.path(projects_folder_path, project_name, " "))
-raster_base_dir <- paste0(project_basedir, trimws(file.path('data', ' ')))
-#binned_base_dir <- paste0(project_basedir, trimws(file.path('data','binned_data', ' '))) #original non-working directory
-binned_base_dir <- paste0(project_basedir, trimws(file.path('data', ' ')))
-result_base_dir <- paste0(project_basedir, trimws(file.path('results', 'decoding_results', ' ')))
+#project_base_dir <- trimws(file.path(projects_folder_path, project_name, " "))
+#raster_base_dir <- paste0(project_base_dir, trimws(file.path('data', ' ')))
+#binned_base_dir <- paste0(project_base_dir, trimws(file.path('data','binned_data', ' '))) #original non-working directory
+#binned_base_dir <- paste0(project_base_dir, trimws(file.path('data', ' ')))
+#result_base_dir <- paste0(project_base_dir, trimws(file.path('results', 'decoding_results', ' ')))
+#script_base_dir <- "scripts"
+
+working_dir <- getwd()
+raster_base_dir <- file.path(working_dir, 'data')
+binned_base_dir <- file.path(working_dir, 'data', 'binned')
+result_base_dir <- file.path(working_dir, 'results')
 script_base_dir <- "scripts"
 
 
-
-req_dc_para <- c("DS___p___binned_data", "DS_type")
 
 #List of classifiers, feature processors, and result metrics
 all_cl <- c("cl_max_correlation", "cl_svm", "cl_poisson_naive_bayes")
@@ -36,13 +40,13 @@ all_rm <- c("rm_main_results", "rm_confusion_matrix")
 all_result_type <- c("zero_one_loss", "normalized_rank", "decision_values", "all")
 
 
-#Makes sure that fp_zscore is not used with the cl_poisson_naive_bayes
-#Used in reactive_all_fp_avail
+# Makes sure that fp_zscore is not used with the cl_poisson_naive_bayes
+# Used in reactive_all_fp_avail
 cl_fp <- data.frame(c(1, 1), c(1, 1), c(1, 0))
 colnames(cl_fp) <- all_cl
 rownames(cl_fp) <- all_fp
 
-#Function used to save generated script
+# Function used to save generated script
 move_file <- function(from, to) {
   todir <- dirname(to)
   if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive=TRUE)

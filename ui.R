@@ -158,7 +158,7 @@ decoding_analysis <- tabPanel(
                           uiOutput("DS_max_repetition_avail_with_any_site"),
                           #DS Basic parameters
                           conditionalPanel(condition = "input.DS_type == 'ds_basic'",
-                                           uiOutput("DS_basic_num_cv_splits"),
+                                           uiOutput("DS_basic___p___num_cv_splits"),
                                            uiOutput("DS_basic___p___num_label_repeats_per_cv_split"),
                                            uiOutput("DS_show_chosen_repetition_info"),
                                            uiOutput("DS_basic___p___num_resample_sites")
@@ -211,11 +211,12 @@ decoding_analysis <- tabPanel(
                                          conditionalPanel(condition = "input.CL_svm___p___kernel == 'radial'|input.CL_svm___p___kernel == 'polynomial'|input.CL_svm___p___kernel == 'sigmoid'",
                                                           numericInput("CL_svm___p___gamma",
                                                                        "Gamma",
-                                                                       NULL))
+                                                                       NULL)) # Elisa default
                                          )
                         )
                     ),
-                    #ETHAN - should I include return_decision_values for CL's?
+                    #Elisa - should I include return_decision_values for CL's?
+                    # Yes with default of it being checked
 
                     #Fourth decoding tab: feature processors
                     tabPanel(

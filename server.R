@@ -74,15 +74,6 @@ function(input, output, session){
 
 
 
-  # observe({
-  #   req(input$DC_to_be_saved_result_name)
-  #   if(input$DC_script_mode == "R Markdown"){
-  #     updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "Rmd"))
-  #   } else{
-  #     updateTextInput(session, "DC_to_be_saved_script_name", value = paste0(substr(input$DC_to_be_saved_result_name, 1,nchar(input$DC_to_be_saved_result_name)-3), "R"))
-  #   }
-  # })
-
 
 
   observeEvent(input$bin_save_raster_to_disk, {
@@ -363,19 +354,16 @@ function(input, output, session){
 
   output$DC_offer_scriptize = renderUI({
     list(
-      #textInput("DC_to_be_saved_result_name",
-      #          "File name of the result to be saved (e.g., my_results)"),
-      #actionButton("DC_scriptize", "Generate script"),
-      actionButton("DC_run_script", "Run script"),
+      actionButton("DC_run_script", "Run and save the script"),
       uiOutput("DC_scriptize_error")
     )
   })
 
-  output$DC_offer_run_decoding = renderUI({
+  output$DC_offer_save_decoding = renderUI({
     list(
       helpText(""),
-      actionButton("DC_run_decoding", "Save the script and run decoding"),
-      uiOutput("DC_run_decoding_error")
+      actionButton("DC_save_decoding", "Save the script only"),
+      uiOutput("DC_save_decoding_error")
     )
   })
 
@@ -604,13 +592,6 @@ function(input, output, session){
     c(rbind(train_lst, test_lst))
   })
 
-  #output$DS_gen___p___test_label_levels = renderUI({
-  #  req(rv$binned_file_name)
-  #  selectInput("DS_gen___p___test_label_levels",
-  #              "Testing labels to use",
-  #              reactive_all_levels_of_gen_test_var_to_use(),
-  #              multiple = TRUE)
-  #})
 
   output$DS_gen___p___use_count_data = renderUI({
     selectInput("DS_gen___p___use_count_data",
@@ -645,45 +626,6 @@ function(input, output, session){
                 "Was the data created simultaneously?",
                 c(0,1))
   })
-
-
-  #output$DS_gen_list_of_var_to_use = renderUI({
-  #  req(rv$binned_file_name)
-  #  selectInput("DS_gen_var_to_use",
-  #              lLabels$DS_gen_var_to_use,
-  #              rv$binned_all_var)
-  #})
-
-  #output$DS_gen___np___select_num_of_groups = renderUI({
-  #  req(rv$binned_file_name)
-  #  temp_max <- rv$binned_maximum_num_of_levels_in_all_var
-  #  numericInput("DS_gen_num_training_level_groups",
-  #               lLabels$DS_gen_num_training_level_groups,
-  #               1,
-  #               min = 1,
-  #               max  = temp_max)
-  #})
-
-  #output$DS_gen_list_of_training_level_groups = renderUI({
-  #  req(input$DS_gen_num_training_level_groups)
-  #  temp_num <- input$DS_gen_num_training_level_groups
-  #  temp_output <- lapply(1:temp_num, function(i){
-  #    list(selectInput(paste0("DS_training_level_group_", i),
-  #                     paste("Training level group", i),
-  #                     reactive_all_levels_of_gen_var_to_use(),
-  #                     multiple = TRUE
-  #    ),
-  #    selectInput(paste0("DS_testing_level_group_", i),
-  #                paste("Testing level group", i),
-  #                reactive_all_levels_of_gen_var_to_use(),
-  #                multiple = TRUE
-  #    ))
-  #  })
-  #  temp_output <- unlist(temp_output, recursive = FALSE)
-  #  temp_output
-  #})
-
-
 
 
   ### Cross Valid Temp ----
@@ -1045,7 +987,7 @@ function(input, output, session){
     # Can't generate a script if a particular binned data file has not been selected
     req(input$DS___p___binned_data)
 
-    rv_para$id <-  c("DS___p___binned_data", "DS_type", "DC_to_be_saved_result_name")
+    rv_para$id <-  c("DS___p___binned_data", "DS_type")
 
 
     # Data Source
@@ -1087,6 +1029,7 @@ function(input, output, session){
 
     # Classifier
     rv_para$id <- c(rv_para$id, "CL_type")
+    rv_para$id <- c(rv_para$id, "CL___p___return_decision_values")
     if(input$CL_type == 'cl_svm'){
       rv_para$id <- c(rv_para$id, "CL_svm___p___kernel", "CL_svm___p___cost")
       if(input$CL_svm___p___kernel == 'polynomial'){
@@ -1167,40 +1110,22 @@ function(input, output, session){
   # Create and run R code
 
   observeEvent(input$DC_run_script,{
+    req(rv$displayed_script)
 
+    # Generate file name
+    script_file_name <- generate_script_name(input$DC_script_mode,
+                                             result_base_dir, script_save_dir)
+    rv$save_script_name <- script_file_name
 
-    if (input$DC_script_mode == "R") {
-      script_save_dir <- file.path("", "r_scripts", "")
-      file_extension <- ".R"
-    } else if (input$DC_script_mode == "R Markdown") {
-      script_save_dir <- file.path("", "r_markdown", "")
-      file_extension <- ".Rmd"
-    }
-
-
-    # generate analysis script name
-
-    # should perhaps do this when the script is generated and then can add the script name as meta
-    #  data to be saved with the decoding results, but ok for now...
-    # ELISA
-    script_file_name <- paste0(result_base_dir, script_save_dir,
-                               "NeuroShiny_Script_ID_",
-                               NeuroDecodeR:::generate_analysis_ID(),
-                               file_extension)
-
-
-    # write the code to a script
+    # Write the code to a script
     fileConn <- file(script_file_name)
     writeLines(rv$displayed_script, fileConn)
     close(fileConn)
 
-
-
-    # run the script
+    # Run the script
     if (input$DC_script_mode == "R") {
       source(script_file_name)
     } else if (input$DC_script_mode == "R Markdown") {
-
 
       rv$pdf_knitting_status <- "running"
 
@@ -1209,13 +1134,12 @@ function(input, output, session){
 
       rv$latest_pdf_file_name <- basename(pdf_file_name)
 
-      # add a notification that the R Markdown document is knitting
+      # Add a notification that the R Markdown document is knitting
       running_id <- showNotification("Knitting R Markdown results...",
                                      duration = NULL,
                                      closeButton = FALSE,
                                      type = "message")
       on.exit(removeNotification(running_id), add = TRUE)
-
 
       rmarkdown::render(script_file_name, "pdf_document", output_dir = dirname(pdf_file_name))
 
@@ -1224,9 +1148,8 @@ function(input, output, session){
       file.copy(pdf_file_name, paste0("www/", basename(pdf_file_name)))
 
 
-    }  # end for creating an R Markdown document
 
-
+    }  # End for creating an R Markdown document
 
   })
 
@@ -1287,37 +1210,17 @@ function(input, output, session){
     write(rv$displayed_script, file = temp_file_name)
   })
 
-  observeEvent(input$DC_run_decoding, {
-    req(input$DC_to_be_saved_result_name, rv$displayed_script)
+  observeEvent(input$DC_save_decoding, {
+    req(rv$displayed_script)
+    # Generate script name
+    script_file_name <- generate_script_name(input$DC_script_mode,
+                                             result_base_dir, script_save_dir)
+    rv$save_script_name <- script_file_name
 
-    # add the appropriate file extenstion to the saved file name
-    if(input$DC_script_mode == "R Markdown"){
-      file_extension <- ".Rmd"
-    } else {
-      file_extension <- ".R"
-    }
-
-    file_pieces <- unlist(base::strsplit(input$DC_to_be_saved_result_name, "[.]"))
-
-    if(length(file_pieces) == 1){
-      save_file_name <- paste0(file_pieces[1], file_extension)
-    } else{
-      if(!(file_pieces[length(file_pieces)] == file_extension)){
-        save_file_name <- paste0(save_file_name, file_extension)
-      }else{
-        save_file_name <- input$DC_to_be_saved_result_name
-      }
-    }
-
-    save_script_name <- file.path(script_base_dir, save_file_name)
-    write(rv$displayed_script, file = save_script_name)
-    rv$save_script_name <- save_script_name
-
-    if(input$DC_script_mode == "R Markdown") {
-      rmarkdown::render(save_script_name, "pdf_document", output_dir = "www")
-    }else{
-      source(save_script_name)
-    }
+    # Write the code to a script
+    fileConn <- file(script_file_name)
+    writeLines(rv$displayed_script, fileConn)
+    close(fileConn)
   })
 
   ## Plotting Results ----
@@ -1419,7 +1322,7 @@ function(input, output, session){
     er_DC_save_displayed_script_error()
   })
 
-  output$DC_run_decoding_error = renderUI({
+  output$DC_save_decoding_error = renderUI({
     er_DC_save_displayed_script_error()
   })
 

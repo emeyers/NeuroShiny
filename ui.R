@@ -185,7 +185,8 @@ decoding_analysis <- tabPanel(
                       selectInput("CL_type", "Classifier", all_cl),
                       box(
                         width = NULL,
-                        title = "Additional parameters (if applicable)",
+                        title = "Additional parameters",
+                        checkboxInput("CL___p___return_decision_values", "Return decision values?", TRUE),
                         #Select parameters if classifier is svm
                         conditionalPanel(condition  = "input.CL_type == 'cl_svm'",
                                          selectInput("CL_svm___p___kernel",
@@ -215,8 +216,6 @@ decoding_analysis <- tabPanel(
                                          )
                         )
                     ),
-                    #Elisa - should I include return_decision_values for CL's?
-                    # Yes with default of it being checked
 
                     #Fourth decoding tab: feature processors
                     tabPanel(
@@ -281,7 +280,7 @@ decoding_analysis <- tabPanel(
                               checkboxInput("include_comments", "Add code comments"),
                               #Running
                               uiOutput("DC_offer_scriptize"),
-                              uiOutput("DC_offer_run_decoding"))  # Get strange errors if I try to add more UI elements :(
+                              uiOutput("DC_offer_save_decoding"))  # Get strange errors if I try to add more UI elements :(
                         ),
                         column(width = 8, box(width = NULL, uiOutput("DC_ace")))
                       )

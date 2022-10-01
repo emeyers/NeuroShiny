@@ -18,11 +18,15 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     my_text <- paste0(my_text, "\n# binned file name\n")
   }
 
-  #ELISA - is this a hardcode that will fix itself eventually? make last one
-  my_text <- paste0(my_text,
-                    "binned_data <- file.path('", decoding_params$binned_dir_name,
-                    "', '", decoding_params$DS___p___binned_data$files$`0`[[2]],
-                    "') \n\n")
+  # Using the base directory, parse the file path and file name for
+  # the binned data
+  bin_data <- shinyFiles::parseFilePaths(c(wd=decoding_params$binned_dir_name),
+                                         decoding_params$DS___p___binned_data)
+
+  my_text <- paste0(my_text, "binned_data <- file.path('",
+                    bin_data$datapath, "') \n\n")
+
+
 
 
   ### Data source ------
@@ -92,7 +96,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-
   # Add start of data source assignment
   my_text <- paste0(my_text, "ds <- ", decoding_params$DS_type,"(\n",
                     "\tbinned_data = binned_data,\n")
@@ -110,7 +113,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
       }
 
       # If label_levels has been specified, but them in as a vector argument
-      if (element == "DS_basic_label_levels") {
+      if (element == "DS_basic___p___label_levels") {
         val <- paste0("c('", paste(val, collapse = "', '"), "')")
       }
 
@@ -148,6 +151,12 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
   my_text <- paste0(my_text, "cl <- ", decoding_params$CL_type, "(")
+
+  if ("CL___p___return_decision_values" %in% names(decoding_params)) {
+    val <- eval(str2lang("decoding_params$CL___p___return_decision_values"))
+    my_text <- paste0(my_text,"return_decision_values = ", val, ",\n")
+  }
+
   for (element in names(decoding_params)) {
 
     # Add support vector machine classifier, if applicable
@@ -158,11 +167,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
   # Finish classifiers
-  if (decoding_params$CL_type == 'cl_svm') {
-    my_text <- gsub('.{2}$', ") \n\n", my_text)
-  } else {
-    my_text <- paste0(my_text, ") \n\n")
-  }
+  my_text <- gsub('.{2}$', ") \n\n", my_text)
 
 
 
@@ -235,7 +240,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     rm_cm_text <- paste0("rm_cm <- rm_confusion_matrix(\n\t save_TCD_results = ",
                          as.character(decoding_params$RM_cm___p___save_TCD_results), ",\n\t ",
                          "create_decision_vals_confusion_matrix = ",
-                         as.character(decoding_params$RM_cm_RM_cm___p___create_decision_vals_confusion_matrix), ")\n")
+                         as.character(decoding_params$RM_cm___p___create_decision_vals_confusion_matrix), ")\n")
   }
 
 
@@ -268,6 +273,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
   my_text <- paste0(my_text, "cv <- cv_standard(\n\t datasource = ds,\n")
   my_text <- paste0(my_text,"\t classifier = cl, \n\t feature_preprocessors = fps,\n")
+  my_text <- paste0(my_text,"\t result_metrics = rms,\n")
 
   # Add existing cross validator parameters
   for (element in names(decoding_params)) {
@@ -318,11 +324,12 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
   results_save_directory <- decoding_params$results_save_dir
 
-  #my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-  #                  "file.path(getwd(), 'results', 'decoding_results', 'decoding_result_files', '')", ")\n\n")
+
+  my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
+                    "file.path('", decoding_params$results_dir_name,
+                    "', 'decoding_results', 'decoding_result_files', '')", ")\n\n")
 
   my_text
-
 
 }
 
@@ -340,7 +347,6 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
   code_body <- generate_r_script_from_shiny_decoding_params(decoding_params)
 
   include_comments <- decoding_params$include_comments
-
 
   my_text <- ""
 
@@ -402,6 +408,27 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 }
 
 
+# To create script name in the run script/save and run script server action
+generate_script_name <- function(script_mode, result_base_dir, script_save_dir) {
+  if (script_mode == "R") {
+    script_save_dir <- file.path("", "r_scripts", "")
+    file_extension <- ".R"
+  } else if (script_mode == "R Markdown") {
+    script_save_dir <- file.path("", "r_markdown", "")
+    file_extension <- ".Rmd"
+  }
+
+  # generate analysis script name
+  # should perhaps do this when the script is generated and then can add the script name as meta
+  #  data to be saved with the decoding results, but ok for now...
+  # ELISA
+  script_file_name <- paste0(result_base_dir, script_save_dir,
+                             "NeuroShiny_Script_ID_",
+                             NeuroDecodeR:::generate_analysis_ID(),
+                             file_extension)
+  return(script_file_name)
+
+}
 
 
 

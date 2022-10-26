@@ -20,7 +20,8 @@ run_analysis_tab <-
             checkboxInput("include_comments", "Add code comments"),
             #Running
             uiOutput("DC_offer_scriptize"),
-            uiOutput("DC_offer_save_decoding"))  # Get strange errors if I try to add more UI elements :(
+            uiOutput("DC_offer_save_decoding"), # Get strange errors if I try to add more UI elements :(
+            uiOutput("DC_plot_pdf"))
       ),
       column(width = 8,
              box(width = NULL,

@@ -29,16 +29,23 @@ output$plot_show_chosen_result = renderText({
 # plot_timeseries ----
 output$plot_timeseries = renderPlot({
   req(rv$result_data)
-  plot(rv$result_data$rm_main_results, plot_type = "line",
-       result_type = input$plot_timeseries_result_type)
+  plot(rv$result_data$rm_main_results, type = "line",
+       results_to_show = input$plot_timeseries_result_type)
 })
 
 
-# plot_tct ----
-output$plot_tct = renderPlot({
+# plot_tcd ----
+output$plot_tcd = renderPlot({
   req(rv$result_data)
   plot(rv$result_data$rm_main_results,
-       result_type = input$plot_timeseries_result_type)
+       results_to_show = input$plot_tcd_result_type)
+})
+
+# plot_cm ----
+output$plot_cm = renderPlot({
+  req(rv$result_data)
+  plot(rv$result_data$rm_confusion_matrix,
+       results_to_show = input$plot_cm_result_type)
 })
 
 observeEvent(input$plot_create_pdf,{

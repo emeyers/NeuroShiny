@@ -45,7 +45,6 @@ myserver <- function(input,output,session){
   source("servers/server_rm.R", local = TRUE)
   source("servers/server_cv.R", local = TRUE)
   source("servers/server_run_analysis.R", local = TRUE)
-  source("servers/server_view_results.R", local = TRUE)
   source("servers/server_plot_decoding.R", local = TRUE)
 
 }

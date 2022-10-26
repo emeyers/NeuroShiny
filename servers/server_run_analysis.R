@@ -168,34 +168,32 @@ observeEvent(input$DC_run_script,{
   writeLines(rv$displayed_script, fileConn)
   close(fileConn)
 
+  rv$pdf_knitting_status <- "running"
   # Run the script
   if (input$DC_script_mode == "R") {
-    source(script_file_name)
+    #source(script_file_name)
+    pdf_file_name <- stringr::str_replace(script_file_name, "r_scripts", "r_scripts_pdf")
+    pdf_file_name <- stringr::str_replace(pdf_file_name, "R$", "pdf")
   } else if (input$DC_script_mode == "R Markdown") {
-
-    rv$pdf_knitting_status <- "running"
-
     pdf_file_name <- stringr::str_replace(script_file_name, "r_markdown", "r_markdown_pdf")
     pdf_file_name <- stringr::str_replace(pdf_file_name, "Rmd$", "pdf")
-
-    rv$latest_pdf_file_name <- basename(pdf_file_name)
-
-    # Add a notification that the R Markdown document is knitting
-    running_id <- showNotification("Knitting R Markdown results...",
-                                   duration = NULL,
-                                   closeButton = FALSE,
-                                   type = "message")
-    on.exit(removeNotification(running_id), add = TRUE)
-
-    rmarkdown::render(script_file_name, "pdf_document", output_dir = dirname(pdf_file_name))
+  }
 
 
-    rv$pdf_knitting_status <- "completed"
-    file.copy(pdf_file_name, paste0("www/", basename(pdf_file_name)))
+  rv$latest_pdf_file_name <- basename(pdf_file_name)
+
+  # Add a notification that the document is knitting
+  running_id <- showNotification("Compiling results...",
+                                 duration = NULL,
+                                 closeButton = FALSE,
+                                 type = "message")
+  on.exit(removeNotification(running_id), add = TRUE)
+
+  rmarkdown::render(script_file_name, "pdf_document", output_dir = dirname(pdf_file_name))
 
 
-
-  }  # End for creating an R Markdown document
+  rv$pdf_knitting_status <- "completed"
+  file.copy(pdf_file_name, paste0("www/", basename(pdf_file_name)))
 
 })
 
@@ -253,6 +251,15 @@ er_DC_save_displayed_script_error <- eventReactive(input$DC_save_displayed_scrip
   )
 })
 
+# DC_plot_pdf ----
+output$DC_plot_pdf <- renderUI({
+  # Elisa, missing the two rvs
+  if (!is.null(rv$pdf_knitting_status)) {
+    tags$iframe(style="height:0px; width:0%; scrolling = yes",
+                src = rv$latest_pdf_file_name)
+  }
+})
+
 
 # DC_ace ----
 output$DC_ace = renderUI({
@@ -274,7 +281,6 @@ output$DC_ace = renderUI({
 update_ace_editor_code <- function() {
 
   if (rv$displayed_script == "") {
-
     curr_radio_button_setting <- input$DC_script_mode
 
     # to make sure the editor shows the script the first time one clicks on a tab

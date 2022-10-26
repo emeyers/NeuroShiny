@@ -1,6 +1,8 @@
 
 
-# Elisa make it base direcotry
+# Elisa make it base directory project tab in the binning spot instead and force
+# them to put in the location of the base directory
+
 source("UIs/ui_binning_params.R")
 source("UIs/ui_plot_raster.R")
 source("UIs/ui_upload_new_raster.R")
@@ -11,7 +13,6 @@ source("UIs/ui_fp.R")
 source("UIs/ui_rm.R")
 source("UIs/ui_cv.R")
 source("UIs/ui_run_analysis.R")
-source("UIs/ui_view_results.R")
 source("UIs/ui_plot_decoding.R")
 
 
@@ -19,8 +20,8 @@ sidebar <- dashboardSidebar(
   sidebarMenu(id = "tabs",
               menuItem("Binning the raster data", tabName = "bin"),
               menuItem("Population decoding", tabName = "decode")
+              )
   )
-)
 
 decoding_analysis <- tabPanel(
   title = "Run a decoding analysis",
@@ -34,13 +35,12 @@ decoding_analysis <- tabPanel(
                     fp_tab, # feature processors
                     rm_tab, # result metrics
                     cv_tab, # cross validator
-                    run_analysis_tab, # running and generating scripts
-                    view_results_tab # viewing pdf output of the script
+                    run_analysis_tab # running and generating scripts
+                    )
              )
       )
     )
   )
-)
 
 
 # Combining sidebar bodies ----
@@ -53,9 +53,9 @@ body <- dashboardBody(tabItems(tabItem(tabName = "bin",
                                        navbarPage(title = "",
                                                   decoding_analysis,
                                                   plot_decoding)
+                                       )
                                )
-)
-)
+                      )
 
 
 

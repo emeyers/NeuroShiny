@@ -37,7 +37,10 @@ script_base_dir <- "scripts"
 all_cl <- c("cl_max_correlation", "cl_svm", "cl_poisson_naive_bayes")
 all_fp <- c("fp_zscore", "fp_select_k_features")
 all_rm <- c("rm_main_results", "rm_confusion_matrix")
-all_result_type <- c("zero_one_loss", "normalized_rank", "decision_values", "all")
+
+#List of inputs for decoding results
+all_result_type <- c("zero_one_loss", "normalized_rank", "decision_vals", "all")
+cm_result_type <- c("zero_one_loss", "mutual_information", "decision_vals")
 
 
 # Makes sure that fp_zscore is not used with the cl_poisson_naive_bayes

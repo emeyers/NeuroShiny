@@ -1,5 +1,4 @@
 
-all_result_type <- c("zero_one_loss", "normalized_rank", "decision_values", "all")
 
 plot_decoding <- tabPanel(
   title = "Plot decoding results",
@@ -21,11 +20,17 @@ plot_decoding <- tabPanel(
                                      all_result_type),
                          plotOutput("plot_timeseries")
                 ),
-                tabPanel("TCT heatmap",
-                         selectInput("plot_tct_result_type",
-                                     NULL,
+                tabPanel("TCD heatmap",
+                         selectInput("plot_tcd_result_type",
+                                     "Type of results to plot",
                                      all_result_type),
-                         plotOutput("plot_tct")
+                         plotOutput("plot_tcd")
+                ),
+                tabPanel("Confusion Matrix",
+                         selectInput("plot_cm_result_type",
+                                     "Type of results to plot",
+                                     cm_result_type),
+                         plotOutput("plot_cm")
                 ),
                 tabPanel("PDF of script and result",
                          actionButton("plot_create_pdf", "Create"),

@@ -2,7 +2,7 @@
 
 # plot_chosen_result ----
 shinyFiles::shinyFileChoose(input, "plot_chosen_result",
-                            root = c(wd=result_base_dir),
+                            root = c(wd=file.path('.', 'results')),
                             filetypes = "Rda")
 
 observe({
@@ -69,4 +69,5 @@ output$plot_pdf <- renderUI({
     tags$iframe(style="height:600px; width:100%", src = pdf_name)
   }
 })
+
 

@@ -1,12 +1,11 @@
 
-
 # DC_script_mode ----
-observeEvent(input$DC_script_mode,{
+observeEvent(list(input$DC_script_mode, input$include_comments, input$result_name), {
 
   # Can't generate a script if a particular binned data file has not been selected
   req(input$DS___p___binned_data)
 
-  rv$id <-  c("DS___p___binned_data", "DS_type")
+  rv$id <- c("DS___p___binned_data", "DS_type")
 
 
   # Data Source
@@ -92,6 +91,7 @@ observeEvent(input$DC_script_mode,{
   }
 
   rv$id <- c(rv$id, "include_comments")
+  rv$id <- c(rv$id, "result_name")
 
   rv$inputIDs <- paste0("input$", rv$id)
   rv$values <- lapply(rv$inputIDs, function(i){
@@ -103,12 +103,10 @@ observeEvent(input$DC_script_mode,{
 
 
   # add the directory name of the binned data to the decoding params
-  decoding_params$working_dir <- working_dir
+  decoding_params$working_dir <- input$projectFolder
   decoding_params$binned_dir_name <- rv$binned_base_dir
   decoding_params$results_dir_name <- rv$result_base_dir #might break this
 
-
-  #decoding_params$include_comments <- FALSE
 
   if (input$DC_script_mode == "R") {
     rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_params)
@@ -124,27 +122,7 @@ observeEvent(input$DC_script_mode,{
 
 
 # include_comments ----
-# Trying to get the script to update when the include comments box is
-# checked/unchecked but this is not working :(
 
-observeEvent(input$include_comments,{
-
-
-  # unfortunately call this function does nothing so need to manually write the code to do this
-  # update_ace_editor_code()
-
-  curr_radio_button_setting <- input$DC_script_mode
-
-  updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                     c("R", "R Markdown", "Matlab"), selected = "R Markdown")
-
-  updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                     c("R", "R Markdown", "Matlab"), selected = "R")
-
-  updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                     c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)
-
-})
 
 
 # DC_offer_scriptize ----
@@ -160,7 +138,7 @@ observeEvent(input$DC_run_script,{
 
   # Generate file name
   script_file_name <- generate_script_name(input$DC_script_mode,
-                                           result_base_dir, script_save_dir)
+                                           rv$result_base_dir, script_save_dir)
   rv$save_script_name <- script_file_name
 
   # Write the code to a script
@@ -231,7 +209,7 @@ observeEvent(input$DC_save_decoding, {
   req(rv$displayed_script)
   # Generate script name
   script_file_name <- generate_script_name(input$DC_script_mode,
-                                           result_base_dir, script_save_dir)
+                                           rv$result_base_dir, script_save_dir)
   rv$save_script_name <- script_file_name
 
   # Write the code to a script
@@ -286,12 +264,6 @@ update_ace_editor_code <- function() {
     # to make sure the editor shows the script the first time one clicks on a tab
     #  one needs to chance the radio button to a different choice and then back again
     #  (definitely a bit of a hack but it seems to work fairly well)
-
-    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                       c("R", "R Markdown", "Matlab"), selected = "R Markdown")
-
-    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                       c("R", "R Markdown", "Matlab"), selected = "R")
 
     updateRadioButtons(session, "DC_script_mode", "File type for generated script",
                        c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)

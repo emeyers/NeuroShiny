@@ -25,7 +25,8 @@ split_parameters_tab <-
                        uiOutput("DS_gen___p___num_resample_sites")
       ),
       #plot output for number of sites against number of repeated conditions
-      plotlyOutput("DS_show_level_repetition_info")
+      withSpinner(plotlyOutput("DS_show_level_repetition_info"),
+                  color = "#79c9da")
     )
   )
 )

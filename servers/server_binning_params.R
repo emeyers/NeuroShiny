@@ -2,7 +2,7 @@
 
 # bin_chosen_raster ----
 shinyFiles::shinyDirChoose(input, "bin_chosen_raster",
-                           roots = c(wd=raster_base_dir),
+                           roots = c(wd=file.path('.', 'data','raster')),
                            filetypes = c("mat", "Rda"))
 
 observe({

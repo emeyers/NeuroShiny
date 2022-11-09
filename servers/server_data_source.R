@@ -1,7 +1,7 @@
 
 # DS___p___binned_data ----
 shinyFiles::shinyFileChoose(input, "DS___p___binned_data",
-                            roots = c(wd=binned_base_dir),
+                            roots = c(wd=file.path('.', 'data','binned')),
                             filetypes = "Rda")
 
 observe({

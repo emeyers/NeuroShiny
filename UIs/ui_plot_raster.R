@@ -17,14 +17,16 @@ plot_raster <- tabPanel(
                       title = "Raster plot",
                       ribbon = TRUE,
                       title_side = "top right",
-                      plotOutput("bin_raster_plot")
+                      withSpinner(plotOutput("bin_raster_plot"),
+                                  color = "#79c9da")
                     ),
                     tabPanel(
                       width = NULL,
                       title = "PSTH (Peristimulus time histogram)",
                       ribbon = TRUE,
                       title_side = "top right",
-                      plotOutput("bin_PSTH")
+                      withSpinner(plotOutput("bin_PSTH"),
+                                  color = "#79c9da")
                     )
              )
       )

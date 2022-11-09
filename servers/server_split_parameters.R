@@ -15,6 +15,14 @@ reactive_level_repetition_info_each_site <- reactive({
   num_label_reps
 })
 
+reactive_num_usable_sites <- reactive({
+  req(reactive_level_repetition_info_each_site())
+  temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
+  num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
+  num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
+  num_usable_sites
+})
+
 
 # DS___np___max_repetition_avail_with_any_site ----
 output$DS___np___max_repetition_avail_with_any_site <- renderText({
@@ -53,13 +61,15 @@ output$DS_show_chosen_repetition_info <- renderText({
   temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
   num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
   num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
+
   if (input$DS_type == "ds_basic"){
     paste("You selected", "<font color='red'>",
           num_repetitions, "</font>",
           "trials (", input$DS_basic___p___num_label_repeats_per_cv_split,
           " repeats x ",  input$DS_basic___p___num_cv_splits,
-          "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>"
-          , num_usable_sites, "</font>", " sites available for decoding.")
+          "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>",
+          num_usable_sites, "</font>",
+          " sites available for decoding.")
   }else{
     paste("You selected", "<font color='red'>",
           temp_chosen_repetition_info$num_repetition, "</font>",
@@ -76,7 +86,7 @@ output$DS_show_chosen_repetition_info <- renderText({
 output$DS_basic___p___num_resample_sites = renderUI({
   numericInput("DS_basic___p___num_resample_sites",
                "Number of resampling sites",
-               value = NULL, min = 1)
+               value = reactive_num_usable_sites(), min = 1)
 })
 
 # ds_generalization outputs

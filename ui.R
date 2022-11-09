@@ -3,6 +3,7 @@
 # Elisa make it base directory project tab in the binning spot instead and force
 # them to put in the location of the base directory
 
+source("UIs/ui_select_project.R")
 source("UIs/ui_binning_params.R")
 source("UIs/ui_plot_raster.R")
 source("UIs/ui_upload_new_raster.R")
@@ -13,15 +14,20 @@ source("UIs/ui_fp.R")
 source("UIs/ui_rm.R")
 source("UIs/ui_cv.R")
 source("UIs/ui_run_analysis.R")
-source("UIs/ui_plot_decoding.R")
+source("UIs/ui_current_results.R")
+source("UIs/ui_plot_single_result.R")
+source("UIs/ui_plot_multi_result.R")
 
 
 sidebar <- dashboardSidebar(
   sidebarMenu(id = "tabs",
-              menuItem("Binning the raster data", tabName = "bin"),
-              menuItem("Population decoding", tabName = "decode")
-              )
+              menuItem("Select Your Project",
+                       icon = icon("folder-open"),
+                       tabName = "project"),
+              menuItemOutput("menuBin"),
+              menuItemOutput("menuDecode")
   )
+)
 
 decoding_analysis <- tabPanel(
   title = "Run a decoding analysis",
@@ -35,7 +41,8 @@ decoding_analysis <- tabPanel(
                     fp_tab, # feature processors
                     rm_tab, # result metrics
                     cv_tab, # cross validator
-                    run_analysis_tab # running and generating scripts
+                    run_analysis_tab, # running and generating scripts
+                    current_results_tab # view pdf
                     )
              )
       )
@@ -44,18 +51,22 @@ decoding_analysis <- tabPanel(
 
 
 # Combining sidebar bodies ----
-body <- dashboardBody(tabItems(tabItem(tabName = "bin",
-                                       navbarPage(title = "",
-                                                  binning_params,
-                                                  plot_raster,
-                                                  upload_raster)),
-                               tabItem(tabName = "decode",
-                                       navbarPage(title = "",
-                                                  decoding_analysis,
-                                                  plot_decoding)
-                                       )
-                               )
-                      )
+body <- dashboardBody(
+  tabItems(
+    tabItem(tabName = "project", select_proj_tab),
+    tabItem(tabName = "bin",
+            navbarPage(title = "",
+                       binning_params,
+                       plot_raster,
+                       upload_raster)),
+    tabItem(tabName = "decode",
+            navbarPage(title = "",
+                       decoding_analysis,
+                       plot_decoding,
+                       plot_manifest)
+    )
+  )
+)
 
 
 

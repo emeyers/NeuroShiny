@@ -327,7 +327,14 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
                     "file.path('", decoding_params$results_dir_name,
-                    "', 'decoding_results', 'decoding_result_files', '')", ")\n\n")
+                    "', 'decoding_results', 'decoding_result_files', '')")
+
+  if(decoding_params$result_name != ""){
+    my_text <- paste0(my_text, ",\n result_name = '",
+                      decoding_params$result_name, "'")
+  }
+
+  my_text <- paste0(my_text,  ")\n\n")
 
   my_text
 

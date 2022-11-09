@@ -4,7 +4,9 @@ library('NeuroDecodeR')
 library('ggplot2')
 library('dplyr')
 library('plotly')
-
+library('shinycssloaders')
+library('shinyFiles')
+library('DT')
 
 
 rm(list=ls())
@@ -15,22 +17,8 @@ options(shiny.maxRequestSize=1000*1024^2)
 
 
 # hard coded these for now, should update with a tab to choose the project directory
-projects_folder_path <- file.path("..", "decoding_analysis_projects")
-project_name <- "Katsuki_Constantinidis_popout_R_analysis"
-
-#project_base_dir <- trimws(file.path(projects_folder_path, project_name, " "))
-#raster_base_dir <- paste0(project_base_dir, trimws(file.path('data', ' ')))
-#binned_base_dir <- paste0(project_base_dir, trimws(file.path('data','binned_data', ' '))) #original non-working directory
-#binned_base_dir <- paste0(project_base_dir, trimws(file.path('data', ' ')))
-#result_base_dir <- paste0(project_base_dir, trimws(file.path('results', 'decoding_results', ' ')))
-#script_base_dir <- "scripts"
-
-working_dir <- getwd()
-raster_base_dir <- file.path(working_dir, 'data')
-binned_base_dir <- file.path(working_dir, 'data', 'binned')
-result_base_dir <- file.path(working_dir, 'results')
-script_base_dir <- "scripts"
-
+# projects_folder_path <- file.path("..", "decoding_analysis_projects")
+# project_name <- "Katsuki_Constantinidis_popout_R_analysis"
 
 
 #List of classifiers, feature processors, and result metrics

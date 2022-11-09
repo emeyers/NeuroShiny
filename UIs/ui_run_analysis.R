@@ -11,17 +11,18 @@ run_analysis_tab <-
             width = NULL,
             status = "danger",
             solidHeader = TRUE,
-            #Select script type
+            # Select script type
             radioButtons("DC_script_mode",
                          "File type for generated script",
                          c("R", "R Markdown", "Matlab"),
                          selected = "R"),
-            #Option to include comments
+            # Option to include comments
             checkboxInput("include_comments", "Add code comments"),
+            # Option to change result name
+            textInput("result_name", "Optional: add result name", ""),
             #Running
             uiOutput("DC_offer_scriptize"),
-            uiOutput("DC_offer_save_decoding"), # Get strange errors if I try to add more UI elements :(
-            uiOutput("DC_plot_pdf"))
+            uiOutput("DC_offer_save_decoding")) # Get strange errors if I try to add more UI elements :(
       ),
       column(width = 8,
              box(width = NULL,

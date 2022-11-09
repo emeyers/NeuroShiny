@@ -1,11 +1,30 @@
 
-
-
 myserver <- function(input,output,session){
+  ##############################################################################
+  ############################## Dependent tabs ################################
+
+  # Menu for Binning Data
+  output$menuBin <- renderMenu({
+    # Open when project is selected
+    if (is.list(input$projectFolder)){
+      menuItem("Binning the raster data", tabName = "bin")
+    }
+  })
+
+  # Menu for
+  output$menuDecode <- renderMenu({
+    if (is.list(input$projectFolder)){
+      menuItem("Population decoding", tabName = "decode")
+    }
+  })
+
+  ##############################################################################
+  ############################# Reactive values ################################
+
   rv <- reactiveValues()
 
   # Raster reactive values
-  rv$raster_base_dir <- raster_base_dir
+  rv$raster_base_dir <- NULL
   rv$raster_cur_dir_name <- NA
   rv$raster_bMat <-FALSE
   rv$raster_num_neuron <- NA
@@ -16,24 +35,27 @@ myserver <- function(input,output,session){
   # Binned data reactive values
   rv$create_bin_function_run <- ""
   rv$mRaster_cur_data <- NULL
-  rv$binned_base_dir <- binned_base_dir
+  rv$binned_base_dir <- NULL
   rv$binned_file_name <- NA
   rv$binned_all_var <- NULL
   rv$displayed_script <- ""
 
-  # Decoding results reactive variables
-  rv$result_base_dir <- result_base_dir
+  # Decoding results reactive values
+  rv$result_base_dir <- NULL
   rv$result_chosen <- NA
   rv$result_data <- NULL
-  rv$save_script_name <- NULL
-
-
-  # Decoding rvs
-  # decoding_para_id changes. This is used by observerEvent who figures out
-  # the ids to signal eventReactive to check if they are in position
+  rv$manifest_chosen <- NULL
+  rv$manifest_data <- NULL
+  rv$manifest_legend_names <- NULL
+  rv$save_script_name <- "scripts"
+  # Find which ids to signal eventReactive to check if they are in position
   rv$decoding_para_id_computed <- 1
 
+  ##############################################################################
+  ########################### Source server files ##############################
+
   # Server files for "Binning the Raster Data" tab
+  source("servers/server_select_project.R", local = TRUE)
   source("servers/server_binning_params.R", local = TRUE)
   source("servers/server_plot_raster.R", local = TRUE)
   source("servers/server_upload_new_raster.R", local = TRUE)
@@ -45,6 +67,8 @@ myserver <- function(input,output,session){
   source("servers/server_rm.R", local = TRUE)
   source("servers/server_cv.R", local = TRUE)
   source("servers/server_run_analysis.R", local = TRUE)
-  source("servers/server_plot_decoding.R", local = TRUE)
+  source("servers/server_current_results.R", local = TRUE)
+  source("servers/server_plot_single_result.R", local = TRUE)
+  source("servers/server_plot_multi_result.R", local = TRUE)
 
 }

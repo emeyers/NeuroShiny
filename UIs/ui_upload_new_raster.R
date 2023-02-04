@@ -1,6 +1,6 @@
 
 ### Upload new raster data ----
-upload_raster <- tabPanel(
+upload_new_raster <- tabPanel(
   title = "Upload new raster data",
   fluidRow(box(width = NULL,
                helpText("We only accept .mat and .Rda format"),

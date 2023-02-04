@@ -1,12 +1,15 @@
-
-
-# Elisa make it base directory project tab in the binning spot instead and force
-# them to put in the location of the base directory
-
+################################################################################
+############################## Upload UI files #################################
+################################################################################
+# UI files for project selection sidebar
 source("UIs/ui_select_project.R")
+
+# UI files for binning tabs
 source("UIs/ui_binning_params.R")
 source("UIs/ui_plot_raster.R")
 source("UIs/ui_upload_new_raster.R")
+
+# UI files for decoding tabs
 source("UIs/ui_data_source.R")
 source("UIs/ui_split_parameters.R")
 source("UIs/ui_classifier.R")
@@ -19,6 +22,9 @@ source("UIs/ui_plot_single_result.R")
 source("UIs/ui_plot_multi_result.R")
 
 
+################################################################################
+############################### Create sidebar #################################
+################################################################################
 sidebar <- dashboardSidebar(
   sidebarMenu(id = "tabs",
               menuItem("Select Your Project",
@@ -29,57 +35,58 @@ sidebar <- dashboardSidebar(
   )
 )
 
+################################################################################
+########################### Sub-tabs for decoding ##############################
+################################################################################
 decoding_analysis <- tabPanel(
   title = "Run a decoding analysis",
   fluidPage(
     fluidRow(
       column(width = 12,
              tabBox(width = 12,
-                    data_source_tab, # selecting data and ds parameters
-                    split_parameters_tab, # additional ds parameter
-                    classifier_tab, # classifiers
-                    fp_tab, # feature processors
-                    rm_tab, # result metrics
-                    cv_tab, # cross validator
-                    run_analysis_tab, # running and generating scripts
-                    current_results_tab # view pdf
+                    data_source_tab, # Selecting data and ds parameters
+                    split_parameters_tab, # Additional ds parameter
+                    classifier_tab, # Classifiers
+                    fp_tab, # Feature processors
+                    rm_tab, # Result metrics
+                    cv_tab, # Cross validator
+                    run_analysis_tab, # Running and generating scripts
+                    current_results_tab # View pdf
                     )
              )
       )
     )
   )
 
-
-# Combining sidebar bodies ----
+################################################################################
+########################### Combining page bodies ##############################
+################################################################################
 body <- dashboardBody(
   tabItems(
+    # Tab to open project folder
     tabItem(tabName = "project", select_proj_tab),
+    # Tab for binning the data
     tabItem(tabName = "bin",
             navbarPage(title = "",
-                       binning_params,
+                       binning_params, # Binning from selected file
                        plot_raster,
-                       upload_raster)),
+                       upload_new_raster)),
+    # Tab for neuro-decoding
     tabItem(tabName = "decode",
             navbarPage(title = "",
-                       decoding_analysis,
-                       plot_decoding,
-                       plot_manifest)
+                       decoding_analysis, # Decoding with sub-tabs
+                       plot_decoding, # Plotting single result
+                       plot_manifest) # Plotting multiple result with manifest
     )
   )
 )
 
-
-
+################################################################################
+####################### Combining sidebars and bodies ##########################
+################################################################################
 myUI <- shinyUI({
   dashboardPage(skin = "green",
                 dashboardHeader(title = "NeuroShiny"),
                 sidebar,
                 body)
 })
-
-
-
-
-
-
-

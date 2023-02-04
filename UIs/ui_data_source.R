@@ -1,5 +1,4 @@
-
-
+# Tab for data upload and data source parameters
 data_source_tab <-
   tabPanel(
   title = "Data Source",
@@ -13,19 +12,19 @@ data_source_tab <-
       shinyFiles::shinyFilesButton("DS___p___binned_data", "Browse", "", multiple = FALSE),
       helpText("Loaded binned data: "),
       textOutput("DS_show_chosen_bin")),
-  #Select DS
+  # Select DS
   selectInput("DS_type", "Type of data source", c("ds_basic","ds_generalization")),
-  #DS Basic options
+  # DS Basic options
   conditionalPanel(condition = "input.DS_type == 'ds_basic'",
                    uiOutput("DS_basic___p___list_of_labels"),
                    checkboxInput("DS_basic___np___select_levels", "Select your specific levels", FALSE),
-                   checkboxInput("DS_basic___np___advanced", "Select advanced parameters?", FALSE)
+                   checkboxInput("DS_basic___np___advanced", "Select advanced parameters", FALSE)
   ),
-  #Option to specify levels for DS Basic
+  # Option to specify levels for DS Basic
   conditionalPanel(condition = "input.DS_basic___np___select_levels && input.DS_type == 'ds_basic'",
                    uiOutput("DS_basic___np___list_of_levels_to_use")
   ),
-  #Optional advanced parameters for DS Basic
+  # Optional advanced parameters for DS Basic
   conditionalPanel(condition = "input.DS_basic___np___advanced && input.DS_type == 'ds_basic'",
                    uiOutput("DS_basic___p___use_count_data"),
                    uiOutput("DS_basic___p___site_IDs_to_use"),
@@ -39,9 +38,9 @@ data_source_tab <-
                    #uiOutput("DS_gen___np___select_num_of_groups"),
                    numericInput("DS_gen___np___class_number","How many classes?", 2, min = 2),
                    uiOutput("DS_gen___p___label_levels"),
-                   checkboxInput("DS_gen___np___advanced", "Select advanced parameters?", FALSE)
+                   checkboxInput("DS_gen___np___advanced", "Select advanced parameters", FALSE)
   ),
-  #Optional advanced parameters for DS Generalization
+  # Optional advanced parameters for DS Generalization
   conditionalPanel(condition = "input.DS_gen___np___advanced && input.DS_type == 'ds_generalization'",
                    uiOutput("DS_gen___p___use_count_data"),
                    uiOutput("DS_gen___p___site_IDs_to_use"),

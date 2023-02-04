@@ -18,6 +18,7 @@ output$bin_save_raster_to_disk_error = renderUI({
 })
 
 er_bin_save_raster_to_disk_error <- eventReactive(input$bin_save_raster_to_disk,{
+  print("hi")
   validate(
     need(input$bin_uploaded_raster, "Please upload a zipped file raster data"),
     need(input$bin_uploaded_raster_name, "Please tell me where you want the file to be unzipped" )
@@ -81,16 +82,6 @@ observeEvent(input$bin_create_raster,{
 
 })
 
-# bin_evil_raster ----
-output$bin_evil_raster = renderUI({
-  req(rv$raster_cur_dir_name)
-  validate(
-    need(reactive_bRaster_qualified() > 0, "Only accept .mat and .Rda format. Please change your dataset file type"))
-})
-
-reactive_bRaster_qualified <- reactive({
-  sum(rv$raster_bMat, rv$raster_bRda)
-})
 
 # bin_show_create_raster_function_run ----
 output$bin_show_create_raster_function_run = renderText(({

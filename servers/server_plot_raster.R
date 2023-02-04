@@ -5,6 +5,7 @@ observe({
 
   rv$raster_cur_dir_name <- shinyFiles::parseDirPath(c(wd= rv$raster_base_dir),
                                                      input$bin_chosen_raster)
+
   req(rv$raster_cur_dir_name)
   mat_files_in_raster_dir <-
     list.files(rv$raster_cur_dir_name, pattern = "\\.mat$")

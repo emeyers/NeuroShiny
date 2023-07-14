@@ -112,10 +112,18 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
         val <- paste0("'", val, "'")
       }
 
-      # If label_levels has been specified, but them in as a vector argument
-      if (element == "DS_basic___p___label_levels") {
+      # If label_levels have been specified, put them in as a vector argument
+      if (element == "DS_basic___p___label_levels" ) {
         val <- paste0("c('", paste(val, collapse = "', '"), "')")
       }
+
+      # For site IDs to be include/exclude, put them in as an int vector
+      if (element == "DS_basic___p___site_IDs_to_use" ||
+          element == "DS_basic___p___site_IDs_to_exclude") {
+        val <- paste0("c(", paste(val, collapse = ", "), ")")
+      }
+
+
 
       # Add current element and it's value to string
       my_text <- paste0(my_text, "\t", gsub("DS_basic___p___", "", element)," = ", val, ",\n")

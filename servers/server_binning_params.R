@@ -1,13 +1,15 @@
 
+################################################################################
+################################ Upload raster #################################
+################################################################################
 
-# bin_chosen_raster ----
+# Selecting raster file to bin
 shinyFiles::shinyDirChoose(input, "bin_chosen_raster",
-                           roots = c(wd=file.path('data','raster')),
+                           roots = c(wd=file.path('data', 'raster')),
                            filetypes = c("mat", "Rda"))
 
-
-# bin_show_chosen_raster ----
-output$bin_show_chosen_raster = renderText({
+# Display raster name
+output$bin_show_chosen_raster <- renderText({
   req(rv$raster_cur_dir_name)
   if(is.na(rv$raster_cur_dir_name)){
     "No file chosen yet"
@@ -17,11 +19,15 @@ output$bin_show_chosen_raster = renderText({
   }
 })
 
-# bin_the_data ----
+################################################################################
+############################### Binning the data ###############################
+################################################################################
+
+# Run binning if button is pressed
+# Elisa - a lot needs to change here and then commented on
 observeEvent(input$bin_the_data,{
   if(rv$raster_bRda){
-
-    # data binned data in the director data/binned
+    # elisa data binned data in the director data/binned
     #binned_basename <- trimws(file.path("data", "binned", " "))
 
     temp_call <- paste0("NeuroDecodeR:::create_binned_data(rv$raster_cur_dir_name, ",
@@ -47,7 +53,6 @@ observeEvent(input$bin_the_data,{
     eval(parse(text = temp_call))
 
   } else if(rv$raster_bMat){
-
     temp_call <- paste0("NeuroDecodeR:::create_binned_data_from_matlab_raster_data(rv$raster_cur_dir_name,",
                        "input$bin_prefix_of_binned_file_name,",
                        "input$bin_bin_width, input$bin_step_size")
@@ -65,8 +70,8 @@ observeEvent(input$bin_the_data,{
 
 })
 
-# bin_show_create_bin_function_run ----
-output$bin_show_create_bin_function_run = renderText({
+# Display bin name? elisa - maybe change the name
+output$bin_show_create_bin_function_run <- renderText({
   rv$create_bin_function_run
 })
 

@@ -1,10 +1,11 @@
 
-myserver <- function(input,output,session){
+myServer <- function(input,output,session){
+
 ################################################################################
-############################### Dependent tabs #################################
+############################### Side menu tabs #################################
 ################################################################################
 
-  # Menu for Binning Data
+  # Side menu for binning data
   output$menuBin <- renderMenu({
     # Open when project is selected
     if (is.list(input$project_folder)){
@@ -12,7 +13,7 @@ myserver <- function(input,output,session){
     }
   })
 
-  # Menu for
+  # Side menu for decoding
   output$menuDecode <- renderMenu({
     if (is.list(input$project_folder)){
       menuItem("Population decoding", tabName = "decode")
@@ -55,7 +56,7 @@ myserver <- function(input,output,session){
   rv$decoding_para_id_computed <- 1
 
 ################################################################################
-############################ Source server files ###############################
+############################ Server source files ###############################
 ################################################################################
 
   # Server files for "Binning the Raster Data" tab

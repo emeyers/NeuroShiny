@@ -1,6 +1,5 @@
 
-
-# UI Tab info ----
+# Binning parameters with input parameters and selected raster
 binning_params <- tabPanel(
   title = "Specify binning parameters",
   fluidPage(
@@ -13,8 +12,7 @@ binning_params <- tabPanel(
                  helpText("We only accept .mat and .Rda format"),
                  shinyFiles::shinyDirButton("bin_chosen_raster", "Browse", ""),
                  helpText("Loaded raster data: "),
-                 textOutput("bin_show_chosen_raster")
-             ),
+                 textOutput("bin_show_chosen_raster")),
              shinydashboard::box(width = 8,
                  numericInput("bin_bin_width", "Bin width", value = 10, min = 1),
                  numericInput("bin_step_size", "Step size", value = 1, min = 1),
@@ -33,9 +31,4 @@ binning_params <- tabPanel(
     )
   )
 )
-
-
-
-
-
 

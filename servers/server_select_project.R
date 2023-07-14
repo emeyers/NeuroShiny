@@ -2,25 +2,26 @@
 ################################################################################
 ################################ Select project ################################
 ################################################################################
+
 # Shiny button to select project folder
-shinyDirChoose(input, 'project_folder', roots=c(home='~'), filetypes=c(''))
-#shinyDirChoose(input, 'project_folder', roots=c(home='~'), filetypes=c(''))
+shinyDirChoose(input, 'project_folder', roots = c(home='~'), filetypes = c(''))
 
-
-# Show project location once selected
+# If a project is selected
+# Then show project location once selected
 output$show_chosen_project <- renderText({
   if(is.integer(input$project_folder)){
     "No project chosen"
-  } else{
+  } else {
     parseDirPath(c(home='~'), input$project_folder)
-    #parseDirPath(c(home='~'), input$project_folder)
   }
 })
 
 ################################################################################
 ############################### Set directories ################################
 ################################################################################
-# Set the current wd to the project and add filters on additional browse buttons
+
+# Set the current wd to the selected project directory
+# Add filters on additional browse buttons for reactive variables
 observe({
   if (is.list(input$project_folder)){
     # Set project as base/working directory

@@ -10,10 +10,10 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   # Conditional variable to check for optional comments added to script
   include_comments <- decoding_params$include_comments
 
-  ### Load the NDR ------
+  # Load the NDR
   my_text <- "library(NeuroDecodeR)\n\n"
 
-  ### Binned Data ------
+  # Binned Data
   if (include_comments) {
     my_text <- paste0(my_text, "\n# binned file name\n")
   }
@@ -29,7 +29,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ### Data source ------
+  # Data source
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
   if (include_comments) {
@@ -142,7 +142,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
 
-  ### Classifier -----
+  # Classifier -----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -171,7 +171,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ###  Feature Preprocessors ----
+  #  Feature Preprocessors ----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -218,7 +218,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ### Result metrics ----
+  # Result metrics ----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -263,7 +263,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ###  Cross Validator -----
+  #  Cross Validator -----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -289,7 +289,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ### Run the decoding analysis ----
+  # Run the decoding analysis ----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -313,7 +313,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  ### Save the results ----
+  # Save the results ----
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 

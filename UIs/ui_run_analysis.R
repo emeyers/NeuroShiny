@@ -1,5 +1,5 @@
 
-
+# Run, save, show analysis after selecting values
 run_analysis_tab <-
   tabPanel(
     title = "Run Analysis",
@@ -22,12 +22,9 @@ run_analysis_tab <-
             textInput("result_name", "Optional: add result name", ""),
             #Running
             uiOutput("DC_offer_scriptize"),
-            uiOutput("DC_offer_save_decoding")) # Get strange errors if I try to add more UI elements :(
-      ),
+            uiOutput("DC_offer_save_decoding"))), # Elisa Get strange errors if I try to add more UI elements :(
       column(width = 8,
              box(width = NULL,
-                 uiOutput("DC_ace")
-                 )
-             )
+                 uiOutput("DC_ace")))
     )
   )

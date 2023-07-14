@@ -1,5 +1,5 @@
 
-### Upload new raster data ----
+# Upload new raster data under binning raster tab
 upload_new_raster <- tabPanel(
   title = "Upload new raster data",
   fluidRow(box(width = NULL,
@@ -7,8 +7,7 @@ upload_new_raster <- tabPanel(
                uiOutput("bin_offer_upload_raster"),
                uiOutput("bin_offer_create_raster"),
                uiOutput("bin_evil_raster"),
-               textOutput("bin_show_create_raster_function_run")
-  )
+               textOutput("bin_show_create_raster_function_run"))
   )
 )
 

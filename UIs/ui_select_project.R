@@ -1,7 +1,5 @@
 
-################################################################################
-############################### Directory button ###############################
-################################################################################
+# Selecting the directory for the whole project
 select_proj_tab <- tabPanel(
   title = "Select Project",
   fluidPage(
@@ -14,8 +12,8 @@ select_proj_tab <- tabPanel(
                                  shinyDirButton('project_folder', 'Browse',
                                                 'Please select a folder'),
                                  helpText("Current Project: "),
-                                 textOutput("show_chosen_project") # Show directory
-             )
+                                 # Show directory
+                                 textOutput("show_chosen_project"))
       )
     )
   )

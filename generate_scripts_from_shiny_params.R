@@ -142,7 +142,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   }
 
 
-  # Classifier -----
+  # Classifier
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -202,8 +202,6 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
       fp_skf <- paste0(fp_skf, "\n\t", gsub("FP_skf___p___", "", element)," = ", val, ",")
     }
   }
-
-
   if (!is.null(fp_skf)) {
     # Close select_k_features and add to string for all feature preprocessors
     fp_skf <- gsub('.{1}$', ") \n\n", fp_skf)
@@ -263,7 +261,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
-  #  Cross Validator -----
+  #  Cross Validator
 
   my_text <- paste0(my_text, "\n")  # Add space between sections
 
@@ -427,7 +425,7 @@ generate_script_name <- function(script_mode, result_base_dir, script_save_dir) 
 
   # generate analysis script name
   # should perhaps do this when the script is generated and then can add the script name as meta
-  #  data to be saved with the decoding results, but ok for now...
+  # data to be saved with the decoding results, but ok for now...
   # ELISA
   script_file_name <- paste0(result_base_dir, script_save_dir,
                              "NeuroShiny_Script_ID_",
@@ -436,12 +434,4 @@ generate_script_name <- function(script_mode, result_base_dir, script_save_dir) 
   return(script_file_name)
 
 }
-
-
-
-
-
-
-
-
 

@@ -14,7 +14,7 @@ observeEvent(list(input$DS___p___binned_data,
   rv$script <- c("DS___p___binned_data", "DS_type")
 
 
-  # DATA SOURCE ---
+  # DATA SOURCE
   # Add the parameters for ds_basic
   if(input$DS_type == "ds_basic"){
     # Required parameters for ds_basic
@@ -60,7 +60,7 @@ observeEvent(list(input$DS___p___binned_data,
   }
 
 
-  # CLASSIFIER ---
+  # CLASSIFIER
   # Required classifier parameters
   rv$script <- c(rv$script, "CL_type", "CL___p___return_decision_values")
   # Add parameters if selected type is SVM
@@ -83,7 +83,7 @@ observeEvent(list(input$DS___p___binned_data,
   }
 
 
-  # FEATURE PREPROCESSORS ---
+  # FEATURE PREPROCESSORS
   # Required parameters
   rv$script <- c(rv$script, "FP_type")
   # Add additional parameters if k features is selected
@@ -93,7 +93,7 @@ observeEvent(list(input$DS___p___binned_data,
   }
 
 
-  # RESULT METRICS ---
+  # RESULT METRICS
   # Required parameters
   rv$script <- c(rv$script, "RM_type")
   # Add additional parameters if main results is selected
@@ -107,7 +107,7 @@ observeEvent(list(input$DS___p___binned_data,
   }
 
 
-  # CROSS VALIDATOR ---
+  # CROSS VALIDATOR
   # Add standard cv items
   rv$script <- c(rv$script, "CV_standard___p___run_TCD",
                  "CV_standard___p___num_resample_runs")
@@ -121,11 +121,11 @@ observeEvent(list(input$DS___p___binned_data,
   }
 
 
-  # COMMENTS & FILE NAME ---
+  # COMMENTS & FILE NAME
   rv$script <- c(rv$script, "include_comments", "result_name")
 
 
-  # PREPARE SCRIPT VALUES ---
+  # PREPARE SCRIPT VALUES
   # Add string input$ to all the values
   rv$inputIDs <- paste0("input$", rv$script)
   # Evaluating these inputs
@@ -141,7 +141,7 @@ observeEvent(list(input$DS___p___binned_data,
   decoding_params$results_dir_name <- rv$result_base_dir
 
 
-  # GENERATE SCRIPT ---
+  # GENERATE SCRIPT
   if (input$DC_script_mode == "R") {
     rv$displayed_script <- generate_r_script_from_shiny_decoding_params(decoding_params)
   } else if (input$DC_script_mode == "R Markdown") {
@@ -157,7 +157,7 @@ observeEvent(list(input$DS___p___binned_data,
 ################################################################################
 
 # Button to run and save
-output$DC_offer_scriptize = renderUI({
+output$DC_offer_scriptize <- renderUI({
   list(
     actionButton("DC_run_script", "Run and save the script"),
     uiOutput("DC_scriptize_error") # elisa this still doesn't work it's below

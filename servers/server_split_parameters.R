@@ -143,7 +143,7 @@ reactive_level_repetition_info <- reactive({
   num_label_reps
 })
 
-# DS basic input the number of resampling sites
+# DS basic reactive variable for resampling sites
 reactive_num_usable_sites <- reactive({
   req(reactive_level_repetition_info())
   temp_chosen_repetition_info <- reactive_level_repetition_info()
@@ -152,6 +152,7 @@ reactive_num_usable_sites <- reactive({
   num_usable_sites
 })
 
+# DS basic input the number of resampling sites
 output$DS_basic___p___num_resample_sites <- renderUI({
   numericInput("DS_basic___p___num_resample_sites",
                "Number of resampling sites",

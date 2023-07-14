@@ -99,22 +99,30 @@ output$DS_gen___p___num_label_repeats_per_cv_split <- renderUI({
 ################################################################################
 ########################## Number of resampling sites ##########################
 ################################################################################
+# DS basic reactive variable for resampling sites
+reactive_num_repetitions <- reactive({
+  num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
+  num_repetitions
+})
+
+reactive_num_usable_sites <- reactive({
+  req(reactive_level_repetition_info_each_site())
+  temp_chosen_rep_info <- reactive_level_repetition_info_each_site()
+  num_usable_sites <- sum(temp_chosen_rep_info$min_repeats >= reactive_num_repetitions())
+  num_usable_sites
+})
 
 # Display number of trials and sites available for decoding
-# Function reactive_level_repetition_info_each_site() above
+# Function reactive_level_repetition_info_each_site() in above section
 output$DS_show_chosen_repetition_info <- renderText({
   req(reactive_level_repetition_info_each_site())
-  temp_chosen_repetition_info <- reactive_level_repetition_info_each_site()
-  num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
-  num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
-
   if (input$DS_type == "ds_basic"){
     paste("You selected", "<font color='red'>",
-          num_repetitions, "</font>",
+          reactive_num_repetitions(), "</font>",
           "trials (", input$DS_basic___p___num_label_repeats_per_cv_split,
           " repeats x ",  input$DS_basic___p___num_cv_splits,
           "CV splits). Based on the levels selected Data source tab, this gives <font color='red'>",
-          num_usable_sites, "</font>",
+          reactive_num_usable_sites(), "</font>",
           " sites available for decoding.")
   }else{
     paste("You selected", "<font color='red'>",
@@ -143,20 +151,11 @@ reactive_level_repetition_info <- reactive({
   num_label_reps
 })
 
-# DS basic reactive variable for resampling sites
-reactive_num_usable_sites <- reactive({
-  req(reactive_level_repetition_info())
-  temp_chosen_repetition_info <- reactive_level_repetition_info()
-  num_repetitions <- input$DS_basic___p___num_label_repeats_per_cv_split * input$DS_basic___p___num_cv_splits
-  num_usable_sites <- sum(temp_chosen_repetition_info$min_repeats >= num_repetitions)
-  num_usable_sites
-})
-
 # DS basic input the number of resampling sites
 output$DS_basic___p___num_resample_sites <- renderUI({
   numericInput("DS_basic___p___num_resample_sites",
                "Number of resampling sites",
-               value = reactive_num_usable_sites(), min = 1)
+               value = NULL, min = 1, max = reactive_num_usable_sites())
 })
 
 # DS generalization input the number of resampling sites

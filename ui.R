@@ -48,6 +48,7 @@ decoding_analysis <- tabPanel(
     fluidRow(
       column(width = 12,
              tabBox(width = 12,
+                    id = "decoding_tabs",
                     data_source_tab, # Selecting data and ds parameters
                     split_parameters_tab, # Additional ds parameter
                     classifier_tab, # Classifiers

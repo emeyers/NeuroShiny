@@ -4,7 +4,10 @@
 ################################################################################
 
 # Update only if those in list have been changed
-observeEvent(list(input$DS___p___binned_data,
+# The variable input$decoding_tabs is the id value of the tab panel in ui.R
+# The result is any change from those tabs will be added since it observes
+# events when the user navigates between them
+observeEvent(list(input$decoding_tabs,
                   input$DC_script_mode,
                   input$include_comments,
                   input$result_name), {
@@ -317,8 +320,6 @@ update_ace_editor_code <- function() {
     curr_radio_button_setting <- input$DC_script_mode
     updateRadioButtons(session, "DC_script_mode", "File type for generated script",
                        c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)
-
   }
-
 }
 

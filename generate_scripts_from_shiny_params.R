@@ -46,8 +46,9 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     # Add the labels that belong to each class
     for (class_i in 1:decoding_params$DS_gen___np___class_number) {
       # Assign train and test labels for class i
-      class_i_train_labels <- eval(str2lang(paste0("decoding_params$DS_genc___p___train_label_levels_class_", class_i)))
-      class_i_test_labels <- eval(str2lang(paste0("decoding_params$DS_genc___p___test_label_levels_class_", class_i)))
+      class_i <- as.character(class_i)
+      class_i_train_labels <- eval(str2lang(paste0("decoding_params$DS_gen___p___train_label_levels_class_", class_i)))
+      class_i_test_labels <- eval(str2lang(paste0("decoding_params$DS_gen___p___test_label_levels_class_", class_i)))
 
       # Start of string for class i's labels
       class_i_train_labels_text <- "c("
@@ -71,9 +72,9 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
       train_labels_text <- paste0(train_labels_text, "\n\t ", class_i_train_labels_text)
       test_labels_text <- paste0(test_labels_text, "\n\t ", class_i_test_labels_text)
 
-      # Remove the DS_genc___p___train_label_levels_class_ for class i from the decoding_params
-      eval(str2lang(paste0("decoding_params[['DS_genc___p___train_label_levels_class_", class_i, "']] <- NULL")))
-      eval(str2lang(paste0("decoding_params[['DS_genc___p___test_label_levels_class_", class_i, "']] <- NULL")))
+      # Remove the DS_gen___p___train_label_levels_class_ for class i from the decoding_params
+      eval(str2lang(paste0("decoding_params[['DS_gen___p___train_label_levels_class_", class_i, "']] <- NULL")))
+      eval(str2lang(paste0("decoding_params[['DS_gen___p___test_label_levels_class_", class_i, "']] <- NULL")))
 
     }  # End for loop over the number of classes
 
@@ -133,7 +134,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
     if(startsWith(element, "DS_gen___p___")){
       val <- eval(str2lang(paste0("decoding_params$", element)))
       # Add all current existing ds_generalization elements in decoding_params
-       paste0(my_text, "\t", gsub("DS_gen___p___", "", element)," = ", val, ",\n")
+      my_text <- paste0(my_text, "\t", gsub("DS_gen___p___", "", element)," = ", val, ",\n")
     }
 
   }

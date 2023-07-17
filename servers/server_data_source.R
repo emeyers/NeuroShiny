@@ -159,26 +159,34 @@ output$DS_gen___p___label_levels <- renderUI({
   req(rv$binned_file_name)
   req(input$DS_gen___np___class_number)
 
-  # Create empty train and test lists
-  train_lst <- list()
-  test_lst <- list()
+  # Create empty list to append the rows
+  allRows <- list()
 
   # For the number of classes in each train and test,
   # Add selected levels using reactive_all_levels_of_gen_var_to_use() options
   for (i in 1:input$DS_gen___np___class_number){
-    # Add the current class levels to train list
-    train_lst[[i]] <- selectInput(paste0("DS_gen___p___train_label_levels_class_", i),
-                                  paste("Class", i, "- Training levels to use"),
-                                  reactive_all_levels_of_gen_var_to_use(),
-                                  multiple = TRUE)
-    # Add the current class levels to test list
-    test_lst[[i]] <- selectInput(paste0("DS_gen___p___test_label_levels_class_", i),
-                                 paste("Class", i, "- Testing levels to use"),
-                                 reactive_all_levels_of_gen_var_to_use(),
-                                 multiple = TRUE)
+    currentRow <- fluidRow(
+      # Train input
+      column(width = 5,
+             selectInput(paste0("DS_gen___p___train_label_levels_class_", i),
+                         paste("Class", i, "- Training levels to use"),
+                         reactive_all_levels_of_gen_var_to_use(),
+                         multiple = TRUE)
+      ),
+      # Test input
+      column(width = 5,
+             selectInput(paste0("DS_gen___p___test_label_levels_class_", i),
+                         paste("Class", i, "- Testing levels to use"),
+                         reactive_all_levels_of_gen_var_to_use(),
+                         multiple = TRUE)
+      )
+    )
+    # Add current class row to list
+    allRows[[i]] <- currentRow
   }
-  # Bind the two lists and return the two input boxes
-  c(rbind(train_lst, test_lst))
+  # Output all the rows for each class
+  allRows
+
 })
 
 ################################################################################

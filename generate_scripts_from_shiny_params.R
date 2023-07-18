@@ -435,7 +435,7 @@ generate_script_name <- function(script_mode, result_base_dir, script_save_dir) 
   # should perhaps do this when the script is generated and then can add the script name as meta
   # data to be saved with the decoding results, but ok for now...
   # ELISA
-  script_file_name <- paste0(result_base_dir, script_save_dir,
+  script_file_name <- paste0(trimws(file.path(result_base_dir, script_save_dir, " ")),
                              "NeuroShiny_Script_ID_",
                              NeuroDecodeR:::generate_analysis_ID(),
                              file_extension)

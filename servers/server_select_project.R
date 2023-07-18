@@ -3,11 +3,9 @@
 ################################ Select project ################################
 ################################################################################
 
-home_dir_name <- getwd()  # "."  # "~"
-
 
 # Shiny button to select project folder
-shinyDirChoose(input, 'project_folder', roots = c(home=home_dir_name), filetypes = c(''))
+shinyDirChoose(input, 'project_folder', roots = c(home=app_base_dir), filetypes = c(''))
 
 # If a project is selected
 # Then show project location once selected
@@ -15,7 +13,7 @@ output$show_chosen_project <- renderText({
   if(is.integer(input$project_folder)){
     "No project chosen"
   } else {
-    parseDirPath(c(home=home_dir_name), input$project_folder)
+    parseDirPath(c(home=app_base_dir), input$project_folder)
   }
 })
 
@@ -28,7 +26,7 @@ output$show_chosen_project <- renderText({
 observe({
   if (is.list(input$project_folder)){
     # Set project as base/working directory
-    working_dir <- parseDirPath(c(home=home_dir_name), input$project_folder)
+    working_dir <- parseDirPath(c(home=app_base_dir), input$project_folder)
     setwd(working_dir)
 
     # Set additional directories

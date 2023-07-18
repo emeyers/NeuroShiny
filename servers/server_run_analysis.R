@@ -208,7 +208,7 @@ observeEvent(input$DC_run_script,{
 
   # Update status of knitting and save to directory
   rv$pdf_knitting_status <- "completed"
-  file.copy(pdf_file_name, paste0("www/", basename(pdf_file_name)))
+  file.copy(pdf_file_name, file.path(app_base_dir, "www", basename(pdf_file_name)))
 
 })
 

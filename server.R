@@ -26,6 +26,8 @@ myServer <- function(input,output,session){
 
   rv <- reactiveValues()
 
+  rv$base_dir <- NULL
+
   # Raster reactive values
   rv$raster_base_dir <- NULL
   rv$raster_cur_dir_name <- NULL

@@ -21,7 +21,7 @@ reactive_DS_levels_to_use <- reactive({
     for (class_i in 1:input$DS_gen___np___class_number) {
       curr_train_labels <- eval(str2lang(paste0("input$DS_gen___p___train_label_levels_class_", class_i)))
       curr_test_labels <- eval(str2lang(paste0("input$DS_gen___p___test_label_levels_class_", class_i)))
-      all_labels <- c(all_labels, curr_train_labels, curr_test_labels)
+      all_labels <- unique(c(all_labels, curr_train_labels, curr_test_labels))
     }
     all_labels
   }
@@ -38,7 +38,7 @@ reactive_level_repetition_info_each_site <- reactive({
     # For DS generalization
   } else {
     num_label_reps <- NeuroDecodeR:::get_num_label_repetitions_each_site(rv$binned_data,
-                                                                         input$DS_gen_var_to_use,
+                                                                         input$DS_gen___p___labels,
                                                                          label_levels = reactive_DS_levels_to_use())
   }
   num_label_reps

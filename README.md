@@ -12,3 +12,11 @@ The current development version of NeuroShiny is only deployable locally and mus
 
 ### Folder Structure
 The application assumes a standardized folder structure for every analysis. A project can be contained in a folder stored anywhere on a computer and with any desired name. Inside this folder there should be two sub-folders: results and data. The data folder must be split further into two more folders: binned and raster. The binned folder holds all binned .Rda data files and the raster folder holds additional folders for .Rda files of spike data. Finally, the results folder contains a decoding_results sub-folder where future scripts and results are saved depending on what is specified in the application. 
+
+### Docker
+If one has installed docker, one can build a docker image of the NeuroShiny app based on the Dockerfile in this repository by running the following command: 
+`docker build . -t "neuroshiny_image"`. 
+
+One can then run the docker container from this image using: `docker run --name neuroshiny -p 3838:3838 neuroshiny_image`. 
+
+Once the docker container is running, the NeuroShiny app can be accessed from a web browser at the address: http://localhost:3838/

@@ -28,7 +28,7 @@ COPY /projects ./app/projects
 COPY /servers ./app/servers
 COPY /UIs ./app/UIs
 COPY /www ./app/www
-COPY *.R ./app
+COPY *.R ./app/
 
 # install renv & restore packages
 RUN Rscript -e 'install.packages("renv")'

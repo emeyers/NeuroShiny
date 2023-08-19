@@ -7,6 +7,7 @@ library('shinydashboard')
 library('NeuroDecodeR')
 library('ggplot2')
 library('dplyr')
+library('shinyAce')
 library('plotly')
 library('shinycssloaders')
 library('shinyFiles')
@@ -41,7 +42,7 @@ colnames(cl_fp) <- all_cl
 rownames(cl_fp) <- all_fp
 
 ################################################################################
-####################### Generating script functions ############################
+########################### Additional functions ###############################
 ################################################################################
 
 # Function used to save generated script
@@ -49,6 +50,13 @@ move_file <- function(from, to) {
   todir <- dirname(to)
   if (!isTRUE(file.info(todir)$isdir)) dir.create(todir, recursive = TRUE)
   file.rename(from = from, to = to)
+}
+
+# A cheat function for simple HTML rendering
+html2Text <- function(string) {
+  formatStr <- paste0("<br><font size='+1' color='black'><strong>",
+                      string, "</strong></font>")
+  return(helpText(HTML(formatStr)))
 }
 
 source("generate_scripts_from_shiny_params.R")

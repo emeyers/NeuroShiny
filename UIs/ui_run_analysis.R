@@ -21,8 +21,12 @@ run_analysis_tab <-
             # Option to change result name
             textInput("result_name", "Optional: add result name", ""),
             #Running
-            uiOutput("DC_offer_scriptize"),
-            uiOutput("DC_offer_save_decoding"))), # Elisa Get strange errors if I try to add more UI elements :(
+            actionButton("DC_run_script", "Run and save the script"),
+            uiOutput("DC_scriptize_error"),
+            helpText(""),
+            actionButton("DC_save_decoding", "Save the script only"),
+            uiOutput("DC_save_decoding_error")
+            )), # Elisa Get strange errors if I try to add more UI elements :(
       column(width = 8,
              box(width = NULL,
                  uiOutput("DC_ace")))

@@ -282,11 +282,18 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
   my_text <- paste0(my_text,"\t classifier = cl, \n\t feature_preprocessors = fps,\n")
   my_text <- paste0(my_text,"\t result_metrics = rms,\n")
 
-  # Add existing cross validator parameters
+  # Add existing cross validator standard parameters
   for (element in names(decoding_params)) {
-    if (startsWith(element, "CV___p___")) {
+    if (startsWith(element, "CV_standard___p___")) {
       val <- eval(str2lang(paste0("decoding_params$",element)))
-       paste0(my_text, "\t ", gsub("CV___p___", "", element)," = ", val, ",\n")
+      if (element == "CV_standard___p___parallel_outfile"){
+        my_text <- paste0(my_text, "\t ", gsub("CV_standard___p___", "", element),
+                          " = '", val, "',\n")
+      } else {
+        my_text <- paste0(my_text, "\t ", gsub("CV_standard___p___", "", element),
+                          " = ", val, ",\n")
+      }
+
     }
   }
 

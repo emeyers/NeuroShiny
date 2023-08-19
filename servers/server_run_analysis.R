@@ -116,11 +116,19 @@ observeEvent(list(input$decoding_tabs,
                  "CV_standard___p___num_resample_runs")
   # Elisa - why all three?
   # If there is 1 or more parallel cores, add corresponding variables
-  if(!is.null(input$CV_standard___p___num_parallel_cores) &&
-     !is.na(input$CV_standard___p___num_parallel_cores) &&
-     input$CV_standard___p___num_parallel_cores >= 1) {
-    rv$script <- c(rv$script, "CV_standard___p___num_parallel_cores",
-                   "CV_standard___p___parallel_outfile")
+  #if(!is.null(input$CV_standard___p___num_parallel_cores) &&
+  #   !is.na(input$CV_standard___p___num_parallel_cores) &&
+  #   input$CV_standard___p___num_parallel_cores >= 1) {
+  #  rv$script <- c(rv$script, "CV_standard___p___num_parallel_cores",
+  #                 "CV_standard___p___parallel_outfile")
+  #}
+
+  if(!is.null(input$CV_standard___p___num_parallel_cores)){
+    rv$script <- c(rv$script, "CV_standard___p___num_parallel_cores")
+    if(!is.na(input$CV_standard___p___num_parallel_cores) &&
+              input$CV_standard___p___num_parallel_cores >= 1){
+      rv$script <- c(rv$script, "CV_standard___p___parallel_outfile")
+    }
   }
 
 
@@ -140,8 +148,8 @@ observeEvent(list(input$decoding_tabs,
   # Add names to the list
   decoding_params <- setNames(decoding_params, rv$script)
   # Add directory names to the decoding params
-  decoding_params$binned_dir_name <- rv$binned_base_dir
-  decoding_params$results_dir_name <- rv$result_base_dir
+  decoding_params$binned_dir_name <- file.path(rv$working_dir, rv$binned_base_dir)
+  decoding_params$results_dir_name <- file.path(rv$working_dir, rv$result_base_dir)
 
 
   # GENERATE SCRIPT
@@ -156,39 +164,33 @@ observeEvent(list(input$decoding_tabs,
 })
 
 ################################################################################
-############################## Run and save script #############################
+############################# Run and saving script ############################
 ################################################################################
 
-# Button to run and save
-output$DC_offer_scriptize <- renderUI({
-  list(
-    actionButton("DC_run_script", "Run and save the script"),
-    uiOutput("DC_scriptize_error") # elisa this still doesn't work it's below
-  )
-})
-
-
-# Running the script
-observeEvent(input$DC_run_script,{
+# Save the script name
+observeEvent(rv$ace_latest_script, {
   req(rv$displayed_script)
-
-  # Generate file name
-  script_file_name <- generate_script_name(input$DC_script_mode,
+  # Generate script name
+  rv$save_script_name <- generate_script_name(input$DC_script_mode,
                                            rv$result_base_dir, script_save_dir)
-  rv$save_script_name <- script_file_name
 
-  # Write the code to a script
-  fileConn <- file(script_file_name)
+  # Write the code to a script and save
+  fileConn <- file(rv$save_script_name)
   writeLines(rv$displayed_script, fileConn)
   close(fileConn)
+})
 
+# Run the script and generate the pdf
+observeEvent(input$DC_run_script,{
+  req(rv$displayed_script)
   rv$pdf_knitting_status <- "running"
-  # Run the script
+
+  # Run the script depending on output selected
   if (input$DC_script_mode == "R") {
-    pdf_file_name <- stringr::str_replace(script_file_name, "r_scripts", "r_scripts_pdf")
+    pdf_file_name <- stringr::str_replace(rv$save_script_name, "r_scripts", "r_scripts_pdf")
     pdf_file_name <- stringr::str_replace(pdf_file_name, "R$", "pdf")
   } else if (input$DC_script_mode == "R Markdown") {
-    pdf_file_name <- stringr::str_replace(script_file_name,
+    pdf_file_name <- stringr::str_replace(rv$save_script_name,
                                           "r_markdown", "r_markdown_pdf")
     pdf_file_name <- stringr::str_replace(pdf_file_name, "Rmd$", "pdf")
   }
@@ -201,15 +203,16 @@ observeEvent(input$DC_run_script,{
                                  duration = NULL,
                                  closeButton = FALSE,
                                  type = "message")
-  on.exit(removeNotification(running_id), add = TRUE) # elisa - what does this do
+  # And remove when complete
+  on.exit(removeNotification(running_id), add = TRUE)
 
   # Render the pdf document using given output directory
-  rmarkdown::render(script_file_name, "pdf_document", output_dir = dirname(pdf_file_name))
+  rmarkdown::render(rv$save_script_name, "pdf_document", output_dir = dirname(pdf_file_name))
+
 
   # Update status of knitting and save to directory
   rv$pdf_knitting_status <- "completed"
   file.copy(pdf_file_name, file.path(app_base_dir, "www", basename(pdf_file_name)))
-
 })
 
 # Error messages when encountering error in scriptizing
@@ -218,81 +221,13 @@ output$DC_scriptize_error <- renderText({
   #er_scriptize_action_error()
 })
 
-er_scriptize_action_error <- eventReactive(rv$decoding_para_id_computed,{
-  # elisa if we don't have this line, this function will be called as soon as users
-  #click the script tab because rv$decoding_para_id_computed is going
-  #from NULL to 1 (I think)
-  req(rv$script)
-  validate(
-    need(input$DS___p___binned_data, "No data has been uploaded")
-  )
-  temp_need = lapply(rv$script, function(i){
-    eval(parse(text = paste0("need(input$", i, ", '", "You need to set your parameter first')")))
-  })
-  do.call(validate, temp_need)
-})
-
-
-
-################################################################################
-################################ Save script only ##############################
-################################################################################
-
-# Action button for saving the file only
-# elisa - maybe you don't need both, you can do it in one?
-output$DC_offer_save_decoding <- renderUI({
-  list(
-    helpText(""),
-    actionButton("DC_save_decoding", "Save the script only"),
-    uiOutput("DC_save_decoding_error")
-  )
-})
-
-# If the save only button is pressed, then save the script
-observeEvent(input$DC_save_decoding, {
-  req(rv$displayed_script)
-  # Generate script name
-  script_file_name <- generate_script_name(input$DC_script_mode,
-                                           rv$result_base_dir, script_save_dir)
-  rv$save_script_name <- script_file_name
-
-  # Write the code to a script and save
-  fileConn <- file(script_file_name)
-  writeLines(rv$displayed_script, fileConn)
-  close(fileConn)
-})
-
-# Error messages when encountering error in scriptizing
-# Elisa - if you do end up using this maybe combine with the one above
-output$DC_save_decoding_error <- renderUI({
-  er_DC_save_displayed_script_error()
-})
-
-# Elisa - same deal with this one
-er_DC_save_displayed_script_error <- eventReactive(input$DC_save_displayed_script,{
-  validate(
-    need(rv$displayed_script,"Please generate the script first"),
-    need(input$DC_to_be_saved_script_name, "Please tell me the new script name")
-  )
-})
-
 ################################################################################
 ############################# Displaying the script ############################
 ################################################################################
 
-# Showing the script as a pdf
-output$DC_plot_pdf <- renderUI({
-  # Elisa, missing the two rvs
-  if (!is.null(rv$pdf_knitting_status)) {
-    tags$iframe(style="height:0px; width:0%; scrolling = yes",
-                src = rv$latest_pdf_file_name)
-  }
-})
-
 # Showing the script in the UI
-# Elisa - rename
 output$DC_ace <- renderUI({
-  # Depending on the code format - Elisa this still needs to be written
+  # Depending on the code format,
   if (input$DC_script_mode == "Matlab") {
     script_editor_mode <- "matlab"
   } else {
@@ -300,26 +235,26 @@ output$DC_ace <- renderUI({
   }
 
   # Display the script
-  ace_editor <- shinyAce::aceEditor("script",
+  ace_editor <- shinyAce::aceEditor("ace_editor_script",
                                     rv$displayed_script,
                                     mode = script_editor_mode)
-  update_ace_editor_code()
   ace_editor
 })
 
-# A helper function that refreshes what is on the ace editor
-# Elisa - check this cuz i don't know if we need it
+# Updating script based on user input
+observeEvent(list(input$DC_run_script, input$DC_save_decoding), {
+  # Update script for any edits made in ace editors
+  rv$displayed_script <- input$ace_editor_script
+  # A work around so that the script updates first, then saves and runs elisa change comment
+  rv$ace_latest_script <- rv$displayed_script
+})
 
-
-# to make sure the editor shows the script the first time one clicks on a tab
-#  one needs to chance the radio button to a different choice and then back again
-#  (definitely a bit of a hack but it seems to work fairly well)
-
-update_ace_editor_code <- function() {
-  if (rv$displayed_script == "") {
-    curr_radio_button_setting <- input$DC_script_mode
-    updateRadioButtons(session, "DC_script_mode", "File type for generated script",
-                       c("R", "R Markdown", "Matlab"), selected = curr_radio_button_setting)
+# Showing the script as a pdf
+output$DC_plot_pdf <- renderUI({
+  if (!is.null(rv$pdf_knitting_status)) {
+    tags$iframe(style="height:0px; width:0%; scrolling = yes",
+                src = rv$latest_pdf_file_name)
   }
-}
+})
+
 

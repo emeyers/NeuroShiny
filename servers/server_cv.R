@@ -27,7 +27,7 @@ output$CV_standard___p___parallel_outfile <- renderUI({
   # Allow for a written input for outfile if requirements met
   textInput("CV_standard___p___parallel_outfile",
             "File name of output from parallel cores",
-            value = NULL)
+            value = "")
 })
 
 

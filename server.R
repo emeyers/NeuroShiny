@@ -50,6 +50,7 @@ myServer <- function(input,output,session){
   rv$result_chosen <- NA
   rv$result_data <- NULL
   rv$prev_bins <- NULL
+  rv$script_error_message <- NULL
   rv$manifest_chosen <- NULL
   rv$manifest_data <- NULL
   rv$manifest_legend_names <- NULL

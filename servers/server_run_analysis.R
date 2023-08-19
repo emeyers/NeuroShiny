@@ -1,6 +1,6 @@
 
 ################################################################################
-############################ Update displayed script ###########################
+########################### Generate displayed script ##########################
 ################################################################################
 
 # Update only if those in list have been changed
@@ -114,14 +114,6 @@ observeEvent(list(input$decoding_tabs,
   # Add standard cv items
   rv$script <- c(rv$script, "CV_standard___p___run_TCD",
                  "CV_standard___p___num_resample_runs")
-  # Elisa - why all three?
-  # If there is 1 or more parallel cores, add corresponding variables
-  #if(!is.null(input$CV_standard___p___num_parallel_cores) &&
-  #   !is.na(input$CV_standard___p___num_parallel_cores) &&
-  #   input$CV_standard___p___num_parallel_cores >= 1) {
-  #  rv$script <- c(rv$script, "CV_standard___p___num_parallel_cores",
-  #                 "CV_standard___p___parallel_outfile")
-  #}
 
   if(!is.null(input$CV_standard___p___num_parallel_cores)){
     rv$script <- c(rv$script, "CV_standard___p___num_parallel_cores")
@@ -163,16 +155,53 @@ observeEvent(list(input$decoding_tabs,
 
 })
 
+
+################################################################################
+############################# Displaying the script ############################
+################################################################################
+
+# Showing the script in the UI
+output$DC_ace <- renderUI({
+  # Depending on the code format,
+  if (input$DC_script_mode == "Matlab") {
+    script_editor_mode <- "matlab"
+  } else {
+    script_editor_mode <- "r"
+  }
+
+  # Display the script
+  ace_editor <- shinyAce::aceEditor("ace_editor_script",
+                                    rv$displayed_script,
+                                    mode = script_editor_mode)
+  ace_editor
+})
+
+# Showing the script as a pdf
+output$DC_plot_pdf <- renderUI({
+  if (!is.null(rv$pdf_knitting_status)) {
+    tags$iframe(style="height:0px; width:0%; scrolling = yes",
+                src = rv$latest_pdf_file_name)
+  }
+})
+
+
 ################################################################################
 ############################# Run and saving script ############################
 ################################################################################
 
-# Save the script name
-observeEvent(rv$ace_latest_script, {
+
+# Updating script based on user input
+observeEvent(input$ace_editor_script, {
+  # Update script for any edits made in ace editors
+  rv$displayed_script <- input$ace_editor_script
+})
+
+# Save the script only
+observeEvent(input$DC_save_decoding, {
   req(rv$displayed_script)
   # Generate script name
   rv$save_script_name <- generate_script_name(input$DC_script_mode,
-                                           rv$result_base_dir, script_save_dir)
+                                              rv$result_base_dir, script_save_dir)
 
   # Write the code to a script and save
   fileConn <- file(rv$save_script_name)
@@ -183,6 +212,17 @@ observeEvent(rv$ace_latest_script, {
 # Run the script and generate the pdf
 observeEvent(input$DC_run_script,{
   req(rv$displayed_script)
+
+  # Generate script name
+  rv$save_script_name <- generate_script_name(input$DC_script_mode,
+                                              rv$result_base_dir, script_save_dir)
+
+  # Write the code to a script and save
+  fileConn <- file(rv$save_script_name)
+  writeLines(rv$displayed_script, fileConn)
+  close(fileConn)
+
+  # Start running the code
   rv$pdf_knitting_status <- "running"
 
   # Run the script depending on output selected
@@ -206,55 +246,24 @@ observeEvent(input$DC_run_script,{
   # And remove when complete
   on.exit(removeNotification(running_id), add = TRUE)
 
-  # Render the pdf document using given output directory
-  rmarkdown::render(rv$save_script_name, "pdf_document", output_dir = dirname(pdf_file_name))
+  tryCatch({
+    # Render the pdf document using given output directory
+    rmarkdown::render(rv$save_script_name, "pdf_document", output_dir = dirname(pdf_file_name))
 
+    # Update status of knitting and save to directory
+    rv$pdf_knitting_status <- "completed"
+    file.copy(pdf_file_name, file.path(app_base_dir, "www", basename(pdf_file_name)))
 
-  # Update status of knitting and save to directory
-  rv$pdf_knitting_status <- "completed"
-  file.copy(pdf_file_name, file.path(app_base_dir, "www", basename(pdf_file_name)))
+    # Don't give an error message if knitting was successful
+    output$DC_scriptize_error <- renderText(NULL)
+  }, error = function(e) {
+    # tryCatch error message
+    rv$pdf_knitting_status <- "error"
+    rv$script_error_message <- paste("<font color='red'>Error: <br>", e$message,
+                                     "</font>")
+    output$DC_scriptize_error <- renderText(rv$script_error_message)
+  })
 })
 
-# Error messages when encountering error in scriptizing
-output$DC_scriptize_error <- renderText({
-  # elisa To do, fix
-  #er_scriptize_action_error()
-})
-
-################################################################################
-############################# Displaying the script ############################
-################################################################################
-
-# Showing the script in the UI
-output$DC_ace <- renderUI({
-  # Depending on the code format,
-  if (input$DC_script_mode == "Matlab") {
-    script_editor_mode <- "matlab"
-  } else {
-    script_editor_mode <- "r"
-  }
-
-  # Display the script
-  ace_editor <- shinyAce::aceEditor("ace_editor_script",
-                                    rv$displayed_script,
-                                    mode = script_editor_mode)
-  ace_editor
-})
-
-# Updating script based on user input
-observeEvent(list(input$DC_run_script, input$DC_save_decoding), {
-  # Update script for any edits made in ace editors
-  rv$displayed_script <- input$ace_editor_script
-  # A work around so that the script updates first, then saves and runs elisa change comment
-  rv$ace_latest_script <- rv$displayed_script
-})
-
-# Showing the script as a pdf
-output$DC_plot_pdf <- renderUI({
-  if (!is.null(rv$pdf_knitting_status)) {
-    tags$iframe(style="height:0px; width:0%; scrolling = yes",
-                src = rv$latest_pdf_file_name)
-  }
-})
 
 

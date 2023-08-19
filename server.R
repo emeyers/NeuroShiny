@@ -30,7 +30,7 @@ myServer <- function(input,output,session){
 
   # Raster reactive values
   rv$raster_base_dir <- NULL
-  rv$raster_cur_dir_name <- NULL
+  rv$selected_rasters <- NULL
   rv$raster_bMat <-FALSE
   rv$raster_num_neuron <- NA
   rv$raster_bRda <- FALSE
@@ -39,7 +39,7 @@ myServer <- function(input,output,session){
 
   # Binned data reactive values
   rv$create_bin_function_run <- ""
-  rv$mRaster_cur_data <- NULL
+  rv$cur_raster_matrix <- NULL
   rv$binned_base_dir <- NULL
   rv$binned_file_name <- NA
   rv$binned_labels <- NULL

@@ -13,7 +13,7 @@ select_proj_tab <- tabPanel(
                                                 'Please select a folder'),
                                  helpText("Current Project: "),
                                  # Show directory
-                                 textOutput("show_chosen_project"))
+                                 htmlOutput("show_chosen_project"))
       )
     )
   )

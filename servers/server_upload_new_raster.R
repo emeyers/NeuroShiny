@@ -46,14 +46,14 @@ observeEvent(input$bin_save_raster_to_disk, {
 
 # Elsia idk what this is for too
 output$bin_offer_create_raster <- renderUI({
-  req(rv$raster_cur_dir_name)
+  req(rv$selected_rasters)
   if(rv$raster_bMat){
-    temp_matlab_raster_dir_name <- rv$raster_cur_dir_name
-    # If the directory name ends with _mat, remove _mat
-    temp_non_desired_pattern <- '.*_mat$'
-    if (grepl(temp_non_desired_pattern, temp_matlab_raster_dir_name) == TRUE){
-      temp_r_raster_dir_name <- substr(temp_matlab_raster_dir_name, 1,
-                                       nchar(temp_matlab_raster_dir_name) - 4)
+  temp_matlab_raster_dir_name <- rv$selected_rasters
+  # If the directory name ends with _mat, remove _mat
+  temp_non_desired_pattern <- '.*_mat$'
+  if (grepl(temp_non_desired_pattern, temp_matlab_raster_dir_name) == TRUE){
+    temp_r_raster_dir_name <- substr(temp_matlab_raster_dir_name, 1,
+                                     nchar(temp_matlab_raster_dir_name) - 4)
     }
     # Then append Rda to the file name
     temp_r_raster_dir_name <- paste0(temp_r_raster_dir_name, "_rda/")
@@ -77,7 +77,7 @@ output$bin_offer_create_raster <- renderUI({
 
 # Elisa - or what does this do?
 observeEvent(input$bin_create_raster, {
-  temp_call <- paste0("NeuroDecodeR:::create_raster_data_from_matlab_raster_data(rv$raster_cur_dir_name,",
+  temp_call <- paste0("NeuroDecodeR:::create_raster_data_from_matlab_raster_data(rv$selected_rasters,",
                      "input$bin_new_raster")
   if(!is.na(input$bin_start_ind)){
     temp_call <- paste0(temp_call, ",input$bin_raster_start_ind")

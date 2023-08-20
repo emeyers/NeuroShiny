@@ -8,9 +8,7 @@ plot_manifest <- tabPanel(
            width = NULL,
            status = "danger",
            solidHeader = TRUE,
-           shinyFiles::shinyFilesButton("manifest_data",
-                                        "Browse", "",
-                                        multiple = FALSE),
+           uiOutput("manifest_data"),
            helpText("Current File: "),
            textOutput("show_chosen_manifest")),
          fluidRow(

@@ -3,21 +3,36 @@
 ############################ Load and prep the data ############################
 ################################################################################
 
-# Select .Rda file from computed results file
-shinyFiles::shinyFileChoose(input, "plot_chosen_result",
-                            root = c(wd=file.path('.', 'results')),
-                            filetypes = "Rda")
+# Create list of valid Rdas from results
+observeEvent(rv$working_dir,{
+  prefix <- list("rm_main_results", "rm_confusion_matrix",
+                 "cross_validation_paramaters")
+  result_folder <- file.path(rv$working_dir, rv$result_base_dir,'decoding_results')
+  result_list <- list.files(result_folder)
+  rv$valid_result_list <- c()
+
+  # Append only files with values from the prefix list
+  for(result in result_list){
+    df <- get(load(file.path(result_folder, result)))
+    valid_result <- all(sapply(prefix, function(p) any(startsWith(names(df), p))))
+    if(valid_result){
+      rv$valid_result_list <- append(rv$valid_result_list, result)
+    }
+  }
+})
+
+# Select single result from available .Rda results
+output$plot_chosen_result <- renderUI({
+  selectInput("plot_chosen_result", "", rv$valid_result_list)
+})
 
 # If a file has been chosen
 # Then load the data and save the data paths and results
 observe({
   # Save file path as reactive variable
   req(input$plot_chosen_result)
-  temp_df_file <- shinyFiles::parseFilePaths(c(wd=rv$result_base_dir),
-                                             input$plot_chosen_result)
-  req(temp_df_file$datapath)
-  rv$result_chosen <- temp_df_file$datapath
-
+  rv$result_chosen <- file.path(rv$working_dir, rv$result_base_dir,
+                                'decoding_results', input$plot_chosen_result)
   # Load and save results as reactive variable
   load(rv$result_chosen)
   rv$result_data <- DECODING_RESULTS
@@ -28,7 +43,8 @@ output$plot_show_chosen_result <- renderText({
   if(is.na(rv$result_chosen)){
     "No file chosen yet"
   } else {
-    basename(rv$result_chosen)
+    file.path(basename(rv$working_dir), rv$result_base_dir,
+              'decoding_results', input$plot_chosen_result)
   }
 })
 

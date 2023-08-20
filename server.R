@@ -51,6 +51,8 @@ myServer <- function(input,output,session){
   rv$result_data <- NULL
   rv$prev_bins <- NULL
   rv$script_error_message <- NULL
+  rv$valid_result_list <- c()
+  rv$valid_manifest_list <- c()
   rv$manifest_chosen <- NULL
   rv$manifest_data <- NULL
   rv$manifest_legend_names <- NULL

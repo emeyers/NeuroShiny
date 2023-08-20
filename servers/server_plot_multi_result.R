@@ -11,25 +11,40 @@ rv$analysis_ID_legend_names <- NULL
 ############################## Load manifest data ##############################
 ################################################################################
 
+# Create list of valid manifests from results
+observeEvent(rv$working_dir,{
+  prefix <- list("analysis_ID", "result_name", "ds_", "cv_", "cl_", "fp_", "rm_")
+  result_folder <- file.path(rv$working_dir, rv$result_base_dir, 'decoding_results')
+  result_list <- list.files(result_folder)
+  rv$valid_manifest_list <- c()
+
+  # Append only files with values from the prefix list
+  for(result in result_list){
+    df <- get(load(file.path(result_folder, result)))
+    valid_result <- all(sapply(prefix, function(p) any(startsWith(names(df), p))))
+    if(valid_result){
+      rv$valid_manifest_list <- append(rv$valid_manifest_list, result)
+    }
+  }
+})
+
 # Select the manifest data
-shinyFiles::shinyFileChoose(input, "manifest_data",
-                            root = c(wd=file.path('results')),
-                            filetypes = "rda")
+output$manifest_data <- renderUI({
+  selectInput("manifest_data", "", rv$valid_manifest_list)
+})
 
 # Load the selected data and save variables
 observeEvent(input$manifest_data, {
   # Find and load the data of the manifest file
-  manifest_path <- shinyFiles::parseFilePaths(c(wd=rv$result_base_dir),
-                                              input$manifest_data)
-  req(manifest_path$datapath)
-  rv$manifest_chosen <- manifest_path$datapath
+  rv$manifest_chosen <- file.path(rv$working_dir, rv$result_base_dir,
+                                'decoding_results', input$manifest_data)
+  # Load and save results as reactive variable
   load(rv$manifest_chosen)
   rv$manifest_data <- manifest_df
 
   # Columns to disable other than result_name
-  # Hard coded only for result_name, not location of column
-  # Elisa should i fix that?
-  result_ind <- which(colnames(rv$manifest_data)== "result_name")
+  # Hard coded only for result_name
+  result_ind <- which(colnames(rv$manifest_data) == "result_name")
   all_cols <- 1:length(rv$manifest_data)
   rv$editable_cols <- all_cols[-c(result_ind)]
 
@@ -43,7 +58,8 @@ output$show_chosen_manifest <- renderText({
   if(is.integer(input$manifest_data)){
     "No manifest file chosen"
   } else {
-    basename(rv$manifest_chosen)
+    file.path(basename(rv$working_dir), rv$result_base_dir,
+              'decoding_results', input$manifest_data)
   }
 })
 

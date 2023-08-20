@@ -89,7 +89,7 @@ observeEvent(list(input$manifest_data, input$legend_label_selection),{
 
 # Fix the legend names if edited
 observeEvent(input$manifest_table_cell_edit,{
-  if(input$legend_label_selection == "Analysis ID"){
+  if(input$legend_label_selection == "Result Name"){
     temp_names <- rv$manifest_legend_names
     current_edits <- input$manifest_table_cell_edit
     for(i in 1:length(current_edits$row)){
@@ -118,6 +118,15 @@ output$type_dropdown <- renderUI({
   }
 })
 
+# If Result Name is selected, add the following text box
+output$suggest_result_name_edit <- renderText({
+  if(input$legend_label_selection == "Result Name"){
+    "<font color='blue'> Tip: try editing the result names in the table </font>"
+  } else {
+    NULL
+  }
+})
+
 # Rendering the manifest plot
 output$manifest_plot <- renderPlot({
   # Validate for both data and then for row selection
@@ -133,6 +142,20 @@ output$manifest_plot <- renderPlot({
 
   # Grabbing the updated names for selected columns
   name_list <- rv$manifest_legend_names[input$manifest_table_rows_selected]
+
+  # If two have the same name, then add the row index to the legend
+  # input$manifest_table_rows_selected lists ind in the order selected
+  unique_names <- unique(name_list)
+  name_counts <- table(name_list)
+
+  for(ind in seq_along(name_list)){
+    name <- name_list[ind]
+    # For more than 1 file with the same name, add the row number to the titles
+    if (name_counts[name] > 1){
+      new_name <- paste0(name, " (", input$manifest_table_rows_selected[ind], ")")
+      name_list[ind] <- new_name
+    }
+  }
 
   # Plot results
   plot_main_results(manifest_path,

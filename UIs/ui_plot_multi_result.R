@@ -20,7 +20,8 @@ plot_manifest <- tabPanel(
              uiOutput("type_dropdown"),
              selectInput("legend_label_selection",
                          "Legend titles to use",
-                         c("Analysis ID", "Result Name")),),
+                         c("Analysis ID", "Result Name")),
+             uiOutput("suggest_result_name_edit")),
            column(
              width = 8,
              withSpinner(plotOutput("manifest_plot"),

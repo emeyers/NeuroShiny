@@ -6,20 +6,17 @@
 # Selecting raster file to bin
 shinyFiles::shinyDirChoose(input, "bin_chosen_raster",
                            roots = c(wd=file.path('data', 'raster')),
-                           filetypes = c("mat", "Rda"))
+                           filetypes = c("mat", "Rda", "csv"))
 
 # Setting the file name and list of rasters
 observe({
   req(input$bin_chosen_raster)
   # Set current directory name to the base directory
   rv$selected_rasters <- shinyFiles::parseDirPath(c(wd=rv$raster_base_dir), input$bin_chosen_raster)
-  #rv$mat_raster_list <- list.files(rv$selected_rasters, pattern = "\\.mat$")
-  #rv$rda_raster_list <- list.files(rv$selected_rasters, pattern = "\\.[rR]da$")
   rv$raster_list <- list.files(rv$selected_rasters,
                                pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
-
-  rv$raster_num_neuron <- length(rv$raster_list) #- elisa
-  #rv$raster_num_neuron <- length(rv$rda_raster_list)
+  # Saving the number of files
+  rv$raster_num_neuron <- length(rv$raster_list)
 })
 
 

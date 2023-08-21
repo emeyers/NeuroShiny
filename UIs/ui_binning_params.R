@@ -9,7 +9,7 @@ binning_params <- tabPanel(
                  status = "danger",
                  solidHeader = TRUE,
                  title = "Choose a directory of raster data files",
-                 helpText("We only accept .mat and .Rda format"),
+                 helpText("We only accept .mat, .Rda, .csv formats"),
                  shinyFiles::shinyDirButton("bin_chosen_raster", "Browse", ""),
                  helpText("Loaded raster data: "),
                  textOutput("bin_show_chosen_raster")),

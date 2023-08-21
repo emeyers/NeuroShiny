@@ -13,9 +13,13 @@ observe({
   req(input$bin_chosen_raster)
   # Set current directory name to the base directory
   rv$selected_rasters <- shinyFiles::parseDirPath(c(wd=rv$raster_base_dir), input$bin_chosen_raster)
-  rv$mat_raster_list <- list.files(rv$selected_rasters, pattern = "\\.mat$")
-  rv$rda_raster_list <- list.files(rv$selected_rasters, pattern = "\\.[rR]da$")
-  rv$raster_num_neuron <- length(rv$rda_raster_list)
+  #rv$mat_raster_list <- list.files(rv$selected_rasters, pattern = "\\.mat$")
+  #rv$rda_raster_list <- list.files(rv$selected_rasters, pattern = "\\.[rR]da$")
+  rv$raster_list <- list.files(rv$selected_rasters,
+                               pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
+
+  rv$raster_num_neuron <- length(rv$raster_list) #- elisa
+  #rv$raster_num_neuron <- length(rv$rda_raster_list)
 })
 
 

@@ -25,17 +25,19 @@ observeEvent(list(rv$selected_rasters, rv$raster_cur_neuron),{
   req(rv$raster_num_neuron)
   if(rv$raster_num_neuron > 0){
     # Find the current file to view
-    rv$raster_cur_file_name <- rv$rda_raster_list[rv$raster_cur_neuron]
+    #rv$raster_cur_file_name <- rv$rda_raster_list[rv$raster_cur_neuron]
+    rv$raster_cur_file_name <- rv$raster_list[rv$raster_cur_neuron] #elisa
 
     # Load in the data and save time cols into matrix
-    #NeuroDecodeR::read_raster_data() - elisa
-    load(file.path(rv$selected_rasters, rv$raster_cur_file_name))
+    raster_data <- NeuroDecodeR::read_raster_data(file.path(rv$selected_rasters, rv$raster_cur_file_name))
+    #load(file.path(rv$selected_rasters, rv$raster_cur_file_name)) #elisa
     raster_df <- select(raster_data, starts_with("time."))
     raster_matrix <- as.matrix(raster_df)
 
     # Reformat matrix and save as random variable
     rownames(raster_matrix) <- 1:dim(raster_matrix)[1]
     colnames(raster_matrix) <- gsub("time.", "", colnames(raster_matrix))
+    colnames(raster_matrix) <- gsub("^(-?[0-9]+)_.*", "\\1", colnames(raster_matrix)) #Elisa
     rv$cur_raster_matrix <- raster_matrix
   }
 })
@@ -75,6 +77,11 @@ output$bin_PSTH <- renderPlot({
   req(rv$cur_raster_matrix)
   # Create column means and turn into a df to plot
   cur_raster_col_means <- colMeans(rv$cur_raster_matrix, na.rm = FALSE)
+
+  # Removing the ranges
+
+  #raster_means_df <- data.frame(time = time,
+  #                              spike_mean_over_trials = cur_raster_col_means)
   raster_means_df <- data.frame(time = as.numeric(names(cur_raster_col_means)),
                                    spike_mean_over_trials = cur_raster_col_means)
 

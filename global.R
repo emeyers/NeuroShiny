@@ -12,6 +12,7 @@ library('plotly')
 library('shinycssloaders')
 library('shinyFiles')
 library('DT')
+library('tools')
 rm(list=ls())
 
 ################################################################################

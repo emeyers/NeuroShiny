@@ -44,6 +44,7 @@ myServer <- function(input,output,session){
   rv$binned_file_name <- NA
   rv$binned_labels <- NULL
   rv$displayed_script <- ""
+  rv$bin_full_raster_path <- NULL
 
   # Decoding results reactive values
   rv$result_base_dir <- NULL

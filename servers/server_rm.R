@@ -37,7 +37,7 @@ output$RM_mr___p___include_norm_rank_results <- renderUI({
 # Header text to denote the additional checkbox(es)
 output$RM_cm___np___text <- renderText({
   if("rm_confusion_matrix" %in% input$RM_type){
-    "<br><strong>Parameters for rm_confusion_matrix</strong>"
+    "<br><strong> Parameters for rm_confusion_matrix </strong>"
   }
 })
 

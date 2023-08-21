@@ -35,7 +35,6 @@ data_source_tab <-
   #DS Generalization options
   conditionalPanel(condition = "input.DS_type == 'ds_generalization'",
                    uiOutput("DS_gen___np___list_of_labels"),
-                   #uiOutput("DS_gen___np___select_num_of_groups"), elisa
                    numericInput("DS_gen___np___class_number",
                                 "How many classes?", 2, min = 2),
                    uiOutput("DS_gen___p___label_levels"),

@@ -34,7 +34,7 @@ plot_decoding <- tabPanel(
                 tabPanel("PDF of script and result",
                          actionButton("plot_create_pdf", "Create"),
                          helpText(""),
-                         uiOutput("plot_pdf")) #Elisa - this doesn't work
+                         uiOutput("plot_pdf"))
          )
   )
 )

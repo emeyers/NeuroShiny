@@ -7,7 +7,7 @@
 observeEvent(rv$working_dir,{
   prefix <- list("rm_main_results", "rm_confusion_matrix",
                  "cross_validation_paramaters")
-  result_folder <- file.path(rv$working_dir, rv$result_base_dir,'decoding_results')
+  result_folder <- file.path(rv$working_dir, rv$result_base_dir, 'decoding_results')
   result_list <- list.files(result_folder)
   rv$valid_result_list <- c()
 
@@ -83,7 +83,6 @@ observeEvent(input$plot_create_pdf, {
   req(rv$result_chosen, input$plot_timeseries_result_type)
   # This function doesn't exist
   append_result_to_pdf_and_knit(rv$result_chosen, input$plot_timeseries_result_type)
-  print("done")
   output$plot_pdf <- renderUI({
     req(rv$result_chosen)
     pdf_name <- gsub("Rmd", "pdf", rv$save_script_name)

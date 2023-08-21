@@ -2,8 +2,9 @@
 ################################################################################
 ################################## Render PDF ##################################
 ################################################################################
+
 output$DC_plot_pdf <- renderUI({
-  # Elisa, missing the two rvs
+  # Render the pdf depending on knitting status
   if (is.null(rv$pdf_knitting_status)) {
     return("No R results have been knit yet")
   } else if (rv$pdf_knitting_status == "running") {

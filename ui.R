@@ -33,8 +33,8 @@ sidebar <- dashboardSidebar(
               menuItem("Select Your Project",
                        icon = icon("folder-open"),
                        tabName = "project"),
-              menuItemOutput("menuBin"),
-              menuItemOutput("menuDecode")
+              menuItemOutput("menu_bin"),
+              menuItemOutput("menu_decode")
   )
 )
 

@@ -11,12 +11,13 @@ shinyFiles::shinyFileChoose(input, "DS___p___binned_data",
 # If button has been clicked:
 # Then load in data to find variable labels
 observe({
-  req(input$DS___p___binned_data)
+  req(input$DS___p___binned_data, rv$binned_base_dir)
 
   # Create file path and set the reactive variable
   binned_file_path <- shinyFiles::parseFilePaths(c(wd = rv$binned_base_dir),
                                              input$DS___p___binned_data)
-  req(binned_file_path$datapath) # Do not remove - Elisa
+
+  req(binned_file_path$datapath) # Do not remove
   rv$binned_file_name <- binned_file_path$datapath
 
   # Load binned_data and set its reactive variable
@@ -57,7 +58,6 @@ reactive_all_basic_levels_to_use  <- reactive({
   levels(factor(binned_data[[paste0("labels.", input$DS_basic___p___labels)]]))
 })
 
-# Elisa this doesnt work
 # Input drop down using reactive_all_basic_levels_to_use as options
 output$DS_basic___np___list_of_levels_to_use <- renderUI({
   selectInput("DS_basic___p___label_levels",
@@ -147,7 +147,7 @@ observeEvent(input$DS_gen___np___class_number, {
   rv$prev_bins <- c(tail(rv$prev_bins, 1), input$DS_gen___np___class_number)
 })
 
-# Reactive function to find the levels - Elisa maybe you only need the one function
+# Reactive function to find the levels
 reactive_all_levels_of_gen_var_to_use <- reactive({
   req(rv$binned_file_name)
   binned_data <- rv$binned_data
@@ -160,12 +160,12 @@ output$DS_gen___p___label_levels <- renderUI({
   req(input$DS_gen___np___class_number)
 
   # Create empty list to append the rows
-  allRows <- list()
+  all_rows <- list()
 
   # For the number of classes in each train and test,
   # Add selected levels using reactive_all_levels_of_gen_var_to_use() options
   for (i in 1:input$DS_gen___np___class_number){
-    currentRow <- fluidRow(
+    current_row <- fluidRow(
       # Train input
       column(width = 5,
              selectInput(paste0("DS_gen___p___train_label_levels_class_", i),
@@ -182,10 +182,10 @@ output$DS_gen___p___label_levels <- renderUI({
       )
     )
     # Add current class row to list
-    allRows[[i]] <- currentRow
+    all_rows[[i]] <- current_row
   }
   # Output all the rows for each class
-  allRows
+  all_rows
 
 })
 
@@ -200,7 +200,7 @@ output$DS_gen___p___use_count_data <- renderUI({
               c(FALSE, TRUE))
 })
 
-# Find the available site ids to select - elisa not sure you need this too
+# Find the available site ids to select
 reactive_all_gen_site_IDs_to_use <- reactive({
   req(rv$binned_file_name)
   binned_data <- rv$binned_data
@@ -219,13 +219,13 @@ output$DS_gen___p___site_IDs_to_use <- renderUI({
 reactive_all_gen_site_IDs_to_exclude <- reactive({
   req(rv$binned_file_name)
   binned_data <- rv$binned_data
-  tempLevels <- levels(unique(factor(binned_data$siteID)))
+  selected_levels <- levels(unique(factor(binned_data$siteID)))
   # If no site ids were selected, then offer all
   if (is.null(input$DS_gen___p___site_IDs_to_use)){
-    tempLevels
+    selected_levels
   # If some were selected, remove them from the options
   } else {
-    tempLevels[-(which(tempLevels %in% input$DS_gen___p___site_IDs_to_use))]
+    selected_levels[-(which(selected_levels %in% input$DS_gen___p___site_IDs_to_use))]
   }
 })
 

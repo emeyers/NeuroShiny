@@ -373,9 +373,9 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
   # Add markdown header
   my_text <- paste0(my_text, "---\ntitle: 'Decoding Analysis'\noutput: pdf_document\n---\n\n\n",
-                   "```{r setup, include=FALSE}\n\n\n",
-                   "knitr::opts_chunk$set(echo = TRUE)\n\n\n",
-                   "```\n\n\n")
+                    "```{r setup, include=FALSE}\n\n\n",
+                    "knitr::opts_chunk$set(echo = TRUE)\n\n\n",
+                    "```\n\n\n")
 
   # Start chunk
   my_text <- paste0(my_text, "\n\n\n# Run the decoding analysis \n\n\n```{r}\n\n")
@@ -386,43 +386,36 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
 
 
+  # Start chunk
+  my_text <- paste0(my_text, "\n\n\n# Plot some results \n\n\n```{r}\n")
 
-  # can add some plots of results to the R Markdown file
-
-  # This should be added to the UI - elisa where would you want this to be in the ui yes do that
-  add_plots_of_results <- TRUE
-
-  if (add_plots_of_results) {
-    # Start chunk
-    my_text <- paste0(my_text, "\n\n\n# Plot some results \n\n\n```{r}\n")
-
-    if ("rm_main_results" %in% decoding_params$RM_type) {
-      if (include_comments) {
-        my_text <- paste0(my_text, "\n# plot main results")
-      }
-
-      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results, type = 'line') \n")
-
-      if (include_comments) {
-        my_text <- paste0(my_text, "\n# plot temporal-cross-decoding results")
-      }
-
-      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results) \n")
-
+  if ("rm_main_results" %in% decoding_params$RM_type) {
+    if (include_comments) {
+      my_text <- paste0(my_text, "\n# plot main results")
     }
 
-    if ("rm_confusion_matrix" %in% decoding_params$RM_type) {
-      if (include_comments) {
-        my_text <- paste0(my_text, "\n# plot confusion matrices")
-      }
+    my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results, type = 'line') \n")
 
-      my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_confusion_matrix) \n")
+    if (include_comments) {
+      my_text <- paste0(my_text, "\n# plot temporal-cross-decoding results")
     }
 
-    # Close chunk
-    my_text <- paste0(my_text, "\n```\n\n\n")
+    my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_main_results) \n")
 
   }
+
+  if ("rm_confusion_matrix" %in% decoding_params$RM_type) {
+    if (include_comments) {
+      my_text <- paste0(my_text, "\n# plot confusion matrices")
+    }
+
+    my_text <- paste0(my_text, "\nplot(DECODING_RESULTS$rm_confusion_matrix) \n")
+  }
+
+  # Close chunk
+  my_text <- paste0(my_text, "\n```\n\n\n")
+
+
 
   my_text
 
@@ -440,9 +433,8 @@ generate_script_name <- function(script_mode, result_base_dir, script_save_dir) 
   }
 
   # generate analysis script name
-  # should perhaps do this when the script is generated and then can add the script name as meta
+  # TODO should perhaps do this when the script is generated and then can add the script name as meta
   # data to be saved with the decoding results, but ok for now...
-  # ELISA
   script_file_name <- paste0(trimws(file.path(result_base_dir, script_save_dir, " ")),
                              "NeuroShiny_Script_ID_",
                              NeuroDecodeR:::generate_analysis_ID(),

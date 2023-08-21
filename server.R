@@ -6,7 +6,7 @@ myServer <- function(input,output,session){
 ################################################################################
 
   # Side menu for binning data
-  output$menuBin <- renderMenu({
+  output$menu_bin <- renderMenu({
     # Open when project is selected
     if (is.list(input$project_folder)){
       menuItem("Binning the raster data", tabName = "bin")
@@ -14,7 +14,7 @@ myServer <- function(input,output,session){
   })
 
   # Side menu for decoding
-  output$menuDecode <- renderMenu({
+  output$menu_decode <- renderMenu({
     if (is.list(input$project_folder)){
       menuItem("Population decoding", tabName = "decode")
     }
@@ -31,9 +31,7 @@ myServer <- function(input,output,session){
   # Raster reactive values
   rv$raster_base_dir <- NULL
   rv$selected_rasters <- NULL
-  rv$raster_bMat <-FALSE
   rv$raster_num_neuron <- NA
-  rv$raster_bRda <- FALSE
   rv$raster_cur_neuron <- 1
   rv$raster_cur_file_name <- NULL
 

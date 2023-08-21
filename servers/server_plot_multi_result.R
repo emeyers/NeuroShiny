@@ -90,14 +90,14 @@ observeEvent(list(input$manifest_data, input$legend_label_selection),{
 # Fix the legend names if edited
 observeEvent(input$manifest_table_cell_edit,{
   if(input$legend_label_selection == "Result Name"){
-    temp_names <- rv$manifest_legend_names
+    legend_names <- rv$manifest_legend_names
     current_edits <- input$manifest_table_cell_edit
     for(i in 1:length(current_edits$row)){
-      temp_names[current_edits$row[i]] <- current_edits$value[i]
+      legend_names[current_edits$row[i]] <- current_edits$value[i]
     }
     # Update the reactive variables
-    rv$manifest_legend_names <- temp_names
-    rv$result_names_legend_names <- temp_names
+    rv$manifest_legend_names <- legend_names
+    rv$result_names_legend_names <- legend_names
   }
 })
 
@@ -121,7 +121,7 @@ output$type_dropdown <- renderUI({
 # If Result Name is selected, add the following text box
 output$suggest_result_name_edit <- renderText({
   if(input$legend_label_selection == "Result Name"){
-    "<font color='blue'> Tip: try editing the result names in the table </font>"
+    "<font color='blue'> Tip: Try editing the result names in the table </font>"
   } else {
     NULL
   }

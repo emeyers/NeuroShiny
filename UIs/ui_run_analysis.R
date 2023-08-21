@@ -25,8 +25,7 @@ run_analysis_tab <-
             uiOutput("DC_scriptize_error"),
             helpText(""),
             actionButton("DC_save_decoding", "Save the script only"),
-            uiOutput("DC_save_decoding_error")
-            )), # Elisa Get strange errors if I try to add more UI elements :(
+            uiOutput("DC_save_decoding_error"))),
       column(width = 8,
              box(width = NULL,
                  uiOutput("DC_ace")))

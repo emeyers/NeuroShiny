@@ -79,9 +79,6 @@ output$bin_PSTH <- renderPlot({
   cur_raster_col_means <- colMeans(rv$cur_raster_matrix, na.rm = FALSE)
 
   # Removing the ranges
-
-  #raster_means_df <- data.frame(time = time,
-  #                              spike_mean_over_trials = cur_raster_col_means)
   raster_means_df <- data.frame(time = as.numeric(names(cur_raster_col_means)),
                                    spike_mean_over_trials = cur_raster_col_means)
 

@@ -10,7 +10,7 @@ data_source_tab <-
       title = "Choose a binned data file",
       status = "danger",
       solidHeader = TRUE,
-      shinyFiles::shinyFilesButton("DS___p___binned_data", "Browse", "", multiple = FALSE),
+      uiOutput("DS___p___binned_data"),
       helpText("Loaded binned data: "),
       textOutput("DS_show_chosen_bin")),
   # Select DS

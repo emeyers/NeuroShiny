@@ -4,15 +4,21 @@
 ################################################################################
 
 # Selecting raster file to bin
-shinyFiles::shinyDirChoose(input, "bin_chosen_raster",
-                           roots = c(wd=file.path('data', 'raster')),
-                           filetypes = c("mat", "Rda", "csv"))
+observeEvent(rv$working_dir,{
+  rv$folders_to_bin <- list.dirs(rv$raster_base_dir, full.names = FALSE,
+                                  recursive = FALSE)
+})
+
+output$bin_chosen_raster <- renderUI({
+  selectInput("bin_chosen_raster", "", rv$folders_to_bin)
+})
 
 # Setting the file name and list of rasters
 observe({
   req(input$bin_chosen_raster)
   # Set current directory name to the base directory
-  rv$selected_rasters <- shinyFiles::parseDirPath(c(wd=rv$raster_base_dir), input$bin_chosen_raster)
+  rv$selected_rasters <- file.path(rv$working_dir, rv$raster_base_dir,
+                                   input$bin_chosen_raster)
   rv$raster_list <- list.files(rv$selected_rasters,
                                pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
   # Saving the number of files
@@ -26,7 +32,8 @@ output$bin_show_chosen_raster <- renderText({
   if(is.na(rv$selected_rasters)){
     "No file chosen yet"
   } else{
-    rv$selected_rasters
+    file.path(basename(rv$working_dir), rv$result_base_dir,
+              input$bin_chosen_raster)
   }
 })
 

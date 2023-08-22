@@ -3,10 +3,15 @@
 ######################### Select and load binned data ##########################
 ################################################################################
 
-# Button to load binned data
-shinyFiles::shinyFileChoose(input, "DS___p___binned_data",
-                            roots = c(wd = file.path('.', 'data', 'binned')),
-                            filetypes = "Rda")
+# Drop down to load binned data
+observeEvent(rv$working_dir,{
+  rv$binned_data_to_decode <- list.files(rv$binned_base_dir, full.names = FALSE,
+                                         pattern = "\\.Rda$")
+})
+output$DS___p___binned_data <- renderUI({
+  selectInput("DS___p___binned_data", "", rv$binned_data_to_decode)
+})
+
 
 # If button has been clicked:
 # Then load in data to find variable labels
@@ -14,11 +19,7 @@ observe({
   req(input$DS___p___binned_data, rv$binned_base_dir)
 
   # Create file path and set the reactive variable
-  binned_file_path <- shinyFiles::parseFilePaths(c(wd = rv$binned_base_dir),
-                                             input$DS___p___binned_data)
-
-  req(binned_file_path$datapath) # Do not remove
-  rv$binned_file_name <- binned_file_path$datapath
+  rv$binned_file_name <- file.path(rv$binned_base_dir, input$DS___p___binned_data)
 
   # Load binned_data and set its reactive variable
   load(rv$binned_file_name)
@@ -35,7 +36,7 @@ output$DS_show_chosen_bin <- renderText({
   if(is.na(rv$binned_file_name)){
     "No file chosen yet"
   } else {
-    basename(rv$binned_file_name)
+    file.path(basename(rv$working_dir), rv$binned_base_dir, rv$binned_file_name)
   }
 })
 

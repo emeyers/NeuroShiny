@@ -47,11 +47,13 @@ output$show_chosen_project <- renderText({
 
 # Set the current wd to the selected project directory
 # Add filters on additional browse buttons for reactive variables
-observe({
+observeEvent(rv$working_dir,{
   if (is.list(input$project_folder)){
     # Set additional directories
     rv$raster_base_dir <- file.path('data', 'raster')
     rv$binned_base_dir <- file.path('data', 'binned')
     rv$result_base_dir <- file.path('results')
+    rv$decoding_results_base_dir <- file.path('results', 'decoding_results')
   }
+
 })

@@ -36,6 +36,7 @@ myServer <- function(input,output,session){
   rv$raster_cur_file_name <- NULL
 
   # Binned data reactive values
+  rv$folders_to_bin <- NULL
   rv$create_bin_function_run <- ""
   rv$cur_raster_matrix <- NULL
   rv$binned_base_dir <- NULL
@@ -46,6 +47,8 @@ myServer <- function(input,output,session){
 
   # Decoding results reactive values
   rv$result_base_dir <- NULL
+  rv$decoding_results_base_dir <- NULL
+  rv$binned_data_to_decode <- NULL
   rv$result_chosen <- NA
   rv$result_data <- NULL
   rv$prev_bins <- NULL

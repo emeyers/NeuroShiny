@@ -9,11 +9,9 @@ select_proj_tab <- tabPanel(
                                  status = "danger",
                                  solidHeader = TRUE,
                                  title = "Choose your project directory to get started",
-                                 shinyDirButton('project_folder', 'Browse',
-                                                'Please select a folder'),
-                                 helpText("Current Project: "),
-                                 # Show directory
-                                 htmlOutput("show_chosen_project"))
+                                 uiOutput('project_option'),
+                                 uiOutput('select_project_folder'),
+                                 uiOutput('create_project_folder'))
       )
     )
   )

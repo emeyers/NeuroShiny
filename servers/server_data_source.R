@@ -4,7 +4,7 @@
 ################################################################################
 
 # Drop down to load binned data
-observeEvent(rv$working_dir,{
+observeEvent(rv$binned_base_dir,{
   rv$binned_data_to_decode <- list.files(rv$binned_base_dir, full.names = FALSE,
                                          pattern = "\\.Rda$")
 })
@@ -36,7 +36,8 @@ output$DS_show_chosen_bin <- renderText({
   if(is.na(rv$binned_file_name)){
     "No file chosen yet"
   } else {
-    file.path(basename(rv$working_dir), rv$binned_base_dir, rv$binned_file_name)
+    base_char <- gsub(app_base_dir, "", rv$binned_base_dir)
+    file.path(base_char, basename(rv$binned_file_name))
   }
 })
 
@@ -55,8 +56,7 @@ output$DS_basic___p___list_of_labels <- renderUI({
 # Find all levels to use in the data
 reactive_all_basic_levels_to_use  <- reactive({
   req(rv$binned_file_name)
-  binned_data <- rv$binned_data
-  levels(factor(binned_data[[paste0("labels.", input$DS_basic___p___labels)]]))
+  levels(factor(rv$binned_data[[paste0("labels.", input$DS_basic___p___labels)]]))
 })
 
 # Input drop down using reactive_all_basic_levels_to_use as options

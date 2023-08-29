@@ -61,7 +61,7 @@ html2Text <- function(string) {
 }
 
 source("generate_scripts_from_shiny_params.R")
-
+source("create_analysis_project.R")
 
 
 ################################################################################

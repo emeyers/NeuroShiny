@@ -4,10 +4,10 @@
 ################################################################################
 
 # Create list of valid Rdas from results
-observeEvent(rv$working_dir,{
+observeEvent(rv$binned_base_dir,{
   prefix <- list("rm_main_results", "rm_confusion_matrix",
                  "cross_validation_paramaters")
-  result_folder <- file.path(rv$working_dir, rv$decoding_results_base_dir)
+  result_folder <- file.path(rv$decoding_results_base_dir)
   result_list <- list.files(result_folder)
   rv$valid_result_list <- c()
 
@@ -31,8 +31,7 @@ output$plot_chosen_result <- renderUI({
 observe({
   # Save file path as reactive variable
   req(input$plot_chosen_result)
-  rv$result_chosen <- file.path(rv$working_dir, rv$decoding_results_base_dir,
-                                input$plot_chosen_result)
+  rv$result_chosen <- file.path(rv$decoding_results_base_dir, input$plot_chosen_result)
   # Load and save results as reactive variable
   load(rv$result_chosen)
   rv$result_data <- DECODING_RESULTS
@@ -43,8 +42,8 @@ output$plot_show_chosen_result <- renderText({
   if(is.na(rv$result_chosen)){
     "No file chosen yet"
   } else {
-    file.path(basename(rv$working_dir), rv$decoding_results_base_dir,
-              input$plot_chosen_result)
+    base_char <- gsub(app_base_dir, "", rv$decoding_results_base_dir)
+    file.path(base_char, input$plot_chosen_result)
   }
 })
 

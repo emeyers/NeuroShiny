@@ -20,13 +20,11 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
   # Using the base directory, parse the file path and file name for
   # the binned data
-  bin_data <- shinyFiles::parseFilePaths(c(wd=decoding_params$binned_dir_name),
-                                         decoding_params$DS___p___binned_data)
+  bin_data <- file.path(decoding_params$binned_dir_name,
+                        decoding_params$DS___p___binned_data)
 
   my_text <- paste0(my_text, "binned_data <- file.path('",
-                    bin_data$datapath, "') \n\n")
-
-
+                    bin_data, "') \n\n")
 
 
   # Data source

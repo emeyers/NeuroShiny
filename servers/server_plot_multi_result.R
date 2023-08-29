@@ -12,9 +12,9 @@ rv$analysis_ID_legend_names <- NULL
 ################################################################################
 
 # Create list of valid manifests from results
-observeEvent(rv$working_dir,{
+observeEvent(rv$binned_base_dir,{
   prefix <- list("analysis_ID", "result_name", "ds_", "cv_", "cl_", "fp_", "rm_")
-  result_folder <- file.path(rv$working_dir, rv$decoding_results_base_dir)
+  result_folder <- rv$decoding_results_base_dir
   result_list <- list.files(result_folder)
   rv$valid_manifest_list <- c()
 
@@ -35,9 +35,9 @@ output$manifest_data <- renderUI({
 
 # Load the selected data and save variables
 observeEvent(input$manifest_data, {
+  req(input$manifest_data)
   # Find and load the data of the manifest file
-  rv$manifest_chosen <- file.path(rv$working_dir, rv$decoding_results_base_dir,
-                                  input$manifest_data)
+  rv$manifest_chosen <- file.path(rv$decoding_results_base_dir, input$manifest_data)
   # Load and save results as reactive variable
   load(rv$manifest_chosen)
   rv$manifest_data <- manifest_df
@@ -55,11 +55,16 @@ observeEvent(input$manifest_data, {
 
 # Show the manifest data file path
 output$show_chosen_manifest <- renderText({
-  if(is.integer(input$manifest_data)){
+  if(is.null(input$manifest_data)){
     "No manifest file chosen"
   } else {
-    file.path(basename(rv$working_dir), rv$decoding_results_base_dir,
-              input$manifest_data)
+    if (input$manifest_data < 1){
+      "No manifest file available"
+    } else {
+      base_char <- gsub(app_base_dir, "", rv$decoding_results_base_dir)
+      file.path(base_char, input$manifest_data)
+    }
+
   }
 })
 

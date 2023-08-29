@@ -8,14 +8,14 @@ myServer <- function(input,output,session){
   # Side menu for binning data
   output$menu_bin <- renderMenu({
     # Open when project is selected
-    if (is.list(input$project_folder)){
+    if (!is.null(rv$working_dir)){
       menuItem("Binning the raster data", tabName = "bin")
     }
   })
 
   # Side menu for decoding
   output$menu_decode <- renderMenu({
-    if (is.list(input$project_folder)){
+    if (!is.null(rv$working_dir)){
       menuItem("Population decoding", tabName = "decode")
     }
   })

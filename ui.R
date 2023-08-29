@@ -70,7 +70,9 @@ decoding_analysis <- tabPanel(
 body <- dashboardBody(
   tabItems(
     # Tab to open project folder
-    tabItem(tabName = "project", select_proj_tab),
+    tabItem(tabName = "project",
+            navbarPage(title = "",
+                       select_proj_tab)),
     # Tab for binning the data
     tabItem(tabName = "bin",
             navbarPage(title = "",

@@ -19,8 +19,7 @@ output$bin_chosen_raster <- renderUI({
 observe({
   req(input$bin_chosen_raster)
   # Set current directory name to the base directory
-  rv$selected_rasters <- file.path(rv$working_dir, rv$raster_base_dir,
-                                   input$bin_chosen_raster)
+  rv$selected_rasters <- file.path(rv$raster_base_dir, input$bin_chosen_raster)
   rv$raster_list <- list.files(rv$selected_rasters,
                                pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
   # Saving the number of files
@@ -34,8 +33,8 @@ output$bin_show_chosen_raster <- renderText({
   if(is.na(rv$selected_rasters)){
     "No file chosen yet"
   } else{
-    file.path(basename(rv$working_dir), rv$result_base_dir,
-              input$bin_chosen_raster)
+    base_char <- gsub(app_base_dir, "", rv$result_base_dir)
+    file.path(base_char, input$bin_chosen_raster)
   }
 })
 

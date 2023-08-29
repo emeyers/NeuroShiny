@@ -4,7 +4,9 @@
 ################################################################################
 
 # Selecting raster file to bin
-observeEvent(rv$working_dir,{
+# Also updates if new rasters are added
+observeEvent(list(rv$binned_base_dir, input$bin_save_raster_to_disk),{
+  req(rv$binned_base_dir)
   rv$folders_to_bin <- list.dirs(rv$raster_base_dir, full.names = FALSE,
                                   recursive = FALSE)
 })

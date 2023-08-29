@@ -3,12 +3,15 @@
 ############################### Raster file prep ###############################
 ################################################################################
 
-# Update current neuron when clicking previous
-observeEvent(list(input$bin_pre_neuron, input$bin_next_neuron),{
-  req(rv$raster_cur_neuron, rv$raster_num_neuron)
+# Update current neuron when clicking toggle buttons
+observeEvent(input$bin_pre_neuron,{
   if(rv$raster_cur_neuron > 1){
     rv$raster_cur_neuron <- rv$raster_cur_neuron - 1
-  } else if(rv$raster_cur_neuron < rv$raster_num_neuron){
+  }
+})
+
+observeEvent(input$bin_next_neuron,{
+  if(rv$raster_cur_neuron < rv$raster_num_neuron){
     rv$raster_cur_neuron <- rv$raster_cur_neuron + 1
   }
 })

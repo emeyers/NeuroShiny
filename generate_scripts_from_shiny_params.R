@@ -338,8 +338,7 @@ generate_r_script_from_shiny_decoding_params <- function(decoding_params) {
 
 
   my_text <- paste0(my_text, "log_save_results(DECODING_RESULTS, \n\t",
-                    "file.path('", decoding_params$results_dir_name,
-                    "', 'decoding_results', 'decoding_result_files', '')")
+                    "'", decoding_params$results_dir_name,"'")
 
   if(decoding_params$result_name != ""){
     my_text <- paste0(my_text, ",\n result_name = '",
@@ -421,12 +420,12 @@ generate_r_markdown_from_shiny_decoding_params <- function(decoding_params) {
 
 
 # To create script name in the run script/save and run script server action
-generate_script_name <- function(script_mode, result_base_dir, script_save_dir) {
+generate_script_name <- function(script_mode, result_base_dir) {
   if (script_mode == "R") {
-    script_save_dir <- file.path("", "r_scripts", "")
+    script_save_dir <- "r_scripts"
     file_extension <- ".R"
   } else if (script_mode == "R Markdown") {
-    script_save_dir <- file.path("", "r_markdown", "")
+    script_save_dir <- "r_markdown"
     file_extension <- ".Rmd"
   }
 

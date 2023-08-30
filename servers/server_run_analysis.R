@@ -204,7 +204,7 @@ observeEvent(input$DC_save_decoding, {
   req(rv$displayed_script)
   # Generate script name
   rv$save_script_name <- generate_script_name(input$DC_script_mode,
-                                              rv$result_base_dir, script_save_dir)
+                                              rv$decoding_results_base_dir)
 
   # Write the code to a script and save
   file_conn <- file(rv$save_script_name)
@@ -218,7 +218,7 @@ observeEvent(input$DC_run_script,{
 
   # Generate script name
   rv$save_script_name <- generate_script_name(input$DC_script_mode,
-                                              rv$result_base_dir, script_save_dir)
+                                              rv$decoding_results_base_dir)
 
   # Write the code to a script and save
   file_conn <- file(rv$save_script_name)

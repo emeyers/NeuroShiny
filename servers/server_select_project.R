@@ -100,6 +100,8 @@ observeEvent(rv$working_dir,{
     rv$binned_base_dir <- file.path(rv$working_dir, 'data', 'binned_data')
     rv$result_base_dir <- file.path(rv$working_dir, 'results')
     rv$decoding_results_base_dir <- file.path(rv$working_dir, 'results',
+                                    'decoding_results')
+    rv$decoding_result_files_base_dir <- file.path(rv$working_dir, 'results',
                                               'decoding_results',
                                               'decoding_result_files')
   }

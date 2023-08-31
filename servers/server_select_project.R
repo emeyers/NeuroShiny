@@ -79,7 +79,7 @@ observeEvent(input$create_project,{
     output$show_created_project <- renderText("<font color='red'> This project already
                                       exists, please select another name </font>")
   } else {
-    create_analysis_project(input$new_project_name)
+    create_analysis_project(input$new_project_name, file.path(app_base_dir, "projects"))
     setwd(rv$working_dir)
     output$show_created_project <- renderText(file.path("projects",
                                                         input$new_project_name))

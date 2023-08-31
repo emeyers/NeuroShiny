@@ -1,4 +1,15 @@
 
+
+################################################################################
+######################### Reset value for project change #######################
+################################################################################
+
+observeEvent(rv$binned_base_dir,{
+  # Reset the dropdown values to NULL when project is updated
+  updateSelectInput(session, "DS___p___binned_data", choices = NULL)
+})
+
+
 ################################################################################
 ######################### Select and load binned data ##########################
 ################################################################################
@@ -15,7 +26,7 @@ output$DS___p___binned_data <- renderUI({
 
 # If button has been clicked:
 # Then load in data to find variable labels
-observe({
+observeEvent(input$DS___p___binned_data,{
   req(input$DS___p___binned_data, rv$binned_base_dir)
 
   # Create file path and set the reactive variable

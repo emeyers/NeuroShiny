@@ -31,7 +31,7 @@ myServer <- function(input,output,session){
   # Raster reactive values
   rv$raster_base_dir <- NULL
   rv$selected_rasters <- NULL
-  rv$raster_num_neuron <- NA
+  rv$raster_num_neuron <- 0
   rv$raster_cur_neuron <- 1
   rv$raster_cur_file_name <- NULL
 
@@ -40,16 +40,18 @@ myServer <- function(input,output,session){
   rv$create_bin_function_run <- ""
   rv$cur_raster_matrix <- NULL
   rv$binned_base_dir <- NULL
-  rv$binned_file_name <- NA
+  rv$binned_file_name <- NULL
   rv$binned_labels <- NULL
   rv$displayed_script <- ""
   rv$bin_full_raster_path <- NULL
+  rv$raster_list <- NULL
+  rv$selected_rasters <- NULL
 
   # Decoding results reactive values
   rv$result_base_dir <- NULL
   rv$decoding_results_base_dir <- NULL
   rv$binned_data_to_decode <- NULL
-  rv$result_chosen <- NA
+  rv$result_chosen <- NULL
   rv$result_data <- NULL
   rv$prev_bins <- NULL
   rv$script_error_message <- NULL

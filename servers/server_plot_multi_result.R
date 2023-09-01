@@ -34,23 +34,33 @@ output$manifest_data <- renderUI({
 })
 
 # Load the selected data and save variables
-observeEvent(input$manifest_data, {
+observeEvent(list(input$manifest_data, rv$decoding_result_files_base_dir), {
   req(input$manifest_data)
-  # Find and load the data of the manifest file
-  rv$manifest_chosen <- file.path(rv$decoding_result_files_base_dir, input$manifest_data)
-  # Load and save results as reactive variable
-  load(rv$manifest_chosen)
-  rv$manifest_data <- manifest_df
+  # If statement to reset plot when there is a new directory
+  if(input$manifest_data %in% list.files(rv$decoding_result_files_base_dir)){
+    # Find and load the data of the manifest file
+    rv$manifest_chosen <- file.path(rv$decoding_result_files_base_dir, input$manifest_data)
+    # Load and save results as reactive variable
+    load(rv$manifest_chosen)
+    rv$manifest_data <- manifest_df
 
-  # Columns to disable other than result_name
-  # Hard coded only for result_name
-  result_ind <- which(colnames(rv$manifest_data) == "result_name")
-  all_cols <- 1:length(rv$manifest_data)
-  rv$editable_cols <- all_cols[-c(result_ind)]
+    # Columns to disable other than result_name
+    # Hard coded only for result_name
+    result_ind <- which(colnames(rv$manifest_data) == "result_name")
+    all_cols <- 1:length(rv$manifest_data)
+    rv$editable_cols <- all_cols[-c(result_ind)]
 
-  # Saving the values of columns
-  rv$result_names_legend_names <- rv$manifest_data$result_name
-  rv$analysis_ID_legend_names <- rv$manifest_data$analysis_ID
+    # Saving the values of columns
+    rv$result_names_legend_names <- rv$manifest_data$result_name
+    rv$analysis_ID_legend_names <- rv$manifest_data$analysis_ID
+  } else {
+    rv$manifest_chosen <- NULL
+    rv$manifest_data <- NULL
+    rv$editable_cols <- NULL
+    rv$result_names_legend_names <- NULL
+    rv$analysis_ID_legend_names <- NULL
+
+  }
 })
 
 # Show the manifest data file path
@@ -85,6 +95,7 @@ output$manifest_table <- renderDT({
 # When the data changes, or the legend label selection changes:
 # Assign the current editable column and legend names accordingly
 observeEvent(list(input$manifest_data, input$legend_label_selection),{
+  req(input$manifest_data)
   if(input$legend_label_selection == "Analysis ID"){
     rv$manifest_legend_names <- rv$analysis_ID_legend_names
   } else {
@@ -94,6 +105,7 @@ observeEvent(list(input$manifest_data, input$legend_label_selection),{
 
 # Fix the legend names if edited
 observeEvent(input$manifest_table_cell_edit,{
+  req(input$manifest_data)
   if(input$legend_label_selection == "Result Name"){
     legend_names <- rv$manifest_legend_names
     current_edits <- input$manifest_table_cell_edit

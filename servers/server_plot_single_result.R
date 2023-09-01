@@ -4,7 +4,7 @@
 ################################################################################
 
 # Create list of valid Rdas from results
-observeEvent(rv$binned_base_dir,{
+observeEvent(rv$working_dir,{
   prefix <- list("rm_main_results", "rm_confusion_matrix",
                  "cross_validation_paramaters")
   result_folder <- file.path(rv$decoding_result_files_base_dir)
@@ -28,18 +28,25 @@ output$plot_chosen_result <- renderUI({
 
 # If a file has been chosen
 # Then load the data and save the data paths and results
-observe({
-  # Save file path as reactive variable
+observeEvent(list(rv$decoding_result_files_base_dir, input$plot_chosen_result),{
   req(input$plot_chosen_result)
-  rv$result_chosen <- file.path(rv$decoding_result_files_base_dir, input$plot_chosen_result)
-  # Load and save results as reactive variable
-  load(rv$result_chosen)
-  rv$result_data <- DECODING_RESULTS
+  # If statement to reset plots when there is a new directory
+  if (input$plot_chosen_result %in% list.files(rv$decoding_result_files_base_dir)){
+    # Save file path as reactive variable
+    rv$result_chosen <- file.path(rv$decoding_result_files_base_dir, input$plot_chosen_result)
+    # Load and save results as reactive variable
+    load(rv$result_chosen)
+    rv$result_data <- DECODING_RESULTS
+
+  } else {
+    rv$result_data <- NULL
+  }
+
 })
 
 # Show the current file that has been chose to plot
 output$plot_show_chosen_result <- renderText({
-  if(is.na(rv$result_chosen)){
+  if(is.null(rv$result_chosen)){
     "No file chosen yet"
   } else {
     base_char <- gsub(app_base_dir, "", rv$decoding_result_files_base_dir)

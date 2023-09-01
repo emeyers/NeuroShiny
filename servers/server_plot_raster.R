@@ -25,7 +25,6 @@ output$bin_show_raster_cur_file_name <- renderText({
 
 # Setting up the current data to be viewed
 observeEvent(list(rv$selected_rasters, rv$raster_cur_neuron),{
-  req(rv$raster_num_neuron)
   if(rv$raster_num_neuron > 0){
     # Find the current file to view
     rv$raster_cur_file_name <- rv$raster_list[rv$raster_cur_neuron]
@@ -42,6 +41,9 @@ observeEvent(list(rv$selected_rasters, rv$raster_cur_neuron),{
     colnames(raster_matrix) <- gsub("time.", "", colnames(raster_matrix))
     colnames(raster_matrix) <- gsub("^(-?[0-9]+)_.*", "\\1", colnames(raster_matrix))
     rv$cur_raster_matrix <- raster_matrix
+  } else if (rv$raster_num_neuron == 0){
+    rv$raster_cur_file_name <- NULL
+    rv$cur_raster_matrix <- NULL
   }
 })
 

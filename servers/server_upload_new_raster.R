@@ -5,10 +5,11 @@
 
 # A text box with the unzipped folder's new location
 output$bin_uploaded_raster_location <- renderUI({
+  base_char <- gsub(app_base_dir, "", rv$raster_base_dir)
   # Input browser for new raster file
   textInput("bin_uploaded_raster_location",
             "Where do you want the file to be unzipped in your current project",
-            rv$raster_base_dir)
+            base_char)
 })
 
 # Find the name of the current data and save the name of the full path

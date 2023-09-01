@@ -16,14 +16,22 @@ output$bin_chosen_raster <- renderUI({
 })
 
 # Setting the file name and list of rasters
-observe({
+observeEvent(list(input$bin_chosen_raster, rv$raster_base_dir), {
   req(input$bin_chosen_raster)
-  # Set current directory name to the base directory
-  rv$selected_rasters <- file.path(rv$raster_base_dir, input$bin_chosen_raster)
-  rv$raster_list <- list.files(rv$selected_rasters,
-                               pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
-  # Saving the number of files
-  rv$raster_num_neuron <- length(rv$raster_list)
+  if(input$bin_chosen_raster %in% list.files(rv$raster_base_dir)){
+    # Set current directory name to the base directory
+    rv$selected_rasters <- file.path(rv$raster_base_dir, input$bin_chosen_raster)
+    rv$raster_list <- list.files(rv$selected_rasters,
+                                 pattern = "\\.[rR]da$|\\.csv$|\\.mat$")
+    # Saving the number of files
+    rv$raster_num_neuron <- length(rv$raster_list)
+  } else {
+    rv$selected_rasters <- NULL
+    rv$raster_list <- NULL
+    rv$raster_num_neuron <- 0
+  }
+
+
 })
 
 

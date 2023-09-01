@@ -1,11 +1,10 @@
 
-
 ################################################################################
 ######################### Reset value for project change #######################
 ################################################################################
 
 observeEvent(rv$binned_base_dir,{
-  # Reset the dropdown values to NULL when project is updated
+  # Reset the drop down values to NULL when project is updated
   updateSelectInput(session, "DS___p___binned_data", choices = NULL)
 })
 
@@ -26,25 +25,33 @@ output$DS___p___binned_data <- renderUI({
 
 # If button has been clicked:
 # Then load in data to find variable labels
-observeEvent(input$DS___p___binned_data,{
-  req(input$DS___p___binned_data, rv$binned_base_dir)
+observeEvent(list(input$DS___p___binned_data, rv$binned_base_dir),{
+  req(input$DS___p___binned_data)
 
-  # Create file path and set the reactive variable
-  rv$binned_file_name <- file.path(rv$binned_base_dir, input$DS___p___binned_data)
+  # If statement to reset plot when there is a new directory
+  if(input$DS___p___binned_data %in% list.files(rv$binned_base_dir)){
 
-  # Load binned_data and set its reactive variable
-  load(rv$binned_file_name)
-  rv$binned_data <- binned_data
+    # Create file path and set the reactive variable
+    rv$binned_file_name <- file.path(rv$binned_base_dir, input$DS___p___binned_data)
 
-  # Create list of variables from binned_data labels and set reactive variables
-  rv$binned_labels <- sub("labels.", "",
-                           names(select(binned_data, starts_with("labels"))))
+    # Load binned_data and set its reactive variable
+    load(rv$binned_file_name)
+    rv$binned_data <- binned_data
+
+    # Create list of variables from binned_data labels and set reactive variables
+    rv$binned_labels <- sub("labels.", "",
+                            names(select(binned_data, starts_with("labels"))))
+  } else {
+    rv$binned_file_name <- NULL
+    rv$binned_data <- NULL
+    rv$binned_labels <- NULL
+  }
 })
 
 # If bin selected
 # Then how binned data path in ui
 output$DS_show_chosen_bin <- renderText({
-  if(is.na(rv$binned_file_name)){
+  if(is.null(rv$binned_file_name)){
     "No file chosen yet"
   } else {
     base_char <- gsub(app_base_dir, "", rv$binned_base_dir)
@@ -112,7 +119,7 @@ reactive_all_basic_site_IDs_to_exclude <- reactive({
   # If no site ids were selected, then offer all
   if (is.null(input$DS_basic___p___site_IDs_to_use)){
     site_IDs
-  # If some were selected, remove them from the options
+    # If some were selected, remove them from the options
   } else {
     site_IDs[-(which(site_IDs %in% input$DS_basic___p___site_IDs_to_use))]
   }
@@ -235,7 +242,7 @@ reactive_all_gen_site_IDs_to_exclude <- reactive({
   # If no site ids were selected, then offer all
   if (is.null(input$DS_gen___p___site_IDs_to_use)){
     selected_levels
-  # If some were selected, remove them from the options
+    # If some were selected, remove them from the options
   } else {
     selected_levels[-(which(selected_levels %in% input$DS_gen___p___site_IDs_to_use))]
   }

@@ -1,7 +1,7 @@
 
 # Select a project or create a new project
 output$project_option <- renderUI({
-  selectInput("project_option", '', c("", "Select a Project", "Create a Project"))
+  selectInput("project_option", '', c("Select a Project", "Create a Project"))
 })
 
 ################################################################################

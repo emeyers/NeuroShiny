@@ -3,11 +3,6 @@
 ################################## Render PDF ##################################
 ################################################################################
 
-# When the directory is changed, remove  the old pdfs
-observeEvent(rv$working_dir,{
-  output$DC_plot_pdf  <- renderUI(NULL)
-})
-
 output$DC_plot_pdf <- renderUI({
   # Render the pdf depending on knitting status
   if (is.null(rv$pdf_knitting_status)) {

@@ -13,7 +13,6 @@ rv$analysis_ID_legend_names <- NULL
 
 # Create list of valid manifests from results
 observeEvent(rv$binned_base_dir,{
-  prefix <- list("analysis_ID", "result_name", "ds_", "cv_", "cl_", "fp_", "rm_")
   result_folder <- rv$decoding_result_files_base_dir
   result_list <- list.files(result_folder)
   rv$valid_manifest_list <- c()
@@ -21,7 +20,7 @@ observeEvent(rv$binned_base_dir,{
   # Append only files with values from the prefix list
   for(result in result_list){
     df <- get(load(file.path(result_folder, result)))
-    valid_result <- all(sapply(prefix, function(p) any(startsWith(names(df), p))))
+    valid_result <- all(sapply(multi_result_prefix, function(p) any(startsWith(names(df), p))))
     if(valid_result){
       rv$valid_manifest_list <- append(rv$valid_manifest_list, result)
     }

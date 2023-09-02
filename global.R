@@ -27,6 +27,10 @@ options(shiny.maxRequestSize=1000*1024^2)
 ############################### Hard-coded lists ###############################
 ################################################################################
 
+# Prefixes of data to check valid types
+multi_result_prefix <- list("analysis_ID", "result_name", "ds_", "cv_", "cl_", "fp_", "rm_")
+single_result_prefix <- list("rm_confusion_matrix")
+
 # List of inputs for decoding results
 all_result_type <- c("zero_one_loss", "normalized_rank", "decision_vals", "all")
 cm_result_type <- c("zero_one_loss", "mutual_information", "decision_vals")

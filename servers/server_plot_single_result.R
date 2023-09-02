@@ -5,8 +5,6 @@
 
 # Create list of valid Rdas from results
 observeEvent(rv$working_dir,{
-  prefix <- list("rm_main_results", "rm_confusion_matrix",
-                 "cross_validation_paramaters")
   result_folder <- file.path(rv$decoding_result_files_base_dir)
   result_list <- list.files(result_folder)
   rv$valid_result_list <- c()
@@ -14,7 +12,7 @@ observeEvent(rv$working_dir,{
   # Append only files with values from the prefix list
   for(result in result_list){
     df <- get(load(file.path(result_folder, result)))
-    valid_result <- all(sapply(prefix, function(p) any(startsWith(names(df), p))))
+    valid_result <- all(sapply(single_result_prefix, function(p) any(startsWith(names(df), p))))
     if(valid_result){
       rv$valid_result_list <- append(rv$valid_result_list, result)
     }

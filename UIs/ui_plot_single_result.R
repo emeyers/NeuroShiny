@@ -31,10 +31,10 @@ plot_decoding <- tabPanel(
                                      cm_result_type),
                          withSpinner(plotOutput("plot_cm"),
                                      color = "#79c9da")),
-                tabPanel("PDF of script and result",
-                         actionButton("plot_create_pdf", "Create"),
-                         helpText(""),
-                         uiOutput("plot_pdf"))
+                tabPanel("PDF of scripts and results",
+                         uiOutput("single_results_pdf_chosen"),
+                         uiOutput("show_single_result_pdf_path"),
+                         uiOutput("show_single_result_pdf"))
          )
   )
 )

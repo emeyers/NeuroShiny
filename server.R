@@ -27,6 +27,8 @@ myServer <- function(input,output,session){
   rv <- reactiveValues()
 
   rv$base_dir <- NULL
+  rv$projects_available <- list.dirs(file.path(app_base_dir, "projects"),
+                                     full.names = FALSE, recursive = FALSE)
 
   # Raster reactive values
   rv$raster_base_dir <- NULL
@@ -68,8 +70,11 @@ myServer <- function(input,output,session){
 ############################ Server source files ###############################
 ################################################################################
 
-  # Server files for "Binning the Raster Data" tab
+  # Server files for project changes
   source("servers/server_select_project.R", local = TRUE)
+  source("servers/server_github.R", local = TRUE)
+
+  # Server files for "Binning the Raster Data" tab
   source("servers/server_binning_params.R", local = TRUE)
   source("servers/server_plot_raster.R", local = TRUE)
   source("servers/server_upload_new_raster.R", local = TRUE)

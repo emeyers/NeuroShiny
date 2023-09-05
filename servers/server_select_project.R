@@ -12,10 +12,7 @@ output$project_option <- renderUI({
 output$select_project_folder <- renderUI({
   req(input$project_option)
   if(input$project_option == "Select a Project"){
-    projects_available <- list.dirs(file.path(app_base_dir, "projects"),
-                                    full.names = FALSE, recursive = FALSE)
-
-    list(selectInput("select_project_folder", 'Please select a folder', projects_available),
+    list(selectInput("select_project_folder", 'Please select a folder', rv$projects_available),
          helpText("Current Project: "),
          htmlOutput("show_chosen_project"))
   }
@@ -86,6 +83,11 @@ observeEvent(input$create_project,{
   }
 })
 
+# Update options if there is a new project
+observeEvent(input$create_project, {
+  rv$projects_available <- list.dirs(file.path(app_base_dir, "projects"),
+                                     full.names = FALSE, recursive = FALSE)
+})
 
 ################################################################################
 ############################### Set directories ################################

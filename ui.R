@@ -5,6 +5,7 @@
 
 # UI files for project selection sidebar
 source("UIs/ui_select_project.R")
+source("UIs/ui_github.R")
 
 # UI files for binning tabs
 source("UIs/ui_binning_params.R")
@@ -72,7 +73,8 @@ body <- dashboardBody(
     # Tab to open project folder
     tabItem(tabName = "project",
             navbarPage(title = "",
-                       select_proj_tab)),
+                       select_proj_tab,
+                       github_tab)),
     # Tab for binning the data
     tabItem(tabName = "bin",
             navbarPage(title = "",

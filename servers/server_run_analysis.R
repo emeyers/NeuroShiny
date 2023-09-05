@@ -143,7 +143,7 @@ observeEvent(list(input$decoding_tabs,
   decoding_params <- setNames(decoding_params, rv$script)
   # Add directory names to the decoding params
   decoding_params$binned_dir_name <- file.path(rv$binned_base_dir)
-  decoding_params$results_dir_name <- file.path(rv$result_base_dir)
+  decoding_params$results_dir_name <- file.path(rv$decoding_result_files_base_dir)
 
 
   # GENERATE SCRIPT

@@ -4,7 +4,7 @@
 ################################################################################
 
 # Create list of valid Rdas from results
-observeEvent(rv$working_dir,{
+observeEvent(list(rv$working_dir, input$DC_run_script),{
   result_folder <- file.path(rv$decoding_result_files_base_dir)
   result_list <- list.files(result_folder)
   rv$valid_result_list <- c()
@@ -58,13 +58,24 @@ output$plot_show_chosen_result <- renderText({
 
 # Plot time series using NeuroDecodeR function
 output$plot_timeseries <- renderPlot({
-  req(rv$result_data)
+  validate(
+    need(rv$result_data, "No data uploaded")
+  )
+  validate(
+    need(rv$result_data$rm_main_results, "This data does not have main results")
+  )
   plot(rv$result_data$rm_main_results, type = "line",
        results_to_show = input$plot_timeseries_result_type)
 })
 
 # Plot TCD using NeuroDecodeR function
 output$plot_tcd <- renderPlot({
+  validate(
+    need(rv$result_data, "No data uploaded")
+  )
+  validate(
+    need(rv$result_data$rm_main_results, "This data does not have main results")
+  )
   req(rv$result_data)
   plot(rv$result_data$rm_main_results,
        results_to_show = input$plot_tcd_result_type)
@@ -72,37 +83,12 @@ output$plot_tcd <- renderPlot({
 
 # Plot CM using NeuroDecodeR function
 output$plot_cm <- renderPlot({
-  req(rv$result_data)
+  validate(
+    need(rv$result_data, "No data uploaded")
+  )
+  validate(
+    need(rv$result_data$rm_main_results, "This data does not have a confusion matrix")
+  )
   plot(rv$result_data$rm_confusion_matrix,
        results_to_show = input$plot_cm_result_type)
 })
-
-################################################################################
-################################## PDF Output ##################################
-################################################################################
-
-# If the create button has been pressed, then render the pdf
-# elisa idk if this is how you wanna do this
-observeEvent(input$plot_create_pdf, {
-  req(rv$result_chosen, input$plot_timeseries_result_type)
-  # This function doesn't exist
-  append_result_to_pdf_and_knit(rv$result_chosen, input$plot_timeseries_result_type)
-  output$plot_pdf <- renderUI({
-    req(rv$result_chosen)
-    pdf_name <- gsub("Rmd", "pdf", rv$save_script_name)
-    tags$iframe(style = "height:600px; width:100%", src = pdf_name)
-  })
-})
-
-# This exists above so i removed it but it still doesn't work
-# Elisa Not sure if this is right, used to be DC_pdf also it doesn't work
-#output$plot_pdf <- renderUI({
-#  if (is.null(rv$save_script_name)){
-#    "The results will appear as a pdf below once the code is done running."
-#  } else {
-#    pdf_name <- gsub("Rmd", "pdf", basename(rv$save_script_name))
-#    tags$iframe(style="height:600px; width:100%", src = pdf_name)
-#  }
-#})
-
-

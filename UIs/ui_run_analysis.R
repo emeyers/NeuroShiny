@@ -12,6 +12,8 @@ run_analysis_tab <-
             status = "danger",
             solidHeader = TRUE,
             # Select script type
+            actionButton("restore_last_script", "Restore previous script?"),
+            helpText(" "),
             radioButtons("DC_script_mode",
                          "File type for generated script",
                          c("R", "R Markdown", "Matlab"),
@@ -23,7 +25,7 @@ run_analysis_tab <-
             #Running
             actionButton("DC_run_script", "Run and save the script"),
             uiOutput("DC_scriptize_error"),
-            helpText(""),
+            helpText(" "),
             actionButton("DC_save_decoding", "Save the script only"),
             uiOutput("DC_save_decoding_error"))),
       column(width = 8,

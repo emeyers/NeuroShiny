@@ -270,3 +270,48 @@ observeEvent(input$DC_run_script,{
 
 
 
+
+#### TEST
+# Saving the previous state only when entering run analysis tab,
+# changing the mode or comments, or manual edits are made
+observeEvent(input$ace_editor_script, {
+  # This if statement is crucial or it will override the prev each
+  # time you change tabs
+  if(input$decoding_tabs == "Run Analysis"){
+    # Save the script mode
+    rv$prev_script_mode <- rv$curr_script_mode
+    rv$curr_script_mode <- input$DC_script_mode
+
+    # Save the comment selection
+    rv$prev_include_comments <- rv$curr_include_comments
+    rv$curr_include_comments <- input$include_comments
+
+    # Save the last script on editor
+    rv$prev_ace_editor_script <- rv$curr_ace_editor_script
+    rv$curr_ace_editor_script <- input$ace_editor_script
+  }
+})
+
+# Restoring the previous script
+observeEvent(input$restore_last_script, {
+  # Changing the tab options to match the last output
+  # First two need to be wrapped in if statements otherwise the default of shiny
+  # will be to pick anything but the correct value, maybe they will change that
+  if(rv$prev_script_mode != input$DC_script_mode){
+    updateRadioButtons(session, "DC_script_mode", selected = rv$prev_script_mode)
+  }
+
+  if(rv$prev_include_comments != input$include_comments){
+    updateCheckboxInput(session, "include_comments", value = rv$prev_include_comments)
+  }
+
+  # Updating the ace scrip
+  if (rv$prev_script_mode == "Matlab") {
+    script_editor_mode <- "matlab"
+  } else {
+    script_editor_mode <- "r"
+  }
+  updateAceEditor(session, "ace_editor_script", rv$prev_ace_editor_script,
+                  mode = script_editor_mode)
+})
+

@@ -66,6 +66,15 @@ myServer <- function(input,output,session){
   # Find which ids to signal eventReactive to check if they are in position
   rv$decoding_para_id_computed <- 1
 
+  # Restoring last script
+  rv$curr_ace_editor_script <- " "
+  rv$curr_include_comments <- FALSE
+  rv$curr_script_mode <- "R"
+  rv$prev_ace_editor_script <- " "
+  rv$prev_include_comments <- FALSE
+  rv$prev_script_mode <- "R"
+
+
 ################################################################################
 ############################ Server source files ###############################
 ################################################################################

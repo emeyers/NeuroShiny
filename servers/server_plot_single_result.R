@@ -92,3 +92,55 @@ output$plot_cm <- renderPlot({
   plot(rv$result_data$rm_confusion_matrix,
        results_to_show = input$plot_cm_result_type)
 })
+
+
+################################################################################
+################################## PDF Output ##################################
+################################################################################
+
+# Create list of valid PDFs from the results
+observeEvent(list(rv$working_dir, input$plot_chosen_result, input$DC_run_script), {
+  req(rv$working_dir, input$plot_chosen_result)
+
+  # Resetting this value, only changed if a pdf is found later
+  rv$found_single_result_pdf <- FALSE
+
+  # Getting the analysis ID
+  analysis_id <- sub("\\.[Rr]da$", "", input$plot_chosen_result)
+
+  # Find the directories that end in PDF
+  result_dir <- list.dirs(rv$decoding_results_base_dir,
+                          full.names = FALSE, recursive = FALSE)
+  pdf_dirs <- result_dir[grep("_pdf$", result_dir)]
+  pdf_list <- c()
+
+  # Find all the pdfs in pdf directories
+  for(directory in pdf_dirs) {
+    pdfs <- list.files(file.path(rv$decoding_results_base_dir, directory),
+                       pattern = ".pdf$")
+    for (p in pdfs){
+      curr_pdf <- file.path(rv$decoding_results_base_dir, directory, p)
+      text <- pdf_text(curr_pdf)
+
+      if(any(grepl(paste("The analysis ID is:", analysis_id), text))){
+        dest_pdf <- file.path(app_base_dir, "www", "single_result_to_show.pdf")
+        file.copy(curr_pdf, dest_pdf)
+        rv$found_single_result_pdf <- TRUE
+      }
+    }
+  }
+})
+
+
+
+# Show the pdf
+output$show_single_result_pdf <- renderUI({
+  validate(
+    need(input$plot_chosen_result, "No pdfs available")
+  )
+  validate(
+    need(rv$found_single_result_pdf, "No available pdf for this analysis id")
+  )
+  tags$iframe(style="height:600px; width:100%",
+              src = "single_result_to_show.pdf")
+})

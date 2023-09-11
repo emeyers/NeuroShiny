@@ -30,7 +30,10 @@ plot_decoding <- tabPanel(
                                      "Type of results to plot",
                                      cm_result_type),
                          withSpinner(plotOutput("plot_cm"),
-                                     color = "#79c9da"))
+                                     color = "#79c9da")),
+                tabPanel("Show PDF",
+                         uiOutput("show_single_result_pdf"))
+
          )
   )
 )

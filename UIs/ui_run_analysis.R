@@ -26,8 +26,7 @@ run_analysis_tab <-
             actionButton("DC_run_script", "Run and save the script"),
             uiOutput("DC_scriptize_error"),
             helpText(" "),
-            actionButton("DC_save_decoding", "Save the script only"),
-            uiOutput("DC_save_decoding_error"))),
+            actionButton("DC_save_decoding", "Save the script only"))),
       column(width = 8,
              box(width = NULL,
                  uiOutput("DC_ace")))

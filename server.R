@@ -27,6 +27,7 @@ myServer <- function(input,output,session){
   rv <- reactiveValues()
 
   rv$base_dir <- NULL
+  rv$repo_list <- NULL
   rv$projects_available <- list.dirs(file.path(app_base_dir, "projects"),
                                      full.names = FALSE, recursive = FALSE)
 

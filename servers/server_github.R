@@ -12,29 +12,34 @@ output$git_project_name <- renderUI({
               selected = basename(rv$working_dir))
 })
 
+output$github_options <- renderUI({
+  req(rv$repo_list, input$git_project_name)
+  if(input$git_project_name %in% rv$repo_list){
+    list(
+      helpText("A repo already exists for this project, you can:"),
+      actionButton("push", "Push"),
+      actionButton("pull", "Pull"))
+  } else {
+    list(
+      helpText("No repo found, please create one first:"),
+      actionButton("create_github", "Create GitHub repo"),
+      uiOutput("git_text"))
+  }
+})
+
+# Update repo options
+observeEvent(list(input$git_project_name, input$create_github), {
+  git_list <- system2("gh", "repo list", stdout = TRUE, stderr = TRUE)
+  rv$repo_list <- sapply(strsplit(git_list, "[/\t]"), function(x) x[2])
+})
 
 
 # Create a new repo if one does not exist with the current project name
 observeEvent(input$create_github, {
-  # Check all the info is in there
-  if (input$username == "") {
-    output$git_text <- renderText("<br><font color='red'>Please enter a username</font>")
-  } else if (input$password == "") {
-    output$git_text <- renderText("<br><font color='red'>Please enter a password</font>")
-  } else if (input$repo_URL == "") {
-    output$git_text <- renderText("<br><font color='red'>Please enter a repo URL first</font>")
-
-  # If a project already exists, throw an error
-  } else if (file.exists(file.path("projects", input$git_project_name))) {
-    output$git_text <- renderText("<br>A project with this project name already exists")
-
-  # When everything is correct
-  } else {
-    # Create new project the new project directory
-    create_github_repo(input$git_project_name)
-    output$git_text <- renderText(paste0("Created new repo called: ",
-                                         input$git_project_name))
-  }
+  # Create new project the new project directory
+  create_github_repo(input$git_project_name, rv$working_dir)
+  output$git_text <- renderText(paste0("Created new repo called: ",
+                                       input$git_project_name))
 })
 
 ################################################################################
@@ -44,13 +49,15 @@ observeEvent(input$create_github, {
 # Run push button
 observeEvent(input$push, {
   req(input$git_project_name)
-  gert::git_push(repo = file.path("projects", input$git_project_name))
+  gert::git_add()
+  gert::git_commit("commit message")
+  gert::git_push()
 })
 
 # Run pull button
 observeEvent(input$pull, {
   req(input$git_project_name)
-  gert::git_pull(repo = file.path("projects", input$git_project_name))
+  gert::git_pull()
 })
 
 

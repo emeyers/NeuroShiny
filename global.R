@@ -66,6 +66,8 @@ html2Text <- function(string) {
   return(helpText(HTML(formatStr)))
 }
 
+`%!in%` = Negate(`%in%`)
+
 source("generate_scripts_from_shiny_params.R")
 source("create_analysis_project.R")
 

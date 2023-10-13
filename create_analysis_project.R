@@ -85,7 +85,7 @@ create_github_repo <- function(project_name,
   # needs the GitHub CLI installed to run this (https://cli.github.com/)
   # would be good if I could create a repo without needed the GitHub CLI
   # need to set up command line login which requires use of command line so this is not good :(
-  system2("gh", paste0("repo create --source ", full_project_path ,
+  system2("gh", paste0("repo create --source ", '"', full_project_path, '"',
                        " --", visibility), stdout = TRUE, stderr = TRUE)
 
 

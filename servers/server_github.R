@@ -3,20 +3,27 @@
 ################################# Create Repo ##################################
 ################################################################################
 
-# Select project
-output$git_project_name <- renderUI({
-  req(rv$working_dir, rv$projects_available)
-  selectInput("git_project_name",
-              'Select the project you want to create a new repo for',
-              rv$projects_available,
-              selected = basename(rv$working_dir))
+# Display raster name
+output$git_project_name <- renderText({
+  req(rv$working_dir)
+  if(is.na(rv$working_dir)){
+    "No projects available <br>"
+  } else{
+    paste0("<br><font size='+1' color='black'><strong> Current Project: ",
+           "</strong></font><font size='+1'>", basename(rv$working_dir), "</font><br>")
+
+  }
 })
 
+
 output$github_options <- renderUI({
-  req(rv$repo_list, input$git_project_name)
-  if(input$git_project_name %in% rv$repo_list){
+  req(rv$repo_list, rv$working_dir)
+  if(basename(rv$working_dir) %in% rv$repo_list){
     list(
-      helpText("A repo already exists for this project, you can:"),
+      helpText("A repo already exists for this project"),
+      textInput("commit_message",
+                "To push, add a commit message (required)",
+                "New Commit"),
       actionButton("push", "Push"),
       actionButton("pull", "Pull"))
   } else {
@@ -28,7 +35,7 @@ output$github_options <- renderUI({
 })
 
 # Update repo options
-observeEvent(list(input$git_project_name, input$create_github), {
+observeEvent(list(rv$working_dir, input$create_github), {
   git_list <- system2("gh", "repo list", stdout = TRUE, stderr = TRUE)
   rv$repo_list <- sapply(strsplit(git_list, "[/\t]"), function(x) x[2])
 })
@@ -37,9 +44,9 @@ observeEvent(list(input$git_project_name, input$create_github), {
 # Create a new repo if one does not exist with the current project name
 observeEvent(input$create_github, {
   # Create new project the new project directory
-  create_github_repo(input$git_project_name, rv$working_dir)
+  create_github_repo(basename(rv$working_dir), rv$working_dir)
   output$git_text <- renderText(paste0("Created new repo called: ",
-                                       input$git_project_name))
+                                       basename(rv$working_dir)))
 })
 
 ################################################################################
@@ -48,15 +55,20 @@ observeEvent(input$create_github, {
 
 # Run push button
 observeEvent(input$push, {
-  req(input$git_project_name)
-  gert::git_add()
-  gert::git_commit("commit message")
-  gert::git_push()
+  req(rv$working_dir, input$commit_message)
+  status_output <- system2("git", "status", stdout = TRUE)
+
+  # Check if there are changes to commit
+  if ("nothing to commit, working tree clean" %!in% status_output) {
+    system2("git", "add .", stdout = TRUE)
+    gert::git_commit(as.character(input$commit_message))
+    gert::git_push()
+  }
 })
 
 # Run pull button
 observeEvent(input$pull, {
-  req(input$git_project_name)
+  req(rv$working_dir)
   gert::git_pull()
 })
 

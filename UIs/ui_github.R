@@ -8,7 +8,7 @@ github_tab <- tabPanel(
              shinydashboard::box(width = NULL,
                                  status = "danger",
                                  solidHeader = TRUE,
-                                 title = "Create a new repo",
+                                 title = "Select or create a new repo",
                                  uiOutput("git_project_name"),
                                  uiOutput("github_options"))
       )

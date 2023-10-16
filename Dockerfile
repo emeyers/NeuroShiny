@@ -1,6 +1,18 @@
 # Base image https://hub.docker.com/u/rocker/
 FROM rocker/shiny:latest
 
+# set up github command line utility (gh cli)
+ENV GITHUB_CLI_VERSION=2.36.0
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    git
+
+RUN curl -sSL https://github.com/cli/cli/releases/download/v${GITHUB_CLI_VERSION}/gh_${GITHUB_CLI_VERSION}_linux_amd64.tar.gz | tar xz -C /tmp && \
+    mv /tmp/gh_${GITHUB_CLI_VERSION}_linux_amd64/bin/gh /usr/local/bin/gh && \
+    rm -rf /tmp/gh_${GITHUB_CLI_VERSION}_linux_amd64
+
+
 # system libraries of general use
 ## install debian packages
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
@@ -41,6 +53,9 @@ RUN Rscript -e 'tinytex::install_tinytex()'
 
 # expose port
 EXPOSE 3838
+
+# run github cli authorization to get it connected to repo
+CMD gh auth login
 
 # run app on container start
 CMD ["R", "-e", "shiny::runApp('/app', host = '0.0.0.0', port = 3838)"]

@@ -12,7 +12,8 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     libssh2-1-dev \
     unixodbc-dev \
     libcurl4-openssl-dev \
-    libssl-dev
+    libssl-dev \
+    libpoppler-cpp-dev
 
 ## update system libraries
 RUN apt-get update && \
@@ -23,7 +24,7 @@ RUN apt-get update && \
 ## renv.lock file
 COPY /renv.lock ./renv.lock
 
-## app 
+## app
 COPY /projects ./app/projects
 COPY /servers ./app/servers
 COPY /UIs ./app/UIs
